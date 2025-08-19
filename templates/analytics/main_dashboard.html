@@ -1,0 +1,726 @@
+{% extends "base.html" %}
+
+{% block title %}Financial Analytics Dashboard - {{ company_name }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/analytics.css') }}">
+<style>
+/* Dashboard-specific styles */
+.analytics-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 2rem 0;
+    margin-bottom: 2rem;
+}
+
+.metric-card {
+    background: white;
+    border-radius: 16px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+    height: 100%;
+}
+
+.metric-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+}
+
+.health-score-circle {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: white;
+}
+
+.score-excellent { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
+.score-good { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+.score-fair { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); }
+.score-poor { background: linear-gradient(135deg, #ff416c 0%, #ff4b2b 100%); }
+
+.chart-container {
+    background: white;
+    border-radius: 16px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    margin-bottom: 2rem;
+}
+
+.chart-header {
+    border-bottom: 2px solid #f8f9fa;
+    padding-bottom: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.insight-item {
+    background: linear-gradient(145deg, #f8f9fa 0%, #ffffff 100%);
+    border-left: 4px solid #667eea;
+    padding: 1rem;
+    margin-bottom: 0.75rem;
+    border-radius: 8px;
+}
+
+.recommendation-item {
+    background: linear-gradient(145deg, #e8f5e8 0%, #ffffff 100%);
+    border-left: 4px solid #43e97b;
+    padding: 1rem;
+    margin-bottom: 0.75rem;
+    border-radius: 8px;
+}
+
+.risk-badge {
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.875rem;
+}
+
+.risk-low { background: #d4edda; color: #155724; }
+.risk-medium { background: #fff3cd; color: #856404; }
+.risk-high { background: #f8d7da; color: #721c24; }
+
+.metric-value {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #2c3e50;
+    margin-bottom: 0.5rem;
+}
+
+.metric-label {
+    color: #6c757d;
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.loading-spinner {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(103, 126, 234, 0.3);
+    border-radius: 50%;
+    border-top-color: #667eea;
+    animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.chart-placeholder {
+    height: 400px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(145deg, #f8f9fa 0%, #ffffff 100%);
+    border-radius: 12px;
+    color: #6c757d;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .analytics-header {
+        padding: 1rem 0;
+    }
+    
+    .metric-card {
+        margin-bottom: 1rem;
+    }
+    
+    .health-score-circle {
+        width: 100px;
+        height: 100px;
+        font-size: 1.25rem;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Analytics Header -->
+    <div class="analytics-header">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1 class="display-5 fw-bold mb-2">
+                        <i class="fas fa-chart-area me-3"></i>
+                        Financial Analytics Dashboard
+                    </h1>
+                    <p class="lead mb-0 opacity-90">
+                        Comprehensive financial risk assessment for {{ company_name }}
+                    </p>
+                </div>
+                <div class="col-md-4 text-end">
+                    {% if dashboard %}
+                    <div class="text-white">
+                        <div class="h4 mb-1">{{ dashboard.financial_year }}</div>
+                        <small class="opacity-75">Financial Year</small>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if error %}
+    <!-- Error State -->
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="alert alert-danger" role="alert">
+                    <h4 class="alert-heading">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Data Not Available
+                    </h4>
+                    <p>{{ error }}</p>
+                    <hr>
+                    <p class="mb-0">
+                        <a href="{{ url_for('analytics.list_companies') }}" class="btn btn-outline-danger">
+                            <i class="fas fa-list me-2"></i>View Available Companies
+                        </a>
+                        <a href="{{ url_for('home') }}" class="btn btn-danger ms-2">
+                            <i class="fas fa-home me-2"></i>Back to Home
+                        </a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    
+    <!-- Dashboard Content -->
+    <div class="container">
+        <!-- Key Metrics Summary -->
+        <div class="row mb-4">
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="metric-card text-center">
+                    {% if dashboard and dashboard.overall_health_score %}
+                        {% set score = dashboard.overall_health_score %}
+                        {% if score >= 80 %}
+                            {% set score_class = "score-excellent" %}
+                        {% elif score >= 60 %}
+                            {% set score_class = "score-good" %}
+                        {% elif score >= 40 %}
+                            {% set score_class = "score-fair" %}
+                        {% else %}
+                            {% set score_class = "score-poor" %}
+                        {% endif %}
+                        
+                        <div class="health-score-circle {{ score_class }}">
+                            {{ score }}/100
+                        </div>
+                        <h5 class="fw-bold text-dark">Overall Health Score</h5>
+                        <p class="text-muted small mb-0">Financial Stability Index</p>
+                    {% else %}
+                        <div class="chart-placeholder">
+                            <div class="loading-spinner me-2"></div>
+                            Loading...
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="metric-card">
+                    <div class="metric-value">
+                        {% if dashboard and dashboard.key_metrics %}
+                            ${{ "%.1f"|format((dashboard.key_metrics.net_income or 0) / 1000000) }}M
+                        {% else %}
+                            --
+                        {% endif %}
+                    </div>
+                    <div class="metric-label">Net Income</div>
+                    <div class="small text-muted mt-2">
+                        <i class="fas fa-dollar-sign me-1"></i>
+                        Annual profit/loss
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="metric-card">
+                    <div class="metric-value">
+                        {% if dashboard and dashboard.key_metrics %}
+                            ${{ "%.1f"|format((dashboard.key_metrics.operating_cash_flow or 0) / 1000000) }}M
+                        {% else %}
+                            --
+                        {% endif %}
+                    </div>
+                    <div class="metric-label">Operating Cash Flow</div>
+                    <div class="small text-muted mt-2">
+                        <i class="fas fa-chart-line me-1"></i>
+                        Cash from operations
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="metric-card">
+                    <div class="text-center">
+                        {% if dashboard and dashboard.ai_insights %}
+                            <span class="risk-badge risk-{{ dashboard.ai_insights.risk_level.lower() }}">
+                                {{ dashboard.ai_insights.risk_level }} Risk
+                            </span>
+                        {% else %}
+                            <span class="risk-badge risk-medium">Unknown Risk</span>
+                        {% endif %}
+                    </div>
+                    <div class="metric-label text-center mt-3">Risk Assessment</div>
+                    <div class="small text-muted text-center mt-2">
+                        <i class="fas fa-shield-alt me-1"></i>
+                        AI-powered analysis
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Row -->
+        <div class="row">
+            <!-- Radar Chart -->
+            <div class="col-lg-6 mb-4">
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <h4 class="fw-bold text-dark mb-2">
+                            <i class="fas fa-chart-pie me-2 text-primary"></i>
+                            Financial Health Radar
+                        </h4>
+                        <p class="text-muted small mb-0">5-dimensional financial assessment</p>
+                    </div>
+                    <div class="chart-content">
+                        <canvas id="radarChart" width="400" height="400"></canvas>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Trend Analysis -->
+            <div class="col-lg-6 mb-4">
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <h4 class="fw-bold text-dark mb-2">
+                            <i class="fas fa-chart-line me-2 text-success"></i>
+                            Financial Trends
+                        </h4>
+                        <p class="text-muted small mb-0">Multi-year performance analysis</p>
+                    </div>
+                    <div class="chart-content">
+                        {% if dashboard and dashboard.trend_analysis %}
+                            <canvas id="trendChart" width="400" height="400"></canvas>
+                        {% else %}
+                            <div class="chart-placeholder">
+                                <div class="text-center">
+                                    <i class="fas fa-chart-line fa-3x text-muted mb-3"></i>
+                                    <p class="text-muted">Insufficient data for trend analysis</p>
+                                    <small class="text-muted">Need at least 2 years of data</small>
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- AI Insights and Recommendations -->
+        <div class="row">
+            <!-- AI Insights -->
+            <div class="col-lg-6 mb-4">
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <h4 class="fw-bold text-dark mb-2">
+                            <i class="fas fa-brain me-2 text-info"></i>
+                            AI Financial Insights
+                        </h4>
+                        <p class="text-muted small mb-0">Machine learning powered analysis</p>
+                    </div>
+                    <div class="insights-content">
+                        {% if dashboard and dashboard.ai_insights and dashboard.ai_insights.insights %}
+                            {% for insight in dashboard.ai_insights.insights %}
+                            <div class="insight-item">
+                                <i class="fas fa-lightbulb me-2 text-warning"></i>
+                                {{ insight }}
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="insight-item">
+                                <i class="fas fa-cog fa-spin me-2 text-primary"></i>
+                                Analyzing financial patterns...
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Recommendations -->
+            <div class="col-lg-6 mb-4">
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <h4 class="fw-bold text-dark mb-2">
+                            <i class="fas fa-tasks me-2 text-success"></i>
+                            AI Recommendations
+                        </h4>
+                        <p class="text-muted small mb-0">Actionable improvement strategies</p>
+                    </div>
+                    <div class="recommendations-content">
+                        {% if dashboard and dashboard.ai_insights and dashboard.ai_insights.recommendations %}
+                            {% for recommendation in dashboard.ai_insights.recommendations %}
+                            <div class="recommendation-item">
+                                <i class="fas fa-check-circle me-2 text-success"></i>
+                                {{ recommendation }}
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="recommendation-item">
+                                <i class="fas fa-cog fa-spin me-2 text-success"></i>
+                                Generating personalized recommendations...
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Additional Metrics -->
+        <div class="row">
+            <div class="col-12">
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <h4 class="fw-bold text-dark mb-2">
+                            <i class="fas fa-calculator me-2 text-warning"></i>
+                            Detailed Financial Metrics
+                        </h4>
+                        <p class="text-muted small mb-0">Comprehensive financial indicators</p>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            <div class="text-center p-3 bg-light rounded">
+                                <div class="h4 fw-bold text-primary">
+                                    {% if dashboard and dashboard.key_metrics %}
+                                        ${{ "%.1f"|format((dashboard.key_metrics.free_cash_flow or 0) / 1000000) }}M
+                                    {% else %}
+                                        --
+                                    {% endif %}
+                                </div>
+                                <small class="text-muted">Free Cash Flow</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="text-center p-3 bg-light rounded">
+                                <div class="h4 fw-bold text-info">
+                                    {% if dashboard and dashboard.key_metrics %}
+                                        {{ "%.2f"|format(dashboard.key_metrics.debt_ratio or 0) }}
+                                    {% else %}
+                                        --
+                                    {% endif %}
+                                </div>
+                                <small class="text-muted">Debt-to-Equity Ratio</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="text-center p-3 bg-light rounded">
+                                <div class="h4 fw-bold text-warning">
+                                    {% if dashboard and dashboard.key_metrics %}
+                                        {{ dashboard.key_metrics.liquidation_risk or 0 }}%
+                                    {% else %}
+                                        --%
+                                    {% endif %}
+                                </div>
+                                <small class="text-muted">Liquidation Risk</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="text-center p-3 bg-light rounded">
+                                <div class="h4 fw-bold text-success">
+                                    {% if dashboard %}
+                                        {{ dashboard.last_analysis[:10] }}
+                                    {% else %}
+                                        --
+                                    {% endif %}
+                                </div>
+                                <small class="text-muted">Last Analysis</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="row mt-4">
+            <div class="col-12 text-center">
+                <a href="{{ url_for('analytics.list_companies') }}" class="btn btn-outline-primary btn-lg me-3">
+                    <i class="fas fa-list me-2"></i>
+                    View All Companies
+                </a>
+                <a href="/api/ml-analysis/{{ company_name }}" class="btn btn-primary btn-lg me-3" target="_blank">
+                    <i class="fas fa-robot me-2"></i>
+                    Full ML Analysis
+                </a>
+                <button class="btn btn-success btn-lg" onclick="refreshDashboard()">
+                    <i class="fas fa-sync-alt me-2"></i>
+                    Refresh Analysis
+                </button>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Chart.js Library -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+
+<script>
+// Initialize dashboard variables
+const companyName = "{{ company_name | safe }}";
+
+// Debugging
+console.log('📊 Dashboard Data:', dashboardData);
+console.log('🏢 Company Name:', companyName);
+
+// Initialize charts when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🚀 DOM Loaded, initializing dashboard...');
+    
+    if (dashboardData && dashboardData.radar_chart) {
+        console.log('📡 Initializing radar chart...');
+        initializeRadarChart();
+    } else {
+        console.warn('⚠️ No radar chart data available');
+    }
+    
+    if (dashboardData && dashboardData.trend_analysis) {
+        console.log('📈 Initializing trend chart...');
+        initializeTrendChart();
+    } else {
+        console.warn('⚠️ No trend analysis data available');
+    }
+});
+
+// Radar Chart for Financial Health
+function initializeRadarChart() {
+    const ctx = document.getElementById('radarChart');
+    
+    if (!ctx) {
+        console.error('❌ Radar chart canvas not found');
+        return;
+    }
+    
+    const radarData = dashboardData.radar_chart;
+    console.log('📡 Radar Chart Data:', radarData);
+    
+    new Chart(ctx.getContext('2d'), {
+        type: 'radar',
+        data: {
+            labels: radarData.labels || ['Liquidity', 'Profitability', 'Debt Management', 'Cash Flow', 'Stability'],
+            datasets: [{
+                label: 'Financial Health Score',
+                data: radarData.scores || [50, 50, 50, 50, 50],
+                backgroundColor: 'rgba(103, 126, 234, 0.2)',
+                borderColor: 'rgba(103, 126, 234, 1)',
+                borderWidth: 2,
+                pointBackgroundColor: 'rgba(103, 126, 234, 1)',
+                pointBorderColor: '#fff',
+                pointHoverBackgroundColor: '#fff',
+                pointHoverBorderColor: 'rgba(103, 126, 234, 1)'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                r: {
+                    beginAtZero: true,
+                    max: 100,
+                    ticks: {
+                        stepSize: 20
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return context.label + ': ' + context.parsed.r + '/100';
+                        }
+                    }
+                }
+            }
+        }
+    });
+    
+    console.log('✅ Radar chart initialized successfully');
+}
+
+// Trend Chart for Historical Analysis
+function initializeTrendChart() {
+    const ctx = document.getElementById('trendChart');
+    
+    if (!ctx) {
+        console.error('❌ Trend chart canvas not found');
+        return;
+    }
+    
+    const trendData = dashboardData.trend_analysis;
+    console.log('📈 Trend Chart Data:', trendData);
+    
+    new Chart(ctx.getContext('2d'), {
+        type: 'line',
+        data: {
+            labels: trendData.years || ['2022', '2023', '2024'],
+            datasets: [
+                {
+                    label: 'Net Income ($M)',
+                    data: trendData.net_income || [0, 0, 0],
+                    borderColor: 'rgba(67, 233, 123, 1)',
+                    backgroundColor: 'rgba(67, 233, 123, 0.1)',
+                    tension: 0.4
+                },
+                {
+                    label: 'Operating Cash Flow ($M)',
+                    data: trendData.cash_flow || [0, 0, 0],
+                    borderColor: 'rgba(79, 172, 254, 1)',
+                    backgroundColor: 'rgba(79, 172, 254, 0.1)',
+                    tension: 0.4
+                },
+                {
+                    label: 'Free Cash Flow ($M)',
+                    data: trendData.free_cash_flow || [0, 0, 0],
+                    borderColor: 'rgba(250, 112, 154, 1)',
+                    backgroundColor: 'rgba(250, 112, 154, 0.1)',
+                    tension: 0.4
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'top'
+                },
+                tooltip: {
+                    mode: 'index',
+                    intersect: false
+                }
+            },
+            scales: {
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Year'
+                    }
+                },
+                y: {
+                    title: {
+                        display: true,
+                        text: 'Amount (Millions USD)'
+                    }
+                }
+            },
+            interaction: {
+                mode: 'nearest',
+                axis: 'x',
+                intersect: false
+            }
+        }
+    });
+    
+    console.log('✅ Trend chart initialized successfully');
+}
+
+// Refresh Dashboard Function
+function refreshDashboard() {
+    const refreshBtn = document.querySelector('button[onclick="refreshDashboard()"]');
+    
+    if (!refreshBtn) {
+        console.error('❌ Refresh button not found');
+        return;
+    }
+    
+    const originalText = refreshBtn.innerHTML;
+    
+    // Show loading state
+    refreshBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Refreshing...';
+    refreshBtn.disabled = true;
+    
+    console.log('🔄 Refreshing dashboard...');
+    
+    // Reload page after short delay
+    setTimeout(() => {
+        window.location.reload();
+    }, 1000);
+}
+
+// Print Dashboard Function
+function printDashboard() {
+    console.log('🖨️ Printing dashboard...');
+    window.print();
+}
+
+// Export Dashboard Data
+function exportDashboard() {
+    try {
+        const dataStr = JSON.stringify(dashboardData, null, 2);
+        const dataBlob = new Blob([dataStr], {type: 'application/json'});
+        const url = URL.createObjectURL(dataBlob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `${companyName}_financial_analysis.json`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+        
+        console.log('💾 Dashboard data exported successfully');
+    } catch (error) {
+        console.error('❌ Export failed:', error);
+        alert('Export failed. Please try again.');
+    }
+}
+
+// Error handling for Chart.js
+window.addEventListener('error', function(e) {
+    if (e.message && e.message.includes('Chart')) {
+        console.error('📊 Chart Error:', e.message);
+        
+        // Show fallback message
+        const chartContainers = document.querySelectorAll('.chart-content canvas');
+        chartContainers.forEach(canvas => {
+            const container = canvas.parentElement;
+            if (container) {
+                container.innerHTML = `
+                    <div class="chart-placeholder">
+                        <div class="text-center">
+                            <i class="fas fa-exclamation-triangle fa-3x text-warning mb-3"></i>
+                            <p class="text-muted">Chart loading failed</p>
+                            <button class="btn btn-sm btn-primary" onclick="window.location.reload()">
+                                <i class="fas fa-refresh me-1"></i> Retry
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }
+        });
+    }
+});
+
+// Console log for debugging
+console.log('📊 Financial Analytics Dashboard Loaded');
+console.log('🏢 Company:', companyName);
+console.log('📈 Dashboard Data Available:', !!dashboardData);
+console.log('🎯 Ready for user interaction');
+</script>
+{% endblock %}

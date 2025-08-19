@@ -1,0 +1,2213 @@
+{% extends "base.html" %}
+
+{% block title %}Risk Assessment - Financial Risk Assessment{% endblock %}
+
+{% block extra_css %}
+<style>
+:root {
+    --primary-color: #059669;
+    --danger-color: #dc2626;
+    --warning-color: #d97706;
+    --success-color: #059669;
+    --text-primary: #1e293b;
+    --text-secondary: #64748b;
+    --bg-light: #f8fafc;
+    --border-light: rgba(0, 0, 0, 0.1);
+    --high-risk: #dc2626;
+    --medium-risk: #d97706;
+    --low-risk: #059669;
+}
+
+body {
+    background: #ffffff;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.risk-assessment-container {
+    min-height: 100vh;
+}
+
+.analytics-header {
+    background: linear-gradient(135deg, var(--danger-color) 0%, #ef4444 100%);
+    color: white;
+    padding: 2rem 0;
+    margin-bottom: 2rem;
+}
+
+.page-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.page-subtitle {
+    font-size: 1.1rem;
+    opacity: 0.9;
+    margin: 0;
+}
+
+.header-actions {
+    display: flex;
+    gap: 1rem;
+}
+
+.btn {
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-primary {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+}
+
+.btn-secondary {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+.btn-danger {
+    background: var(--danger-color);
+    color: white;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.controls-section {
+    background: white;
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.control-group label {
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+.form-select {
+    border: 1px solid var(--border-light);
+    border-radius: 8px;
+    padding: 0.75rem;
+    background: white;
+    color: var(--text-primary);
+    width: 100%;
+}
+
+/* Risk Overview Section */
+.risk-overview-section {
+    display: flex;
+    gap: 2rem;
+}
+
+.risk-score-card {
+    background: white;
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+.score-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.score-header h3 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.score-badge {
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.score-badge.low {
+    background: rgba(5, 150, 105, 0.1);
+    color: var(--low-risk);
+}
+
+.score-badge.medium {
+    background: rgba(217, 119, 6, 0.1);
+    color: var(--medium-risk);
+}
+
+.score-badge.high {
+    background: rgba(220, 38, 38, 0.1);
+    color: var(--high-risk);
+}
+
+.score-circle {
+    position: relative;
+    display: inline-block;
+    margin-bottom: 1rem;
+}
+
+.progress-ring {
+    transform: rotate(-90deg);
+}
+
+.progress-ring-circle {
+    transition: stroke-dashoffset 0.5s;
+}
+
+.score-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+}
+
+.score-number {
+    display: block;
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.score-label {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+.score-description {
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+}
+
+.risk-indicator-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    border-left: 4px solid;
+}
+
+.risk-indicator-card.liquidation {
+    border-left-color: var(--high-risk);
+}
+
+.risk-indicator-card.cashflow {
+    border-left-color: var(--warning-color);
+}
+
+.indicator-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.indicator-header i {
+    font-size: 1.25rem;
+    color: var(--danger-color);
+}
+
+.indicator-header h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.indicator-status {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.status-text {
+    font-size: 1.25rem;
+    font-weight: 700;
+}
+
+.status-icon {
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+.indicator-status.low {
+    color: var(--low-risk);
+}
+
+.indicator-status.medium {
+    color: var(--medium-risk);
+}
+
+.indicator-status.high {
+    color: var(--high-risk);
+}
+
+.indicator-details p {
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+    margin-bottom: 0.5rem;
+}
+
+.detail-value {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+/* Risk Analysis Grid */
+.risk-analysis-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto auto auto;
+    gap: 2rem;
+    grid-template-areas:
+        "risk-factors risk-timeline"
+        "risk-mitigation early-warning"
+        "risk-comparison risk-summary";
+}
+
+.risk-factors {
+    grid-area: risk-factors;
+}
+
+.risk-timeline {
+    grid-area: risk-timeline;
+}
+
+.risk-mitigation {
+    grid-area: risk-mitigation;
+}
+
+.early-warning {
+    grid-area: early-warning;
+}
+
+.risk-comparison {
+    grid-area: risk-comparison;
+}
+
+.risk-summary {
+    grid-area: risk-summary;
+}
+
+.risk-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.card-header {
+    padding: 1.5rem 2rem;
+    background: var(--bg-light);
+    border-bottom: 1px solid var(--border-light);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.card-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.card-body {
+    padding: 2rem;
+}
+
+/* Risk Factors */
+.risk-factors-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.risk-factor-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    background: var(--bg-light);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.risk-factor-item:hover {
+    background: rgba(5, 150, 105, 0.05);
+    transform: translateY(-2px);
+}
+
+.factor-info {
+    flex: 1;
+}
+
+.factor-name {
+    font-weight: 600;
+    color: var(--text-primary);
+    display: block;
+    margin-bottom: 0.25rem;
+}
+
+.factor-description {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+.factor-score {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    min-width: 120px;
+}
+
+.score-value {
+    font-weight: 700;
+    color: var(--text-primary);
+    min-width: 40px;
+}
+
+.risk-meter {
+    width: 60px;
+    height: 8px;
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.meter-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.5s ease;
+    width: 0%;
+}
+
+.meter-fill.low {
+    background: var(--low-risk);
+}
+
+.meter-fill.medium {
+    background: var(--medium-risk);
+}
+
+.meter-fill.high {
+    background: var(--high-risk);
+}
+
+/* Chart Containers */
+.timeline-chart-container,
+.comparison-chart-container {
+    position: relative;
+    height: 300px;
+    margin-bottom: 1rem;
+}
+
+.timeline-summary,
+.comparison-summary {
+    display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-light);
+}
+
+.summary-item,
+.comparison-metric {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.label,
+.metric-label {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+.value,
+.metric-value {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+/* Mitigation Strategies */
+.mitigation-strategies {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.strategy-placeholder {
+    text-align: center;
+    color: var(--text-secondary);
+    padding: 2rem;
+    font-style: italic;
+}
+
+.strategy-item {
+    padding: 1rem;
+    background: var(--bg-light);
+    border-radius: 8px;
+    border-left: 4px solid var(--primary-color);
+}
+
+.strategy-item h5 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+}
+
+.strategy-item p {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+.strategy-priority {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    margin-top: 0.5rem;
+}
+
+.strategy-priority.high {
+    background: rgba(220, 38, 38, 0.1);
+    color: var(--high-risk);
+}
+
+.strategy-priority.medium {
+    background: rgba(217, 119, 6, 0.1);
+    color: var(--medium-risk);
+}
+
+.strategy-priority.low {
+    background: rgba(5, 150, 105, 0.1);
+    color: var(--low-risk);
+}
+
+/* Early Warning System */
+.warning-indicators {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.warning-item {
+    display: flex;
+    gap: 1rem;
+    padding: 1rem;
+    background: var(--bg-light);
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.warning-item.alert {
+    background: rgba(220, 38, 38, 0.05);
+    border-left: 4px solid var(--high-risk);
+}
+
+.warning-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.05);
+    color: var(--text-secondary);
+    flex-shrink: 0;
+}
+
+.warning-item.alert .warning-icon {
+    background: rgba(220, 38, 38, 0.1);
+    color: var(--high-risk);
+}
+
+.warning-content {
+    flex: 1;
+}
+
+.warning-content h5 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+}
+
+.warning-content p {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.5rem;
+}
+
+.warning-status {
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.warning-status.normal {
+    background: rgba(5, 150, 105, 0.1);
+    color: var(--low-risk);
+}
+
+.warning-status.caution {
+    background: rgba(217, 119, 6, 0.1);
+    color: var(--medium-risk);
+}
+
+.warning-status.alert {
+    background: rgba(220, 38, 38, 0.1);
+    color: var(--high-risk);
+}
+
+/* Risk Summary */
+.summary-sections {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.summary-section h4 {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 1rem;
+}
+
+.summary-section ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.summary-section li {
+    padding: 0.5rem 0;
+    color: var(--text-secondary);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.summary-section li:last-child {
+    border-bottom: none;
+}
+
+.assessment-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border-light);
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+
+.loading-content {
+    text-align: center;
+    color: white;
+}
+
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid rgba(255, 255, 255, 0.1);
+    border-top: 4px solid var(--danger-color);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 1rem;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Help Modal Styles */
+.help-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+}
+
+.help-modal-content {
+    background: white;
+    padding: 2rem;
+    border-radius: 12px;
+    max-width: 500px;
+    margin: 1rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.help-modal h4 {
+    margin-bottom: 1rem;
+    color: var(--text-primary);
+    font-size: 1.5rem;
+}
+
+.help-modal p {
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+}
+
+.help-modal button {
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.help-modal button:hover {
+    background: #047857;
+    transform: translateY(-2px);
+}
+
+/* Notification Styles */
+.notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 1rem 1.5rem;
+    border-radius: 8px;
+    z-index: 10000;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 500;
+    animation: slideIn 0.3s ease;
+}
+
+.notification.error {
+    background: var(--danger-color);
+    color: white;
+}
+
+.notification.success {
+    background: var(--success-color);
+    color: white;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@media (max-width: 1200px) {
+    .risk-analysis-grid {
+        grid-template-columns: 1fr;
+        grid-template-areas:
+            "risk-factors"
+            "risk-timeline" 
+            "risk-mitigation"
+            "early-warning"
+            "risk-comparison"
+            "risk-summary";
+    }
+    
+    .risk-overview-section {
+        flex-direction: column;
+    }
+}
+
+@media (max-width: 768px) {
+    .page-title {
+        font-size: 2rem;
+    }
+    
+    .header-actions {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .timeline-summary,
+    .comparison-summary {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .factor-score {
+        min-width: 100px;
+    }
+    
+    .assessment-footer {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+    }
+    
+    .help-modal-content {
+        margin: 1rem;
+        padding: 1.5rem;
+    }
+    
+    .notification {
+        right: 10px;
+        left: 10px;
+        width: auto;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="risk-assessment-container">
+    <!-- Header Section -->
+    <div class="analytics-header">
+        <div class="container-fluid">
+            <div class="row align-items-center">
+                <div class="col">
+                    <div class="header-content">
+                        <h1 class="page-title">
+                            <i class="fas fa-shield-alt me-2"></i>
+                            Financial Risk Assessment
+                        </h1>
+                        <p class="page-subtitle">Comprehensive risk analysis based on cash flow statement data</p>
+                    </div>
+                </div>
+                <div class="col-auto">
+                    <div class="header-actions">
+                        <button class="btn btn-primary" onclick="exportRiskReport()">
+                            <i class="fas fa-file-pdf"></i> Export Report
+                        </button>
+                        <button class="btn btn-secondary" onclick="generateRiskAlert()">
+                            <i class="fas fa-bell"></i> Set Alerts
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container-fluid py-4">
+        <!-- Controls Section -->
+        <div class="controls-section mb-4">
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="control-group">
+                        <label for="riskCompanySelect">Select Company</label>
+                        <select id="riskCompanySelect" class="form-select">
+                            <option value="">Choose a company...</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="control-group">
+                        <label for="riskTimeframe">Assessment Period</label>
+                        <select id="riskTimeframe" class="form-select">
+                            <option value="current">Current Year (2024)</option>
+                            <option value="3year">3-Year Analysis</option>
+                            <option value="historical">Historical Trend</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="control-group">
+                        <label>&nbsp;</label>
+                        <button class="btn btn-danger w-100" onclick="assessRisk()">
+                            <i class="fas fa-calculator"></i> Assess Risk
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Risk Overview Dashboard -->
+        <div class="risk-overview-section mb-4">
+            <div class="row">
+                <!-- Overall Risk Score -->
+                <div class="col-md-4">
+                    <div class="risk-score-card">
+                        <div class="score-header">
+                            <h3>Overall Risk Score</h3>
+                            <span class="score-badge" id="overallRiskBadge">-</span>
+                        </div>
+                        <div class="score-circle">
+                            <svg class="progress-ring" width="120" height="120">
+                                <circle class="progress-ring-circle" cx="60" cy="60" r="54" 
+                                        stroke="#e5e7eb" stroke-width="8" fill="transparent"/>
+                                <circle class="progress-ring-bar" cx="60" cy="60" r="54" 
+                                        stroke="#dc2626" stroke-width="8" fill="transparent"
+                                        stroke-dasharray="339.292" stroke-dashoffset="339.292"/>
+                            </svg>
+                            <div class="score-text">
+                                <span class="score-number" id="riskScoreNumber">0</span>
+                                <span class="score-label">Risk Level</span>
+                            </div>
+                        </div>
+                        <div class="score-description" id="riskScoreDesc">
+                            Select a company to assess risk
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Liquidation Risk -->
+                <div class="col-md-4">
+                    <div class="risk-indicator-card liquidation">
+                        <div class="indicator-header">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <h4>Liquidation Risk</h4>
+                        </div>
+                        <div class="indicator-status" id="liquidationStatus">
+                            <span class="status-text">Unknown</span>
+                            <span class="status-icon">?</span>
+                        </div>
+                        <div class="indicator-details">
+                            <p>Based on negative cash flow patterns</p>
+                            <span class="detail-value" id="liquidationDetail">-</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cash Flow Risk -->
+                <div class="col-md-4">
+                    <div class="risk-indicator-card cashflow">
+                        <div class="indicator-header">
+                            <i class="fas fa-water"></i>
+                            <h4>Cash Flow Risk</h4>
+                        </div>
+                        <div class="indicator-status" id="cashflowStatus">
+                            <span class="status-text">Unknown</span>
+                            <span class="status-icon">?</span>
+                        </div>
+                        <div class="indicator-details">
+                            <p>Operating cash flow stability</p>
+                            <span class="detail-value" id="cashflowDetail">-</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Risk Analysis Grid -->
+        <div class="risk-analysis-grid">
+            <!-- Risk Factors Breakdown -->
+            <div class="risk-card risk-factors">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-list-check me-2"></i>
+                        Risk Factors Analysis
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="risk-factors-list">
+                        <div class="risk-factor-item" title="Click for more information">
+                            <div class="factor-info">
+                                <span class="factor-name">Operating Cash Flow</span>
+                                <span class="factor-description">Cash generation from operations</span>
+                            </div>
+                            <div class="factor-score">
+                                <span class="score-value" id="ocfRiskScore">-</span>
+                                <div class="risk-meter">
+                                    <div class="meter-fill" data-factor="ocf"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="risk-factor-item" title="Click for more information">
+                            <div class="factor-info">
+                                <span class="factor-name">Free Cash Flow</span>
+                                <span class="factor-description">Available cash after investments</span>
+                            </div>
+                            <div class="factor-score">
+                                <span class="score-value" id="fcfRiskScore">-</span>
+                                <div class="risk-meter">
+                                    <div class="meter-fill" data-factor="fcf"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="risk-factor-item" title="Click for more information">
+                            <div class="factor-info">
+                                <span class="factor-name">Debt to Equity Ratio</span>
+                                <span class="factor-description">Financial leverage assessment</span>
+                            </div>
+                            <div class="factor-score">
+                                <span class="score-value" id="debtRiskScore">-</span>
+                                <div class="risk-meter">
+                                    <div class="meter-fill" data-factor="debt"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="risk-factor-item" title="Click for more information">
+                            <div class="factor-info">
+                                <span class="factor-name">Interest Coverage</span>
+                                <span class="factor-description">Ability to service debt payments</span>
+                            </div>
+                            <div class="factor-score">
+                                <span class="score-value" id="interestRiskScore">-</span>
+                                <div class="risk-meter">
+                                    <div class="meter-fill" data-factor="interest"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="risk-factor-item" title="Click for more information">
+                            <div class="factor-info">
+                                <span class="factor-name">Working Capital</span>
+                                <span class="factor-description">Short-term liquidity position</span>
+                            </div>
+                            <div class="factor-score">
+                                <span class="score-value" id="wcRiskScore">-</span>
+                                <div class="risk-meter">
+                                    <div class="meter-fill" data-factor="wc"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="risk-factor-item" title="Click for more information">
+                            <div class="factor-info">
+                                <span class="factor-name">Profitability</span>
+                                <span class="factor-description">Net income consistency</span>
+                            </div>
+                            <div class="factor-score">
+                                <span class="score-value" id="profitRiskScore">-</span>
+                                <div class="risk-meter">
+                                    <div class="meter-fill" data-factor="profit"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Risk Timeline -->
+            <div class="risk-card risk-timeline">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-chart-line me-2"></i>
+                        Risk Timeline (2022-2024)
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="timeline-chart-container">
+                        <canvas id="riskTimelineChart"></canvas>
+                    </div>
+                    <div class="timeline-summary">
+                        <div class="summary-item">
+                            <span class="label">Risk Trend:</span>
+                            <span class="value" id="riskTrend">-</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="label">Highest Risk Period:</span>
+                            <span class="value" id="highestRiskPeriod">-</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="label">Improvement Rate:</span>
+                            <span class="value" id="improvementRate">-</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Risk Mitigation -->
+            <div class="risk-card risk-mitigation">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-shield-check me-2"></i>
+                        Risk Mitigation Strategies
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="mitigation-strategies" id="mitigationStrategies">
+                        <div class="strategy-placeholder">
+                            Select a company to view risk mitigation recommendations
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Early Warning System -->
+            <div class="risk-card early-warning">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-radar me-2"></i>
+                        Early Warning Indicators
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="warning-indicators">
+                        <div class="warning-item" id="warning1">
+                            <div class="warning-icon">
+                                <i class="fas fa-exclamation-circle"></i>
+                            </div>
+                            <div class="warning-content">
+                                <h5>Cash Flow Decline</h5>
+                                <p>Monitoring for consecutive negative cash flow periods</p>
+                                <span class="warning-status" id="cashflowWarning">Normal</span>
+                            </div>
+                        </div>
+
+                        <div class="warning-item" id="warning2">
+                            <div class="warning-icon">
+                                <i class="fas fa-chart-line-down"></i>
+                            </div>
+                            <div class="warning-content">
+                                <h5>Revenue Deterioration</h5>
+                                <p>Tracking declining revenue trends</p>
+                                <span class="warning-status" id="revenueWarning">Normal</span>
+                            </div>
+                        </div>
+
+                        <div class="warning-item" id="warning3">
+                            <div class="warning-icon">
+                                <i class="fas fa-balance-scale"></i>
+                            </div>
+                            <div class="warning-content">
+                                <h5>Debt Burden</h5>
+                                <p>Monitoring debt-to-equity ratio increases</p>
+                                <span class="warning-status" id="debtWarning">Normal</span>
+                            </div>
+                        </div>
+
+                        <div class="warning-item" id="warning4">
+                            <div class="warning-icon">
+                                <i class="fas fa-coins"></i>
+                            </div>
+                            <div class="warning-content">
+                                <h5>Liquidity Pressure</h5>
+                                <p>Working capital and liquidity monitoring</p>
+                                <span class="warning-status" id="liquidityWarning">Normal</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Risk Comparison -->
+            <div class="risk-card risk-comparison">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-balance-scale me-2"></i>
+                        Industry Risk Comparison
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="comparison-chart-container">
+                        <canvas id="riskComparisonChart"></canvas>
+                    </div>
+                    <div class="comparison-summary">
+                        <div class="comparison-metric">
+                            <span class="metric-label">Industry Average Risk:</span>
+                            <span class="metric-value">Medium</span>
+                        </div>
+                        <div class="comparison-metric">
+                            <span class="metric-label">Company Position:</span>
+                            <span class="metric-value" id="companyPosition">-</span>
+                        </div>
+                        <div class="comparison-metric">
+                            <span class="metric-label">Peer Ranking:</span>
+                            <span class="metric-value" id="peerRanking">-</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Risk Report Summary -->
+            <div class="risk-card risk-summary">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-clipboard-check me-2"></i>
+                        Risk Assessment Summary
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="summary-sections">
+                        <div class="summary-section">
+                            <h4>Key Findings</h4>
+                            <ul id="keyFindings">
+                                <li>Select a company to view risk assessment findings</li>
+                            </ul>
+                        </div>
+
+                        <div class="summary-section">
+                            <h4>Immediate Actions Required</h4>
+                            <ul id="immediateActions">
+                                <li>Assessment pending</li>
+                            </ul>
+                        </div>
+
+                        <div class="summary-section">
+                            <h4>Monitoring Recommendations</h4>
+                            <ul id="monitoringRecommendations">
+                                <li>Assessment pending</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="assessment-footer">
+                        <div class="assessment-date">
+                            <span>Assessment Date: <span id="assessmentDate">-</span></span>
+                        </div>
+                        <div class="next-review">
+                            <span>Next Review: <span id="nextReview">-</span></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Loading Overlay -->
+<div class="loading-overlay" id="riskLoadingOverlay" style="display: none;">
+    <div class="loading-content">
+        <div class="spinner"></div>
+        <p>Analyzing financial risk factors...</p>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+<script>
+let riskCompaniesData = [];
+let riskTimelineChart = null;
+let riskComparisonChart = null;
+
+// Initialize page
+document.addEventListener('DOMContentLoaded', function() {
+    loadRiskCompanies();
+    setupRiskEventListeners();
+    initializeHelpSystem();
+});
+
+function setupRiskEventListeners() {
+    document.getElementById('riskCompanySelect').addEventListener('change', function() {
+        if (this.value) {
+            assessRisk();
+        }
+    });
+    
+    document.getElementById('riskTimeframe').addEventListener('change', function() {
+        const selectedCompany = document.getElementById('riskCompanySelect').value;
+        if (selectedCompany) {
+            assessRisk();
+        }
+    });
+}
+
+// Load companies from cash_flow_statement table
+let allRiskCompaniesData = []; // Store all companies data
+let uniqueRiskCompaniesData = []; // Store unique companies for dropdown
+
+// Load companies using analytics API
+async function loadRiskCompanies() {
+    try {
+        showRiskLoading(true);
+        console.log('Loading companies for risk assessment...');
+        
+        // Use analytics API endpoint
+        const response = await fetch('/api/companies');
+        
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        const data = await response.json();
+        console.log('Risk API Response:', data);
+        
+        // Handle analytics API response format
+        let companies = [];
+        
+        if (data.success && data.companies) {
+            companies = data.companies;
+        } else if (Array.isArray(data)) {
+            companies = data;
+        } else {
+            console.warn('Unexpected API response structure:', data);
+            companies = [];
+        }
+        
+        if (companies.length > 0) {
+            // Store ALL companies data
+            allRiskCompaniesData = companies;
+            console.log(`Loaded ALL risk companies: ${allRiskCompaniesData.length} records`);
+            
+            // Create unique list for dropdown
+            const uniqueCompanies = [];
+            const seenCompanies = new Set();
+            
+            companies.forEach(company => {
+                if (!company || !company.company_name) return;
+                
+                let normalizedName = company.company_name.trim();
+                
+                // Remove common duplicate indicators
+                normalizedName = normalizedName
+                    .replace(/\s*\(\d+\)$/g, '')    // Remove (1), (2), etc.
+                    .replace(/\s*Inc\.?$/i, '')     // Remove Inc/Inc.
+                    .replace(/\s*Corporation$/i, '') // Remove Corporation
+                    .replace(/\s*Ltd\.?$/i, '')     // Remove Ltd/Ltd.
+                    .replace(/\s*Plc$/i, '')        // Remove Plc
+                    .replace(/\s*Company$/i, '')    // Remove Company
+                    .replace(/\s*Corp\.?$/i, '')    // Remove Corp/Corp.
+                    .trim();
+                
+                const key = normalizedName.toLowerCase();
+                
+                if (!seenCompanies.has(key)) {
+                    seenCompanies.add(key);
+                    uniqueCompanies.push(company);
+                }
+            });
+            
+            // Sort unique companies alphabetically for dropdown
+            uniqueRiskCompaniesData = uniqueCompanies.sort((a, b) => {
+                const nameA = (a.company_name || '').toLowerCase();
+                const nameB = (b.company_name || '').toLowerCase();
+                return nameA.localeCompare(nameB);
+            });
+            
+            // For backward compatibility
+            riskCompaniesData = uniqueRiskCompaniesData;
+            
+            console.log(`Unique risk companies for dropdown: ${uniqueRiskCompaniesData.length}`);
+            console.log(`Total risk data available: ${allRiskCompaniesData.length} companies`);
+            
+            populateRiskCompanySelect();
+            
+        } else {
+            showRiskError('No companies found in database.');
+            allRiskCompaniesData = [];
+            uniqueRiskCompaniesData = [];
+            populateRiskCompanySelect();
+        }
+        
+    } catch (error) {
+        console.error('Error loading companies for risk assessment:', error);
+        
+        allRiskCompaniesData = [];
+        uniqueRiskCompaniesData = [];
+        populateRiskCompanySelect();
+        
+        showRiskError('Failed to load companies: ' + error.message);
+    } finally {
+        showRiskLoading(false);
+    }
+}
+
+function populateRiskCompanySelect() {
+    const select = document.getElementById('riskCompanySelect');
+    if (!select) {
+        console.error('Risk company select element not found');
+        return;
+    }
+    
+    select.innerHTML = '<option value="">Choose a company...</option>';
+    
+    // Use unique companies for dropdown
+    const safeData = uniqueRiskCompaniesData || [];
+    
+    if (safeData.length === 0) {
+        console.warn('No companies data available');
+        select.innerHTML = '<option value="">No companies available</option>';
+        return;
+    }
+    
+    try {
+        // Populate dropdown with all unique companies (no slice limit)
+        safeData.forEach(company => {
+            if (company && company.company_name) {
+                const option = document.createElement('option');
+                option.value = company.company_name;
+                option.textContent = company.company_name;
+                select.appendChild(option);
+            }
+        });
+        
+        console.log(`Showing ${safeData.length} unique companies in risk dropdown`);
+        
+    } catch (error) {
+        console.error('Error populating risk company select:', error);
+        select.innerHTML = '<option value="">Error loading companies</option>';
+    }
+}
+
+// Main risk assessment function
+async function assessRisk() {
+    const companyName = document.getElementById('riskCompanySelect').value;
+    const timeframe = document.getElementById('riskTimeframe').value;
+    
+    if (!companyName) {
+        showRiskError('Please select a company first');
+        return;
+    }
+    
+    try {
+        showRiskLoading(true);
+        console.log(`🔍 Assessing risk for ${companyName} (${timeframe})`);
+        
+        // Get company cash flow data
+        const response = await fetch(`/cash-flow/${encodeURIComponent(companyName)}`);
+        const data = await response.json();
+        
+        if (!data.success) {
+            throw new Error(data.error);
+        }
+        
+        // Process risk assessment
+        const riskData = processRiskData(data.data, timeframe);
+        
+        // Update all risk components
+        updateOverallRiskScore(riskData);
+        updateRiskIndicators(riskData);
+        updateRiskFactors(riskData);
+        updateRiskTimeline(riskData);
+        updateMitigationStrategies(riskData);
+        updateEarlyWarningSystem(riskData);
+        updateRiskComparison(riskData);
+        updateRiskSummary(riskData, companyName);
+        
+        console.log(`✅ Risk assessment completed for ${companyName}`);
+        
+    } catch (error) {
+        console.error('❌ Error assessing risk:', error);
+        showRiskError('Failed to assess risk: ' + error.message);
+    } finally {
+        showRiskLoading(false);
+    }
+}
+
+function processRiskData(rawData, timeframe) {
+    let processedData;
+    
+    if (timeframe === 'current') {
+        // Use latest year data
+        processedData = rawData.sort((a, b) => b.year - a.year)[0];
+    } else {
+        // Use multi-year data
+        processedData = rawData.sort((a, b) => a.year - b.year);
+    }
+    
+    return {
+        current: Array.isArray(processedData) ? processedData[processedData.length - 1] : processedData,
+        historical: rawData,
+        timeframe: timeframe
+    };
+}
+
+function updateOverallRiskScore(riskData) {
+    const data = riskData.current;
+    const riskScore = calculateOverallRiskScore(data);
+    
+    // Update risk score display
+    document.getElementById('riskScoreNumber').textContent = riskScore;
+    
+    // Update risk badge
+    const badge = document.getElementById('overallRiskBadge');
+    if (riskScore <= 30) {
+        badge.textContent = 'Low Risk';
+        badge.className = 'score-badge low';
+    } else if (riskScore <= 70) {
+        badge.textContent = 'Medium Risk';
+        badge.className = 'score-badge medium';
+    } else {
+        badge.textContent = 'High Risk';
+        badge.className = 'score-badge high';
+    }
+    
+    // Update progress ring
+    updateProgressRing(riskScore);
+    
+    // Update description
+    document.getElementById('riskScoreDesc').textContent = getRiskDescription(riskScore);
+}
+
+function calculateOverallRiskScore(data) {
+    let riskScore = 0;
+    
+    try {
+        // Operating Cash Flow Risk (25%)
+        const ocf = parseFloat(data.net_cash_from_operating_activities) || 0;
+        if (ocf < -1000000) riskScore += 25;
+        else if (ocf < 0) riskScore += 15;
+        else if (ocf < 1000000) riskScore += 5;
+        
+        // Free Cash Flow Risk (20%)
+        const fcf = parseFloat(data.free_cash_flow) || 0;
+        if (fcf < -500000) riskScore += 20;
+        else if (fcf < 0) riskScore += 12;
+        else if (fcf < 500000) riskScore += 3;
+        
+        // Profitability Risk (20%)
+        const netIncome = parseFloat(data.net_income) || 0;
+        if (netIncome < -500000) riskScore += 20;
+        else if (netIncome < 0) riskScore += 12;
+        else if (netIncome < 500000) riskScore += 3;
+        
+        // Liquidation Risk (25%)
+        const liquidationLabel = parseInt(data.liquidation_label) || 0;
+        if (liquidationLabel === 1) riskScore += 25;
+        
+        // Debt Risk (10%)
+        const debtRatio = parseFloat(data.debt_to_equity_ratio) || 0;
+        if (debtRatio > 3) riskScore += 10;
+        else if (debtRatio > 1.5) riskScore += 5;
+        
+        return Math.min(100, riskScore);
+    } catch (error) {
+        console.error('Error calculating risk score:', error);
+        return 50; // Default to medium risk
+    }
+}
+
+function updateProgressRing(score) {
+    const circle = document.querySelector('.progress-ring-bar');
+    if (!circle) return;
+    
+    const radius = circle.r.baseVal.value;
+    const circumference = radius * 2 * Math.PI;
+    const offset = circumference - (score / 100) * circumference;
+    
+    circle.style.strokeDasharray = `${circumference} ${circumference}`;
+    circle.style.strokeDashoffset = offset;
+    
+    // Change color based on risk level
+    if (score <= 30) {
+        circle.style.stroke = '#059669';
+    } else if (score <= 70) {
+        circle.style.stroke = '#d97706';
+    } else {
+        circle.style.stroke = '#dc2626';
+    }
+}
+
+function getRiskDescription(score) {
+    if (score <= 30) {
+        return 'Low financial risk with stable cash flows and strong fundamentals';
+    } else if (score <= 70) {
+        return 'Moderate risk requiring monitoring of key financial metrics';
+    } else {
+        return 'High risk requiring immediate attention and intervention';
+    }
+}
+
+function updateRiskIndicators(riskData) {
+    const data = riskData.current;
+    
+    // Liquidation Risk
+    const liquidationRisk = data.liquidation_label == 1;
+    const liquidationStatus = document.getElementById('liquidationStatus');
+    
+    if (liquidationRisk) {
+        liquidationStatus.className = 'indicator-status high';
+        liquidationStatus.innerHTML = '<span class="status-text">High Risk</span><span class="status-icon">⚠</span>';
+        document.getElementById('liquidationDetail').textContent = 'Negative cash flow patterns detected';
+    } else {
+        liquidationStatus.className = 'indicator-status low';
+        liquidationStatus.innerHTML = '<span class="status-text">Low Risk</span><span class="status-icon">✓</span>';
+        document.getElementById('liquidationDetail').textContent = 'Stable financial performance';
+    }
+    
+    // Cash Flow Risk
+    const ocf = parseFloat(data.net_cash_from_operating_activities) || 0;
+    const cashflowStatus = document.getElementById('cashflowStatus');
+    
+    if (ocf < -1000000) {
+        cashflowStatus.className = 'indicator-status high';
+        cashflowStatus.innerHTML = '<span class="status-text">High Risk</span><span class="status-icon">⚠</span>';
+        document.getElementById('cashflowDetail').textContent = formatCurrency(ocf) + ' - Significant negative cash flow';
+    } else if (ocf < 0) {
+        cashflowStatus.className = 'indicator-status medium';
+        cashflowStatus.innerHTML = '<span class="status-text">Medium Risk</span><span class="status-icon">!</span>';
+        document.getElementById('cashflowDetail').textContent = formatCurrency(ocf) + ' - Negative cash flow';
+    } else {
+        cashflowStatus.className = 'indicator-status low';
+        cashflowStatus.innerHTML = '<span class="status-text">Low Risk</span><span class="status-icon">✓</span>';
+        document.getElementById('cashflowDetail').textContent = formatCurrency(ocf) + ' - Positive cash flow';
+    }
+}
+
+function updateRiskFactors(riskData) {
+    const data = riskData.current;
+    
+    // OCF Risk
+    const ocfRisk = calculateFactorRisk(data.net_cash_from_operating_activities, 'ocf');
+    updateRiskFactor('ocf', ocfRisk);
+    
+    // FCF Risk
+    const fcfRisk = calculateFactorRisk(data.free_cash_flow, 'fcf');
+    updateRiskFactor('fcf', fcfRisk);
+    
+    // Debt Risk
+    const debtRisk = calculateFactorRisk(data.debt_to_equity_ratio, 'debt');
+    updateRiskFactor('debt', debtRisk);
+    
+    // Interest Coverage Risk
+    const interestRisk = calculateFactorRisk(data.interest_coverage_ratio, 'interest');
+    updateRiskFactor('interest', interestRisk);
+    
+    // Working Capital Risk
+    const wcRisk = calculateFactorRisk(data.changes_in_working_capital, 'wc');
+    updateRiskFactor('wc', wcRisk);
+    
+    // Profitability Risk
+    const profitRisk = calculateFactorRisk(data.net_income, 'profit');
+    updateRiskFactor('profit', profitRisk);
+}
+
+function calculateFactorRisk(value, type) {
+    const num = parseFloat(value) || 0;
+    
+    switch(type) {
+        case 'ocf':
+        case 'fcf':
+        case 'profit':
+            if (num < -1000000) return { level: 'high', score: 90 };
+            if (num < 0) return { level: 'medium', score: 60 };
+            if (num < 1000000) return { level: 'low', score: 30 };
+            return { level: 'low', score: 10 };
+            
+        case 'debt':
+            if (num > 3) return { level: 'high', score: 85 };
+            if (num > 1.5) return { level: 'medium', score: 50 };
+            return { level: 'low', score: 20 };
+            
+        case 'interest':
+            if (num < 1) return { level: 'high', score: 90 };
+            if (num < 2.5) return { level: 'medium', score: 55 };
+            return { level: 'low', score: 15 };
+            
+        default:
+            return { level: 'low', score: 25 };
+    }
+}
+
+function updateRiskFactor(factorType, risk) {
+    const scoreElement = document.getElementById(factorType + 'RiskScore');
+    const meterElement = document.querySelector(`[data-factor="${factorType}"]`);
+    
+    if (scoreElement) scoreElement.textContent = risk.score;
+    if (meterElement) {
+        meterElement.style.width = risk.score + '%';
+        meterElement.className = `meter-fill ${risk.level}`;
+    }
+}
+
+function updateRiskTimeline(riskData) {
+    if (riskData.historical.length < 2) {
+        // Show message if insufficient data
+        const ctx = document.getElementById('riskTimelineChart');
+        if (ctx) {
+            const parentDiv = ctx.parentElement;
+            parentDiv.innerHTML = '<div style="text-align: center; padding: 2rem; color: #64748b;">Insufficient data for timeline analysis</div>';
+        }
+        return;
+    }
+    
+    const ctx = document.getElementById('riskTimelineChart');
+    if (!ctx) return;
+    
+    if (riskTimelineChart) {
+        riskTimelineChart.destroy();
+    }
+    
+    const timelineData = riskData.historical.map(yearData => ({
+        year: yearData.year,
+        riskScore: calculateOverallRiskScore(yearData)
+    })).sort((a, b) => a.year - b.year);
+    
+    riskTimelineChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: timelineData.map(d => d.year.toString()),
+            datasets: [{
+                label: 'Risk Score',
+                data: timelineData.map(d => d.riskScore),
+                borderColor: '#dc2626',
+                backgroundColor: 'rgba(220, 38, 38, 0.1)',
+                borderWidth: 3,
+                fill: true,
+                tension: 0.4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 100,
+                    title: {
+                        display: true,
+                        text: 'Risk Score'
+                    }
+                },
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Year'
+                    }
+                }
+            }
+        }
+    });
+    
+    // Update timeline summary
+    updateTimelineSummary(timelineData);
+}
+
+function updateTimelineSummary(timelineData) {
+    if (timelineData.length < 2) return;
+    
+    const latest = timelineData[timelineData.length - 1];
+    const earliest = timelineData[0];
+    
+    // Risk trend
+    const trendDirection = latest.riskScore > earliest.riskScore ? 'Increasing' : 'Decreasing';
+    document.getElementById('riskTrend').textContent = trendDirection;
+    
+    // Highest risk period
+    const highestRisk = timelineData.reduce((max, current) => 
+        current.riskScore > max.riskScore ? current : max
+    );
+    document.getElementById('highestRiskPeriod').textContent = highestRisk.year;
+    
+    // Improvement rate
+    const improvementRate = ((earliest.riskScore - latest.riskScore) / earliest.riskScore * 100).toFixed(1);
+    document.getElementById('improvementRate').textContent = improvementRate + '%';
+}
+
+function updateMitigationStrategies(riskData) {
+    const data = riskData.current;
+    const container = document.getElementById('mitigationStrategies');
+    
+    container.innerHTML = '';
+    
+    const strategies = generateMitigationStrategies(data);
+    
+    strategies.forEach(strategy => {
+        const item = document.createElement('div');
+        item.className = 'strategy-item';
+        item.innerHTML = `
+            <h5>${strategy.title}</h5>
+            <p>${strategy.description}</p>
+            <span class="strategy-priority ${strategy.priority}">${strategy.priority} Priority</span>
+        `;
+        container.appendChild(item);
+    });
+}
+
+function generateMitigationStrategies(data) {
+    const strategies = [];
+    
+    const ocf = parseFloat(data.net_cash_from_operating_activities) || 0;
+    const fcf = parseFloat(data.free_cash_flow) || 0;
+    const netIncome = parseFloat(data.net_income) || 0;
+    const liquidationRisk = data.liquidation_label == 1;
+    
+    if (ocf < 0) {
+        strategies.push({
+            title: 'Improve Working Capital Management',
+            description: 'Focus on accelerating receivables collection and optimizing payment terms with suppliers.',
+            priority: 'high'
+        });
+    }
+    
+    if (fcf < 0) {
+        strategies.push({
+            title: 'Review Capital Expenditure',
+            description: 'Evaluate and potentially defer non-critical capital investments to preserve cash.',
+            priority: 'high'
+        });
+    }
+    
+    if (netIncome < 0) {
+        strategies.push({
+            title: 'Cost Reduction Program',
+            description: 'Implement comprehensive cost reduction measures to return to profitability.',
+            priority: 'high'
+        });
+    }
+    
+    if (liquidationRisk) {
+        strategies.push({
+            title: 'Emergency Cash Conservation',
+            description: 'Implement immediate cash conservation measures and explore additional financing options.',
+            priority: 'high'
+        });
+    }
+    
+    if (strategies.length === 0) {
+        strategies.push({
+            title: 'Maintain Current Practices',
+            description: 'Continue current financial management practices while monitoring key metrics.',
+            priority: 'low'
+        });
+    }
+    
+    return strategies;
+}
+
+function updateEarlyWarningSystem(riskData) {
+    const data = riskData.current;
+    
+    // Cash Flow Warning
+    const ocf = parseFloat(data.net_cash_from_operating_activities) || 0;
+    updateWarningIndicator('cashflow', ocf < 0 ? 'alert' : 'normal');
+    
+    // Revenue Warning (using net income as proxy)
+    const netIncome = parseFloat(data.net_income) || 0;
+    updateWarningIndicator('revenue', netIncome < 0 ? 'caution' : 'normal');
+    
+    // Debt Warning
+    const debtRatio = parseFloat(data.debt_to_equity_ratio) || 0;
+    updateWarningIndicator('debt', debtRatio > 2 ? 'alert' : debtRatio > 1 ? 'caution' : 'normal');
+    
+    // Liquidity Warning
+    const liquidationRisk = data.liquidation_label == 1;
+    updateWarningIndicator('liquidity', liquidationRisk ? 'alert' : 'normal');
+}
+
+function updateWarningIndicator(type, status) {
+    const warningElement = document.getElementById(type + 'Warning');
+    const warningItem = warningElement ? warningElement.closest('.warning-item') : null;
+    
+    if (warningElement) {
+        warningElement.textContent = status.charAt(0).toUpperCase() + status.slice(1);
+        warningElement.className = 'warning-status ' + status;
+    }
+    
+    if (warningItem) {
+        if (status === 'alert') {
+            warningItem.classList.add('alert');
+        } else {
+            warningItem.classList.remove('alert');
+        }
+    }
+}
+
+function updateRiskComparison(riskData) {
+    const ctx = document.getElementById('riskComparisonChart');
+    if (!ctx) return;
+    
+    if (riskComparisonChart) {
+        riskComparisonChart.destroy();
+    }
+    
+    const currentRisk = calculateOverallRiskScore(riskData.current);
+    
+    riskComparisonChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Company Risk', 'Industry Average', 'Best in Class'],
+            datasets: [{
+                data: [currentRisk, 45, 15], // Industry benchmarks
+                backgroundColor: [
+                    currentRisk > 70 ? '#dc2626' : currentRisk > 30 ? '#d97706' : '#059669',
+                    '#6366f1',
+                    '#10b981'
+                ],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+    
+    // Update comparison metrics
+    const position = currentRisk < 30 ? 'Above Average' : currentRisk < 50 ? 'Average' : 'Below Average';
+    document.getElementById('companyPosition').textContent = position;
+    
+    const ranking = currentRisk < 30 ? 'Top 25%' : currentRisk < 50 ? 'Top 50%' : 'Bottom 50%';
+    document.getElementById('peerRanking').textContent = ranking;
+}
+
+function updateRiskSummary(riskData, companyName) {
+    const data = riskData.current;
+    const riskScore = calculateOverallRiskScore(data);
+    
+    // Key Findings
+    const keyFindings = generateKeyFindings(data, riskScore);
+    const findingsList = document.getElementById('keyFindings');
+    findingsList.innerHTML = '';
+    keyFindings.forEach(finding => {
+        const li = document.createElement('li');
+        li.textContent = finding;
+        findingsList.appendChild(li);
+    });
+    
+    // Immediate Actions
+    const immediateActions = generateImmediateActions(data);
+    const actionsList = document.getElementById('immediateActions');
+    actionsList.innerHTML = '';
+    immediateActions.forEach(action => {
+        const li = document.createElement('li');
+        li.textContent = action;
+        actionsList.appendChild(li);
+    });
+    
+    // Monitoring Recommendations
+    const monitoringRecs = generateMonitoringRecommendations(data);
+    const monitoringList = document.getElementById('monitoringRecommendations');
+    monitoringList.innerHTML = '';
+    monitoringRecs.forEach(rec => {
+        const li = document.createElement('li');
+        li.textContent = rec;
+        monitoringList.appendChild(li);
+    });
+    
+    // Update dates
+    const today = new Date();
+    document.getElementById('assessmentDate').textContent = today.toLocaleDateString();
+    
+    const nextReview = new Date(today);
+    nextReview.setMonth(nextReview.getMonth() + (riskScore > 70 ? 1 : riskScore > 30 ? 3 : 6));
+    document.getElementById('nextReview').textContent = nextReview.toLocaleDateString();
+}
+
+function generateKeyFindings(data, riskScore) {
+    const findings = [];
+    
+    findings.push(`Overall risk score: ${riskScore}/100 (${riskScore > 70 ? 'High' : riskScore > 30 ? 'Medium' : 'Low'} Risk)`);
+    
+    const ocf = parseFloat(data.net_cash_from_operating_activities) || 0;
+    if (ocf < 0) {
+        findings.push(`Negative operating cash flow of ${formatCurrency(ocf)} indicates operational challenges`);
+    } else {
+        findings.push(`Positive operating cash flow of ${formatCurrency(ocf)} shows healthy operations`);
+    }
+    
+    const liquidationRisk = data.liquidation_label == 1;
+    if (liquidationRisk) {
+        findings.push('Company shows signs of liquidation risk based on financial patterns');
+    }
+    
+    const debtRatio = parseFloat(data.debt_to_equity_ratio) || 0;
+    if (debtRatio > 2) {
+        findings.push(`High debt-to-equity ratio of ${debtRatio.toFixed(2)} indicates elevated leverage risk`);
+    }
+    
+    return findings;
+}
+
+function generateImmediateActions(data) {
+    const actions = [];
+    
+    const ocf = parseFloat(data.net_cash_from_operating_activities) || 0;
+    const fcf = parseFloat(data.free_cash_flow) || 0;
+    const liquidationRisk = data.liquidation_label == 1;
+    
+    if (liquidationRisk) {
+        actions.push('Implement immediate cash conservation measures');
+        actions.push('Review and potentially restructure debt obligations');
+    }
+    
+    if (ocf < -1000000) {
+        actions.push('Conduct urgent working capital analysis and optimization');
+    }
+    
+    if (fcf < -500000) {
+        actions.push('Review and potentially defer capital expenditure projects');
+    }
+    
+    if (actions.length === 0) {
+        actions.push('Continue monitoring key financial metrics');
+        actions.push('Maintain current risk management practices');
+    }
+    
+    return actions;
+}
+
+function generateMonitoringRecommendations(data) {
+    const recommendations = [];
+    
+    recommendations.push('Monitor operating cash flow on a monthly basis');
+    recommendations.push('Track debt service coverage ratios');
+    recommendations.push('Review working capital metrics quarterly');
+    
+    const liquidationRisk = data.liquidation_label == 1;
+    if (liquidationRisk) {
+        recommendations.push('Implement weekly cash flow forecasting');
+        recommendations.push('Establish early warning triggers for key metrics');
+    }
+    
+    recommendations.push('Conduct annual comprehensive risk assessment review');
+    
+    return recommendations;
+}
+
+// Utility functions
+function formatCurrency(value) {
+    if (value === null || value === undefined) return 'N/A';
+    
+    const num = parseFloat(value);
+    if (isNaN(num)) return 'N/A';
+    
+    if (Math.abs(num) >= 1e9) {
+        return `${(num/1e9).toFixed(1)}B`;
+    } else if (Math.abs(num) >= 1e6) {
+        return `${(num/1e6).toFixed(1)}M`;
+    } else if (Math.abs(num) >= 1e3) {
+        return `${(num/1e3).toFixed(1)}K`;
+    } else {
+        return `${num.toFixed(0)}`;
+    }
+}
+
+function showRiskLoading(show) {
+    const overlay = document.getElementById('riskLoadingOverlay');
+    if (overlay) {
+        overlay.style.display = show ? 'flex' : 'none';
+    }
+}
+
+function showRiskError(message) {
+    createNotification(message, 'error');
+}
+
+function showRiskSuccess(message) {
+    createNotification(message, 'success');
+}
+
+function createNotification(message, type) {
+    // Remove existing notifications
+    const existingNotifications = document.querySelectorAll('.notification');
+    existingNotifications.forEach(n => n.remove());
+    
+    // Create new notification
+    const notification = document.createElement('div');
+    notification.className = `notification ${type}`;
+    
+    const icon = type === 'error' ? 'fas fa-exclamation-triangle' : 'fas fa-check-circle';
+    notification.innerHTML = `<i class="${icon}"></i>${message}`;
+    
+    document.body.appendChild(notification);
+    
+    // Auto remove after 5 seconds
+    setTimeout(() => {
+        if (notification.parentNode) {
+            notification.remove();
+        }
+    }, 5000);
+    
+    // Click to dismiss
+    notification.addEventListener('click', () => {
+        notification.remove();
+    });
+}
+
+// Action functions
+function exportRiskReport() {
+    const companyName = document.getElementById('riskCompanySelect').value;
+    if (!companyName) {
+        showRiskError('Please select a company first');
+        return;
+    }
+    
+    showRiskLoading(true);
+    
+    // Simulate report generation
+    setTimeout(() => {
+        showRiskLoading(false);
+        showRiskSuccess('Risk assessment report exported successfully!');
+        
+        // Create a simple CSV export
+        const riskData = {
+            company: companyName,
+            riskScore: document.getElementById('riskScoreNumber').textContent,
+            riskLevel: document.getElementById('overallRiskBadge').textContent,
+            assessmentDate: new Date().toLocaleDateString(),
+            liquidationRisk: document.getElementById('liquidationStatus').textContent.includes('High') ? 'Yes' : 'No',
+            cashFlowRisk: document.getElementById('cashflowStatus').textContent.includes('High') ? 'High' : 'Low'
+        };
+        
+        const csvContent = `Company,Risk Score,Risk Level,Assessment Date,Liquidation Risk,Cash Flow Risk\n${riskData.company},${riskData.riskScore},${riskData.riskLevel},${riskData.assessmentDate},${riskData.liquidationRisk},${riskData.cashFlowRisk}`;
+        
+        const blob = new Blob([csvContent], { type: 'text/csv' });
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `${companyName}_risk_assessment.csv`;
+        link.click();
+        window.URL.revokeObjectURL(url);
+        
+    }, 2000);
+}
+
+function generateRiskAlert() {
+    const companyName = document.getElementById('riskCompanySelect').value;
+    if (!companyName) {
+        showRiskError('Please select a company first');
+        return;
+    }
+    
+    // Simulate alert setup
+    const alertThreshold = prompt('Set risk score threshold for alerts (0-100):');
+    if (alertThreshold && !isNaN(alertThreshold) && alertThreshold >= 0 && alertThreshold <= 100) {
+        showRiskSuccess(`Risk alert set for ${companyName} at threshold ${alertThreshold}`);
+        console.log(`Alert created for ${companyName} at threshold ${alertThreshold}`);
+    } else if (alertThreshold !== null) {
+        showRiskError('Please enter a valid threshold between 0 and 100');
+    }
+}
+
+// Help System
+function initializeHelpSystem() {
+    // Add help tooltips to risk factors
+    const riskFactorItems = document.querySelectorAll('.risk-factor-item');
+    riskFactorItems.forEach(item => {
+        const factorName = item.querySelector('.factor-name').textContent;
+        
+        item.addEventListener('click', function() {
+            showFactorHelp(factorName);
+        });
+    });
+}
+
+function showFactorHelp(factorName) {
+    const helpTexts = {
+        'Operating Cash Flow': 'Operating Cash Flow measures the cash generated from core business operations. Negative values indicate the company is using more cash than it generates from operations.',
+        'Free Cash Flow': 'Free Cash Flow is the cash remaining after capital expenditures. It represents cash available for debt payments, dividends, and growth investments.',
+        'Debt to Equity Ratio': 'This ratio compares total debt to shareholder equity. Higher ratios indicate higher financial leverage and potential risk.',
+        'Interest Coverage': 'Interest Coverage Ratio measures the company\'s ability to pay interest on outstanding debt. Lower ratios indicate higher risk of default.',
+        'Working Capital': 'Working Capital represents short-term liquidity and operational efficiency. Negative changes may indicate cash flow challenges.',
+        'Profitability': 'Net Income consistency indicates the company\'s ability to generate sustainable profits over time.'
+    };
+    
+    const helpText = helpTexts[factorName] || 'Financial metric used in risk assessment.';
+    
+    const modal = document.createElement('div');
+    modal.className = 'help-modal';
+    
+    modal.innerHTML = `
+        <div class="help-modal-content">
+            <h4>${factorName}</h4>
+            <p>${helpText}</p>
+            <button onclick="this.closest('.help-modal').remove()">
+                Got it
+            </button>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    
+    // Close on outside click
+    modal.addEventListener('click', function(e) {
+        if (e.target === modal) {
+            modal.remove();
+        }
+    });
+    
+    // Close on ESC key
+    const handleEscape = function(e) {
+        if (e.key === 'Escape') {
+            modal.remove();
+            document.removeEventListener('keydown', handleEscape);
+        }
+    };
+    document.addEventListener('keydown', handleEscape);
+}
+
+// Performance monitoring
+window.addEventListener('load', function() {
+    const loadTime = performance.timing.loadEventEnd - performance.timing.navigationStart;
+    console.log(`📊 Risk Assessment page loaded in ${loadTime}ms`);
+});
+
+// Auto-check alerts when risk assessment is complete
+function checkRiskAlerts() {
+    const currentCompany = document.getElementById('riskCompanySelect').value;
+    const currentRiskScore = parseInt(document.getElementById('riskScoreNumber').textContent) || 0;
+    
+    // Simple threshold check (in real app, this would be stored in database)
+    if (currentRiskScore >= 80) {
+        showRiskError(`HIGH ALERT: ${currentCompany} risk score (${currentRiskScore}) is critically high!`);
+    } else if (currentRiskScore >= 60) {
+        createNotification(`Warning: ${currentCompany} risk score (${currentRiskScore}) requires attention`, 'error');
+    }
+}
+
+// Auto-check alerts when risk assessment is complete
+const originalUpdateOverallRiskScore = updateOverallRiskScore;
+updateOverallRiskScore = function(riskData) {
+    originalUpdateOverallRiskScore(riskData);
+    setTimeout(checkRiskAlerts, 1000);
+};
+
+// Keyboard shortcuts
+document.addEventListener('keydown', function(e) {
+    if (e.ctrlKey || e.metaKey) {
+        switch(e.key) {
+            case 'r':
+                e.preventDefault();
+                assessRisk();
+                break;
+            case 'e':
+                e.preventDefault();
+                exportRiskReport();
+                break;
+        }
+    }
+});
+
+console.log('🛡️ Risk Assessment initialized - Ready to analyze financial risk from cash_flow_statement');
+console.log('💡 Keyboard shortcuts: Ctrl+R (Assess Risk), Ctrl+E (Export Report)');
+</script>
+{% endblock %}

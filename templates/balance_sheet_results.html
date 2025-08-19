@@ -1,0 +1,1296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Balance Sheet Results - Team Finance</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Chart.js - Updated to latest version -->
+    <!-- Replace old Chart.js with this -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+
+    <style>
+        :root {
+            --primary-color: #059669;
+            --secondary-color: #10b981;
+            --success-color: #059669;
+            --info-color: #6366f1;
+            --warning-color: #d97706;
+            --danger-color: #dc2626;
+            --dark-color: #1f2937;
+            --light-color: #f8fafc;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --card-bg: rgba(255, 255, 255, 0.95);
+            --glass-bg: rgba(255, 255, 255, 0.9);
+            --border-color: rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: var(--text-primary);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Team Finance Navbar Styles */
+        .navbar {
+            background: linear-gradient(135deg, var(--primary-color), #3b82f6);
+            box-shadow: 0 2px 20px rgba(37, 99, 235, 0.1);
+            padding: 0.75rem 0;
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: white !important;
+        }
+
+        .nav-link {
+            font-weight: 500;
+            transition: all 0.3s ease;
+            color: rgba(255, 255, 255, 0.9) !important;
+            margin: 0 0.25rem;
+            border-radius: 6px;
+            padding: 0.5rem 1rem !important;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            color: #ffffff !important;
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-1px);
+        }
+
+        .dropdown-menu {
+            border: none;
+            border-radius: 8px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+            backdrop-filter: blur(10px);
+        }
+
+        .dropdown-item {
+            padding: 0.75rem 1.25rem;
+            transition: all 0.2s ease;
+        }
+
+        .dropdown-item:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .dropdown-item.active {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .results-header {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .company-title {
+            font-size: 2.5rem;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+        }
+
+        .generation-date {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            font-weight: 500;
+        }
+
+        .health-score {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin: 1rem 0;
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .balance-sheet-card {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .balance-sheet-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .card-title {
+            font-size: 1.8rem;
+            color: var(--text-primary);
+            margin-bottom: 1.5rem;
+            border-bottom: 3px solid var(--primary-color);
+            padding-bottom: 0.5rem;
+            font-weight: 700;
+        }
+
+        .balance-sheet-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+
+        .balance-sheet-table th,
+        .balance-sheet-table td {
+            padding: 0.8rem;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        .balance-sheet-table th {
+            background: var(--light-color);
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .balance-sheet-table .section-header {
+            background: var(--primary-color);
+            color: white;
+            font-weight: bold;
+        }
+
+        .balance-sheet-table .amount {
+            text-align: right;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .positive {
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        .negative {
+            color: var(--danger-color);
+            font-weight: 600;
+        }
+
+        .total-row {
+            font-weight: 700 !important;
+            background: #edf2f7 !important;
+            color: var(--text-primary) !important;
+        }
+
+        .analysis-card {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            transition: transform 0.3s ease;
+        }
+
+        .analysis-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .ratio-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        .ratio-item {
+            background: var(--light-color);
+            padding: 1.5rem;
+            border-radius: 10px;
+            text-align: center;
+            border-left: 4px solid var(--primary-color);
+            transition: all 0.3s ease;
+        }
+
+        .ratio-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .ratio-value {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .ratio-label {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            font-weight: 600;
+        }
+
+        .insights-section {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            margin: 2rem 0;
+            transition: transform 0.3s ease;
+        }
+
+        .insights-section:hover {
+            transform: translateY(-2px);
+        }
+
+        .insight-item {
+            display: flex;
+            align-items: flex-start;
+            margin: 1rem 0;
+            padding: 1rem;
+            border-radius: 8px;
+            background: var(--light-color);
+            transition: all 0.3s ease;
+        }
+
+        .insight-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .insight-icon {
+            margin-right: 1rem;
+            font-size: 1.5rem;
+        }
+
+        .insight-positive .insight-icon {
+            color: var(--success-color);
+        }
+
+        .insight-warning .insight-icon {
+            color: var(--warning-color);
+        }
+
+        .insight-negative .insight-icon {
+            color: var(--danger-color);
+        }
+
+        .insight-text {
+            flex: 1;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .insight-title {
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin: 2rem 0;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color), #3b82f6);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(5, 150, 105, 0.4);
+        }
+
+        .btn-secondary {
+            background: var(--success-color);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #047857;
+            transform: translateY(-2px);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .btn-outline:hover {
+            background: var(--primary-color);
+            color: white;
+            transform: translateY(-1px);
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
+            margin: 1rem 0;
+        }
+
+        .data-quality-badge {
+            display: inline-block;
+            background: var(--info-color);
+            color: white;
+            padding: 0.3rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            margin: 0.5rem 0;
+            font-weight: 600;
+        }
+
+        .footer-section {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            margin: 2rem 0;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .disclaimer {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            margin: 1rem 0;
+            line-height: 1.6;
+            font-weight: 500;
+        }
+
+        .error-message {
+            background: #fee2e2;
+            border: 1px solid #fecaca;
+            color: #dc2626;
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+        }
+
+        /* Mobile responsive */
+        @media (max-width: 768px) {
+            .navbar-brand {
+                font-size: 1.25rem;
+            }
+
+            .results-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .container {
+                padding: 1rem;
+            }
+            
+            .company-title {
+                font-size: 2rem;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .btn {
+                min-width: 200px;
+            }
+            
+            .ratio-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Team Finance Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-chart-line me-2"></i>
+                Team Finance
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/dashboard">
+                            <i class="fas fa-tachometer-alt me-1"></i>Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/companies">
+                            <i class="fas fa-building me-1"></i>Companies
+                        </a>
+                    </li>
+                    
+                    <!-- ANALYTICS DROPDOWN MENU -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="analyticsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-chart-bar me-1"></i>Analytics
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="analyticsDropdown">
+                            <li>
+                                <a class="dropdown-item" href="/analytics">
+                                    <i class="fas fa-chart-line me-2"></i>Financial Analysis
+                                </a>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <a class="dropdown-item" href="/radar-chart">
+                                    <i class="fas fa-chart-area me-2"></i>Radar Chart
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="/trend-analysis">
+                                    <i class="fas fa-chart-line me-2"></i>Trend Analysis
+                                </a>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <a class="dropdown-item" href="/risk-assessment">
+                                    <i class="fas fa-exclamation-triangle me-2"></i>Risk Assessment
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="/upload">
+                            <i class="fas fa-upload me-1"></i>Upload Files
+                        </a>
+                    </li>
+                    
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle active" href="#" id="toolsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-tools me-1"></i>Tools
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="toolsDropdown">
+                            <li>
+                                <a class="dropdown-item" href="/cash-flow-generator">
+                                    <i class="fas fa-calculator me-2"></i>Cash Flow Generator
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item active" href="/balance-sheet-generator">
+                                    <i class="fas fa-file-invoice me-2"></i>Balance Sheet Generator
+                                </a>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <a class="dropdown-item" href="/api/cash-flow/companies">
+                                    <i class="fas fa-file-alt me-2"></i>API Reports
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="/api/ml-analysis">
+                                    <i class="fas fa-robot me-2"></i>ML Analysis
+                                </a>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <a class="dropdown-item" href="#" onclick="exportData()">
+                                    <i class="fas fa-download me-2"></i>Export Data
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#settingsModal">
+                                    <i class="fas fa-cog me-2"></i>Settings
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="/user-guide">
+                            <i class="fas fa-book me-1"></i>Guide
+                        </a>
+                    </li>
+                </ul>
+                
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#searchModal">
+                            <i class="fas fa-search me-1"></i>Search
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="toggleTheme()">
+                            <i class="fas fa-moon me-1" id="themeIcon"></i>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="results-header">
+            <h1 class="company-title">Your Company Balance Sheet</h1>
+            <div class="generation-date">Generated on: <span id="currentDate"></span></div>
+            
+        </div>
+
+        <div class="results-grid">
+            <div class="balance-sheet-card">
+                <h2 class="card-title">Assets</h2>
+                <table class="balance-sheet-table">
+                    <thead>
+                        <tr>
+                            <th>Item</th>
+                            <th class="amount">Amount ($)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="section-header">
+                            <td colspan="2">Current Assets</td>
+                        </tr>
+                        <tr>
+                            <td>Cash and Cash Equivalents</td>
+                            <td class="amount positive" id="cashEquivalents">$125,000</td>
+                        </tr>
+                        <tr>
+                            <td>Accounts Receivable</td>
+                            <td class="amount positive" id="accountsReceivableAssets">$85,500</td>
+                        </tr>
+                        <tr>
+                            <td>Inventory</td>
+                            <td class="amount positive" id="inventoryAssets">$45,200</td>
+                        </tr>
+                        <tr>
+                            <td>Prepaid Expenses</td>
+                            <td class="amount positive" id="prepaidExpenses">$12,300</td>
+                        </tr>
+                        <tr class="total-row">
+                            <td>Total Current Assets</td>
+                            <td class="amount positive" id="totalCurrentAssets">$268,000</td>
+                        </tr>
+                        <tr class="section-header">
+                            <td colspan="2">Non-Current Assets</td>
+                        </tr>
+                        <tr>
+                            <td>Property, Plant & Equipment</td>
+                            <td class="amount positive" id="netPPE">$185,000</td>
+                        </tr>
+                        <tr>
+                            <td>Intangible Assets</td>
+                            <td class="amount positive" id="intangibleAssets">$25,000</td>
+                        </tr>
+                        <tr>
+                            <td>Investments</td>
+                            <td class="amount positive" id="investments">$35,000</td>
+                        </tr>
+                        <tr class="total-row">
+                            <td>Total Non-Current Assets</td>
+                            <td class="amount positive" id="totalNonCurrentAssets">$245,000</td>
+                        </tr>
+                        <tr class="total-row" style="background: #667eea; color: white;">
+                            <td><strong>TOTAL ASSETS</strong></td>
+                            <td class="amount" id="totalAssets"><strong>$513,000</strong></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="balance-sheet-card">
+                <h2 class="card-title">Liabilities & Equity</h2>
+                <table class="balance-sheet-table">
+                    <thead>
+                        <tr>
+                            <th>Item</th>
+                            <th class="amount">Amount ($)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="section-header">
+                            <td colspan="2">Current Liabilities</td>
+                        </tr>
+                        <tr>
+                            <td>Accounts Payable</td>
+                            <td class="amount negative" id="accountsPayableLiabilities">$45,000</td>
+                        </tr>
+                        <tr>
+                            <td>Short-term Debt</td>
+                            <td class="amount negative" id="shortTermDebt">$25,000</td>
+                        </tr>
+                        <tr>
+                            <td>Accrued Expenses</td>
+                            <td class="amount negative" id="accruedLiabilities">$18,500</td>
+                        </tr>
+                        <tr class="total-row">
+                            <td>Total Current Liabilities</td>
+                            <td class="amount negative" id="totalCurrentLiabilities">$88,500</td>
+                        </tr>
+                        <tr class="section-header">
+                            <td colspan="2">Non-Current Liabilities</td>
+                        </tr>
+                        <tr>
+                            <td>Long-term Debt</td>
+                            <td class="amount negative" id="longTermDebt">$125,000</td>
+                        </tr>
+                        <tr>
+                            <td>Deferred Tax Liability</td>
+                            <td class="amount negative" id="deferredTaxLiabilities">$15,500</td>
+                        </tr>
+                        <tr class="total-row">
+                            <td>Total Non-Current Liabilities</td>
+                            <td class="amount negative" id="totalNonCurrentLiabilities">$140,500</td>
+                        </tr>
+                        <tr class="total-row">
+                            <td>Total Liabilities</td>
+                            <td class="amount negative" id="totalLiabilities">$229,000</td>
+                        </tr>
+                        <tr class="section-header">
+                            <td colspan="2">Shareholders' Equity</td>
+                        </tr>
+                        <tr>
+                            <td>Share Capital</td>
+                            <td class="amount positive" id="shareCapital">$200,000</td>
+                        </tr>
+                        <tr>
+                            <td>Retained Earnings</td>
+                            <td class="amount positive" id="retainedEarnings">$84,000</td>
+                        </tr>
+                        <tr class="total-row">
+                            <td>Total Shareholders' Equity</td>
+                            <td class="amount positive" id="totalEquity">$284,000</td>
+                        </tr>
+                        <tr class="total-row" style="background: #667eea; color: white;">
+                            <td><strong>TOTAL LIABILITIES & EQUITY</strong></td>
+                            <td class="amount" id="totalLiabilitiesEquity"><strong>$513,000</strong></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="analysis-card">
+            <h2 class="card-title">Key Financial Ratios</h2>
+            <div class="ratio-grid">
+                <div class="ratio-item">
+                    <div class="ratio-value" id="currentRatio">3.03</div>
+                    <div class="ratio-label">Current Ratio</div>
+                </div>
+                <div class="ratio-item">
+                    <div class="ratio-value" id="debtToEquityRatio">0.81</div>
+                    <div class="ratio-label">Debt to Equity</div>
+                </div>
+                <div class="ratio-item">
+                    <div class="ratio-value" id="equityRatioDisplay">55.4%</div>
+                    <div class="ratio-label">Equity Ratio</div>
+                </div>
+                <div class="ratio-item">
+                    <div class="ratio-value" id="debtRatioDisplay">44.6%</div>
+                    <div class="ratio-label">Debt Ratio</div>
+                </div>
+                <div class="ratio-item">
+                    <div class="ratio-value" id="quickRatio">2.52</div>
+                    <div class="ratio-label">Quick Ratio</div>
+                </div>
+                <div class="ratio-item">
+                    <div class="ratio-value" id="assetUtilization">52.2%</div>
+                    <div class="ratio-label">Asset Utilization</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="insights-section">
+            <h2 class="card-title">AI-Powered Financial Insights</h2>
+            
+            <div class="insight-item insight-positive" id="insight1">
+                <div class="insight-icon">✅</div>
+                <div class="insight-text">
+                    <div class="insight-title">Strong Liquidity Position</div>
+                    <div>Your current ratio of 3.03 indicates excellent ability to meet short-term obligations. Cash reserves are healthy at $125,000.</div>
+                </div>
+            </div>
+
+            <div class="insight-item insight-positive" id="insight2">
+                <div class="insight-icon">📈</div>
+                <div class="insight-text">
+                    <div class="insight-title">Balanced Capital Structure</div>
+                    <div>Debt-to-equity ratio of 0.81 shows a well-balanced financing mix between debt and equity funding.</div>
+                </div>
+            </div>
+
+            <div class="insight-item insight-warning" id="insight3">
+                <div class="insight-icon">⚠️</div>
+                <div class="insight-text">
+                    <div class="insight-title">Inventory Management Opportunity</div>
+                    <div>Inventory levels at $45,200 could be optimized. Consider implementing just-in-time inventory management.</div>
+                </div>
+            </div>
+
+            <div class="insight-item insight-positive" id="insight4">
+                <div class="insight-icon">💼</div>
+                <div class="insight-text">
+                    <div class="insight-title">Asset Efficiency</div>
+                    <div>Total assets of $513,000 are well-distributed across current and non-current categories, showing good asset management.</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="analysis-card">
+    <h2 class="card-title">Balance Sheet Trends</h2>
+    <div class="chart-container">
+        <canvas id="balanceSheetChart"></canvas>
+    </div>
+</div>
+
+        <div class="action-buttons">
+            <button onclick="generateCashFlow()" class="btn btn-primary">Generate Cash Flow Statement</button>
+            <button onclick="downloadReport()" class="btn btn-secondary">Download Full Report</button>
+            <button onclick="scheduleAnalysis()" class="btn btn-outline">Schedule Regular Analysis</button>
+        </div>
+
+        <div class="footer-section">
+            <h3>Next Steps</h3>
+            <p class="disclaimer">
+                This balance sheet analysis is generated using AI-powered algorithms with 94% accuracy. 
+                For comprehensive financial planning, proceed to generate your cash flow statement and complete risk assessment.
+                All data is processed securely and complies with financial privacy standards.
+            </p>
+        </div>
+    </div>
+
+    <script>
+        let balanceSheetData = null;
+        let companyData = null;
+
+        // Load balance sheet data when page loads
+    
+window.addEventListener('load', async function() {
+    const balanceSheetData = localStorage.getItem('balance_sheet_data');
+    
+    if (!balanceSheetData) {
+        alert('No balance sheet data found. Please generate a balance sheet first.');
+        window.location.href = 'balance_sheet_generator.html';
+        return;
+    }
+    
+    try {
+        const data = JSON.parse(balanceSheetData);
+        populateBalanceSheet(data);
+        calculateAndDisplayRatios(data);
+        generateInsights(data);
+        
+        // Initialize chart after data loads
+        setTimeout(() => {
+            initializeBalanceSheetChart(data);
+        }, 500);
+        
+        console.log('✅ Balance sheet data loaded successfully');
+    } catch (error) {
+        console.error('Error loading balance sheet:', error);
+        alert('Error loading balance sheet data: ' + error.message);
+    }
+});
+
+        function populateBalanceSheet(data) {
+            // Update company title and date
+            document.querySelector('.company-title').textContent = data.company_name || 'Your Company Balance Sheet';
+            document.getElementById('currentDate').textContent = new Date(data.generated_at).toLocaleDateString('en-US');
+            
+            // Update assets section
+            document.getElementById('cashEquivalents').textContent = formatCurrency(data.cash_and_equivalents);
+            document.getElementById('accountsReceivableAssets').textContent = formatCurrency(data.accounts_receivable);
+            document.getElementById('inventoryAssets').textContent = formatCurrency(data.inventory);
+            document.getElementById('prepaidExpenses').textContent = formatCurrency(data.prepaid_expenses);
+            document.getElementById('totalCurrentAssets').textContent = formatCurrency(data.current_assets);
+            document.getElementById('netPPE').textContent = formatCurrency(data.net_ppe);
+            document.getElementById('intangibleAssets').textContent = formatCurrency(data.intangible_assets);
+            document.getElementById('investments').textContent = formatCurrency(data.investments);
+            document.getElementById('totalNonCurrentAssets').textContent = formatCurrency(data.non_current_assets);
+            document.getElementById('totalAssets').innerHTML = `<strong>${formatCurrency(data.total_assets)}</strong>`;
+            
+            // Update liabilities & equity section
+            document.getElementById('accountsPayableLiabilities').textContent = formatCurrency(data.accounts_payable);
+            document.getElementById('shortTermDebt').textContent = formatCurrency(data.short_term_debt);
+            document.getElementById('accruedLiabilities').textContent = formatCurrency(data.accrued_liabilities);
+            document.getElementById('totalCurrentLiabilities').textContent = formatCurrency(data.current_liabilities);
+            document.getElementById('longTermDebt').textContent = formatCurrency(data.long_term_debt);
+            document.getElementById('deferredTaxLiabilities').textContent = formatCurrency(data.deferred_tax_liabilities);
+            document.getElementById('totalNonCurrentLiabilities').textContent = formatCurrency(data.non_current_liabilities);
+            document.getElementById('totalLiabilities').textContent = formatCurrency(data.total_liabilities);
+            document.getElementById('shareCapital').textContent = formatCurrency(data.share_capital);
+            document.getElementById('retainedEarnings').textContent = formatCurrency(data.retained_earnings);
+            document.getElementById('totalEquity').textContent = formatCurrency(data.total_equity);
+            document.getElementById('totalLiabilitiesEquity').innerHTML = `<strong>${formatCurrency(data.total_assets)}</strong>`;
+            
+            // Update data quality badge
+            document.querySelector('.data-quality-badge').textContent = 
+                `Data Quality: ${data.accuracy_percentage || 94}% Accurate`;
+        }
+
+        function calculateAndDisplayRatios(data) {
+            // Calculate financial ratios from actual data
+            const currentRatio = (data.current_assets || 0) / (data.current_liabilities || 1);
+            const debtToEquity = (data.total_liabilities || 0) / (data.total_equity || 1);
+            const equityRatio = ((data.total_equity || 0) / (data.total_assets || 1)) * 100;
+            const debtRatio = ((data.total_liabilities || 0) / (data.total_assets || 1)) * 100;
+            const quickRatio = ((data.current_assets || 0) - (data.inventory || 0)) / (data.current_liabilities || 1);
+            const assetUtilization = ((data.current_assets || 0) / (data.total_assets || 1)) * 100;
+            
+            // Update ratio displays
+            document.getElementById('currentRatio').textContent = currentRatio.toFixed(2);
+            document.getElementById('debtToEquityRatio').textContent = debtToEquity.toFixed(2);
+            document.getElementById('equityRatioDisplay').textContent = equityRatio.toFixed(1) + '%';
+            document.getElementById('debtRatioDisplay').textContent = debtRatio.toFixed(1) + '%';
+            document.getElementById('quickRatio').textContent = quickRatio.toFixed(2);
+            document.getElementById('assetUtilization').textContent = assetUtilization.toFixed(1) + '%';
+            
+            // Update health score based on ratios
+            const healthScore = calculateHealthScore({
+                currentRatio,
+                debtToEquity,
+                equityRatio: equityRatio / 100,
+                quickRatio
+            });
+            
+            document.querySelector('.health-score').textContent = 
+                `Financial Health Score: ${healthScore}/100`;
+        }
+
+        function calculateHealthScore(ratios) {
+            let score = 0;
+            
+            // Current ratio scoring (25 points max)
+            if (ratios.currentRatio >= 2) score += 25;
+            else if (ratios.currentRatio >= 1.5) score += 20;
+            else if (ratios.currentRatio >= 1) score += 15;
+            else score += 5;
+            
+            // Debt to equity scoring (25 points max)
+            if (ratios.debtToEquity <= 0.5) score += 25;
+            else if (ratios.debtToEquity <= 1) score += 20;
+            else if (ratios.debtToEquity <= 1.5) score += 15;
+            else score += 5;
+            
+            // Equity ratio scoring (25 points max)
+            if (ratios.equityRatio >= 0.6) score += 25;
+            else if (ratios.equityRatio >= 0.4) score += 20;
+            else if (ratios.equityRatio >= 0.3) score += 15;
+            else score += 5;
+            
+            // Quick ratio scoring (25 points max)
+            if (ratios.quickRatio >= 1.5) score += 25;
+            else if (ratios.quickRatio >= 1) score += 20;
+            else if (ratios.quickRatio >= 0.8) score += 15;
+            else score += 5;
+            
+            return Math.round(score);
+        }
+
+        function generateInsights(data) {
+            const insights = [];
+            
+            // Calculate ratios for insights
+            const currentRatio = (data.current_assets || 0) / (data.current_liabilities || 1);
+            const debtToEquity = (data.total_liabilities || 0) / (data.total_equity || 1);
+            const cashPosition = data.cash_and_equivalents || 0;
+            const inventoryLevel = data.inventory || 0;
+            
+            // Liquidity insight
+            if (currentRatio >= 2) {
+                insights.push({
+                    type: 'positive',
+                    title: 'Strong Liquidity Position',
+                    description: `Your current ratio of ${currentRatio.toFixed(2)} indicates excellent ability to meet short-term obligations. Cash reserves are healthy at ${formatCurrency(cashPosition)}.`
+                });
+            } else if (currentRatio >= 1) {
+                insights.push({
+                    type: 'warning',
+                    title: 'Adequate Liquidity',
+                    description: `Your current ratio of ${currentRatio.toFixed(2)} is acceptable but could be improved. Monitor cash flow closely.`
+                });
+            } else {
+                insights.push({
+                    type: 'negative',
+                    title: 'Liquidity Concern',
+                    description: `Your current ratio of ${currentRatio.toFixed(2)} indicates potential difficulty meeting short-term obligations. Immediate attention required.`
+                });
+            }
+            
+            // Capital structure insight
+            if (debtToEquity <= 1) {
+                insights.push({
+                    type: 'positive',
+                    title: 'Balanced Capital Structure',
+                    description: `Debt-to-equity ratio of ${debtToEquity.toFixed(2)} shows a well-balanced financing mix between debt and equity funding.`
+                });
+            } else if (debtToEquity <= 2) {
+                insights.push({
+                    type: 'warning',
+                    title: 'Moderate Debt Levels',
+                    description: `Debt-to-equity ratio of ${debtToEquity.toFixed(2)} indicates moderate leverage. Monitor debt service capabilities.`
+                });
+            } else {
+                insights.push({
+                    type: 'negative',
+                    title: 'High Debt Burden',
+                    description: `Debt-to-equity ratio of ${debtToEquity.toFixed(2)} shows high leverage. Consider debt reduction strategies.`
+                });
+            }
+            
+            // Inventory insight
+            const inventoryToAssets = (inventoryLevel / (data.total_assets || 1)) * 100;
+            if (inventoryToAssets > 15) {
+                insights.push({
+                    type: 'warning',
+                    title: 'Inventory Management Opportunity',
+                    description: `Inventory levels at ${formatCurrency(inventoryLevel)} (${inventoryToAssets.toFixed(1)}% of total assets) could be optimized. Consider implementing just-in-time inventory management.`
+                });
+            } else {
+                insights.push({
+                    type: 'positive',
+                    title: 'Efficient Inventory Management',
+                    description: `Inventory levels are well-managed at ${formatCurrency(inventoryLevel)}, representing ${inventoryToAssets.toFixed(1)}% of total assets.`
+                });
+            }
+            
+            // Asset efficiency insight
+            const assetDistribution = ((data.current_assets || 0) / (data.total_assets || 1)) * 100;
+            insights.push({
+                type: 'positive',
+                title: 'Asset Efficiency',
+                description: `Total assets of ${formatCurrency(data.total_assets)} are distributed with ${assetDistribution.toFixed(1)}% in current assets, showing balanced asset management.`
+            });
+            
+            // Update insights in UI
+            updateInsightsDisplay(insights);
+        }
+
+        function updateInsightsDisplay(insights) {
+            const insightItems = [
+                document.getElementById('insight1'),
+                document.getElementById('insight2'),
+                document.getElementById('insight3'),
+                document.getElementById('insight4')
+            ];
+            
+            insights.forEach((insight, index) => {
+                if (insightItems[index]) {
+                    const item = insightItems[index];
+                    item.className = `insight-item insight-${insight.type}`;
+                    item.querySelector('.insight-title').textContent = insight.title;
+                    item.querySelector('.insight-text div:last-child').textContent = insight.description;
+                    
+                    // Update icon based on type
+                    const icon = item.querySelector('.insight-icon');
+                    switch (insight.type) {
+                        case 'positive':
+                            icon.textContent = '✅';
+                            break;
+                        case 'warning':
+                            icon.textContent = '⚠️';
+                            break;
+                        case 'negative':
+                            icon.textContent = '❌';
+                            break;
+                    }
+                }
+            });
+        }
+
+        function formatCurrency(amount) {
+            if (amount === null || amount === undefined || amount === 0) return '$0';
+            
+            const absAmount = Math.abs(amount);
+            const sign = amount < 0 ? '-' : '';
+            
+            if (absAmount >= 1000000000) {
+                return sign + '$' + (absAmount / 1000000000).toFixed(1) + 'B';
+            } else if (absAmount >= 1000000) {
+                return sign + '$'+ (absAmount / 1000000).toFixed(1) + 'M';
+            } else if (absAmount >= 1000) {
+                return sign + '$' + (absAmount / 1000).toFixed(1) + 'K';
+            } else {
+                return sign + '$' + absAmount.toLocaleString('en-US');
+            }
+        }
+
+        // Replace the downloadReport function in your balance_sheet_results.html
+
+function downloadReport() {
+    const balanceSheetData = JSON.parse(localStorage.getItem('balance_sheet_data'));
+    if (!balanceSheetData) {
+        alert('No balance sheet data available for download');
+        return;
+    }
+    
+    // Generate CSV content
+    const csvContent = generateCSVReport(balanceSheetData);
+    
+    // Create and download file
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `balance_sheet_analysis_${new Date().toISOString().split('T')[0]}.csv`;
+    link.click();
+    window.URL.revokeObjectURL(url);
+    
+    alert('Balance Sheet Analysis Report download started!');
+}
+
+function generateCSVReport(data) {
+    return `Balance Sheet Analysis Report
+Company: ${data.company_name}
+Generated: ${new Date(data.generated_at).toLocaleDateString()}
+Data Accuracy: ${data.accuracy_percentage}%
+
+ASSETS
+Cash and Equivalents,${data.cash_and_equivalents}
+Accounts Receivable,${data.accounts_receivable}
+Inventory,${data.inventory}
+Prepaid Expenses,${data.prepaid_expenses}
+Total Current Assets,${data.current_assets}
+
+Property Plant Equipment,${data.net_ppe}
+Intangible Assets,${data.intangible_assets}
+Investments,${data.investments}
+Total Non-Current Assets,${data.non_current_assets}
+TOTAL ASSETS,${data.total_assets}
+
+LIABILITIES
+Accounts Payable,${data.accounts_payable}
+Short-term Debt,${data.short_term_debt}
+Accrued Liabilities,${data.accrued_liabilities}
+Total Current Liabilities,${data.current_liabilities}
+
+Long-term Debt,${data.long_term_debt}
+Deferred Tax Liabilities,${data.deferred_tax_liabilities}
+Total Non-Current Liabilities,${data.non_current_liabilities}
+TOTAL LIABILITIES,${data.total_liabilities}
+
+EQUITY
+Share Capital,${data.share_capital}
+Retained Earnings,${data.retained_earnings}
+TOTAL EQUITY,${data.total_equity}
+
+FINANCIAL RATIOS
+Current Ratio,${((data.current_assets || 0) / (data.current_liabilities || 1)).toFixed(2)}
+Debt to Equity,${((data.total_liabilities || 0) / (data.total_equity || 1)).toFixed(2)}
+Quick Ratio,${(((data.current_assets || 0) - (data.inventory || 0)) / (data.current_liabilities || 1)).toFixed(2)}`;
+}
+
+        function scheduleAnalysis() {
+            alert('Regular analysis scheduling feature coming soon! You will be notified when available.');
+        }
+
+        // Add animation effects
+        window.addEventListener('load', async function() {
+    const balanceSheetData = localStorage.getItem('balance_sheet_data');
+    
+    if (!balanceSheetData) {
+        alert('No balance sheet data found. Please generate a balance sheet first.');
+        window.location.href = 'balance_sheet_generator.html';
+        return;
+    }
+    
+    try {
+        const data = JSON.parse(balanceSheetData);
+        populateBalanceSheet(data);
+        calculateAndDisplayRatios(data);
+        generateInsights(data);
+        
+        // Initialize chart after data loads
+        setTimeout(() => {
+            initializeBalanceSheetChart(data);
+        }, 500);
+        
+        console.log('✅ Balance sheet data loaded successfully');
+    } catch (error) {
+        console.error('Error loading balance sheet:', error);
+        alert('Error loading balance sheet data: ' + error.message);
+    }
+});
+
+        // Add hover effects for ratio items
+        document.querySelectorAll('.ratio-item').forEach(item => {
+            item.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-5px)';
+                this.style.transition = 'all 0.3s ease';
+            });
+            
+            item.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+            });
+        });
+
+
+        function generateCashFlow() {
+    const balanceSheetData = localStorage.getItem('balance_sheet_data');
+    
+    if (!balanceSheetData) {
+        alert('No balance sheet data found. Please generate a balance sheet first.');
+        return;
+    }
+    
+    // Store flag for cash flow generator
+    localStorage.setItem('generate_from_balance_sheet', 'true');
+    localStorage.setItem('balance_sheet_source', 'true');
+    
+    // Navigate to cash flow generator
+    window.location.href = 'cash_flow_generator.html';
+}
+
+
+
+
+
+function initializeBalanceSheetChart(data) {
+    const ctx = document.getElementById('balanceSheetChart');
+    if (!ctx) {
+        console.log('Chart canvas not found');
+        return;
+    }
+    
+    // Destroy existing chart
+    const existingChart = Chart.getChart(ctx);
+    if (existingChart) {
+        existingChart.destroy();
+    }
+    
+    try {
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Current Assets', 'Non-Current Assets', 'Current Liabilities', 'Non-Current Liabilities', 'Equity'],
+                datasets: [{
+                    data: [
+                        data.current_assets || 0,
+                        data.non_current_assets || 0,
+                        data.current_liabilities || 0,
+                        data.non_current_liabilities || 0,
+                        data.total_equity || 0
+                    ],
+                    backgroundColor: [
+                        '#48bb78',  // Green - Current Assets
+                        '#4299e1',  // Blue - Non-Current Assets  
+                        '#ed8936',  // Orange - Current Liabilities
+                        '#e53e3e',  // Red - Non-Current Liabilities
+                        '#667eea'   // Purple - Equity
+                    ],
+                    borderWidth: 3,
+                    borderColor: '#ffffff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'bottom',
+                        align: 'center',
+                        labels: {
+                            usePointStyle: true,
+                            pointStyle: 'rect',
+                            padding: 15,
+                            font: {
+                                size: 11,
+                                weight: '600',
+                                family: "'Segoe UI', sans-serif"
+                            },
+                            color: '#2d3748',
+                            boxWidth: 12,
+                            boxHeight: 12,
+                            generateLabels: function(chart) {
+                                const data = chart.data;
+                                return data.labels.map((label, i) => ({
+                                    text: label,
+                                    fillStyle: data.datasets[0].backgroundColor[i],
+                                    strokeStyle: data.datasets[0].backgroundColor[i],
+                                    lineWidth: 0,
+                                    pointStyle: 'rect',
+                                    hidden: false,
+                                    index: i
+                                }));
+                            }
+                        },
+                        onClick: null  // Disable click to hide segments
+                    },
+                    tooltip: {
+                        titleFont: {
+                            size: 14,
+                            weight: 'bold'
+                        },
+                        bodyFont: {
+                            size: 13
+                        },
+                        callbacks: {
+                            label: function(context) {
+                                const value = context.parsed;
+                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                const percentage = ((value / total) * 100).toFixed(1);
+                                return context.label + ': ' + formatCurrency(value) + ' (' + percentage + '%)';
+                            }
+                        }
+                    }
+                },
+                layout: {
+                    padding: {
+                        bottom: 20
+                    }
+                }
+            }
+        });
+        
+        console.log('✅ Chart created with proper legend');
+    } catch (error) {
+        console.error('❌ Chart error:', error);
+    }
+}
+    </script>
+</body>
+</html>

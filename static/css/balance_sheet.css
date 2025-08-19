@@ -1,0 +1,545 @@
+/* ===========================================
+   BALANCE SHEET GENERATOR CSS
+   Complete styling for balance sheet pages
+   =========================================== */
+
+/* CSS Variables for consistent theming */
+:root {
+    --bs-primary: #2563eb;
+    --bs-secondary: #64748b;
+    --bs-success: #10b981;
+    --bs-warning: #f59e0b;
+    --bs-danger: #ef4444;
+    --bs-info: #06b6d4;
+    --bs-light: #f8fafc;
+    --bs-dark: #1e293b;
+    --bs-gradient-primary: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+    --bs-gradient-success: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    --bs-gradient-warning: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    --bs-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --bs-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    --bs-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    --bs-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    --bs-border-radius: 12px;
+    --bs-border-radius-lg: 20px;
+}
+
+/* Global Balance Sheet Page Styling */
+.balance-sheet-page {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+/* Main Container */
+.bs-main-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+/* Page Header Section */
+.bs-page-header {
+    background: var(--bs-gradient-primary);
+    color: white;
+    padding: 2.5rem;
+    border-radius: var(--bs-border-radius-lg);
+    margin-bottom: 2rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.bs-page-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+    opacity: 0.3;
+}
+
+.bs-page-header h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+    position: relative;
+    z-index: 2;
+}
+
+.bs-page-header p {
+    font-size: 1.1rem;
+    opacity: 0.9;
+    margin-bottom: 0;
+    position: relative;
+    z-index: 2;
+}
+
+/* File Upload Section */
+.bs-upload-section {
+    background: white;
+    border-radius: var(--bs-border-radius);
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: var(--bs-shadow-lg);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.bs-upload-zone {
+    border: 3px dashed #e2e8f0;
+    border-radius: var(--bs-border-radius);
+    padding: 3rem 2rem;
+    text-align: center;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    position: relative;
+    overflow: hidden;
+}
+
+.bs-upload-zone:hover {
+    border-color: var(--bs-primary);
+    background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+    transform: translateY(-2px);
+    box-shadow: var(--bs-shadow-md);
+}
+
+.bs-upload-zone.dragover {
+    border-color: var(--bs-success);
+    background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+    box-shadow: 0 0 20px rgba(16, 185, 129, 0.2);
+}
+
+.bs-upload-icon {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 1.5rem;
+    background: var(--bs-gradient-primary);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    color: white;
+    transition: all 0.3s ease;
+}
+
+.bs-upload-zone:hover .bs-upload-icon {
+    transform: scale(1.1);
+}
+
+.bs-upload-text {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--bs-dark);
+    margin-bottom: 0.5rem;
+}
+
+.bs-upload-subtext {
+    color: var(--bs-secondary);
+    margin-bottom: 1rem;
+}
+
+.bs-upload-formats {
+    font-size: 0.875rem;
+    color: var(--bs-secondary);
+}
+
+/* File List Section */
+.bs-file-list {
+    background: white;
+    border-radius: var(--bs-border-radius);
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: var(--bs-shadow-md);
+    display: none;
+}
+
+.bs-file-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem;
+    background: var(--bs-light);
+    border-radius: 10px;
+    margin-bottom: 0.75rem;
+    transition: all 0.3s ease;
+}
+
+.bs-file-item:hover {
+    background: #f1f5f9;
+    transform: translateX(4px);
+}
+
+.bs-file-item:last-child {
+    margin-bottom: 0;
+}
+
+.bs-file-info {
+    display: flex;
+    align-items: center;
+    flex-grow: 1;
+}
+
+.bs-file-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 1rem;
+    color: white;
+    font-size: 1.1rem;
+}
+
+.bs-file-icon.pdf { background: var(--bs-danger); }
+.bs-file-icon.excel { background: var(--bs-success); }
+.bs-file-icon.word { background: var(--bs-primary); }
+.bs-file-icon.csv { background: var(--bs-warning); }
+
+.bs-file-details h6 {
+    margin: 0 0 0.25rem 0;
+    font-weight: 600;
+    color: var(--bs-dark);
+}
+
+.bs-file-details small {
+    color: var(--bs-secondary);
+}
+
+.bs-file-status {
+    padding: 0.25rem 0.75rem;
+    border-radius: 15px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-right: 0.75rem;
+}
+
+.bs-file-status.ready { background: #f3f4f6; color: #374151; }
+.bs-file-status.processing { background: #eff6ff; color: var(--bs-primary); }
+.bs-file-status.success { background: #ecfdf5; color: var(--bs-success); }
+.bs-file-status.error { background: #fef2f2; color: var(--bs-danger); }
+
+/* Progress Bar */
+.bs-progress-bar {
+    height: 4px;
+    background: #e5e7eb;
+    border-radius: 2px;
+    overflow: hidden;
+    margin-top: 0.5rem;
+}
+
+.bs-progress-fill {
+    height: 100%;
+    background: var(--bs-gradient-success);
+    border-radius: 2px;
+    transition: width 0.3s ease;
+}
+
+/* Processing Options Section */
+.bs-processing-options {
+    background: white;
+    border-radius: var(--bs-border-radius);
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: var(--bs-shadow-md);
+}
+
+.bs-option-card {
+    background: var(--bs-light);
+    border: 2px solid #e2e8f0;
+    border-radius: var(--bs-border-radius);
+    padding: 1.5rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-bottom: 1rem;
+}
+
+.bs-option-card:hover {
+    border-color: var(--bs-primary);
+    background: #eff6ff;
+    transform: translateY(-2px);
+    box-shadow: var(--bs-shadow-md);
+}
+
+.bs-option-card.selected {
+    border-color: var(--bs-primary);
+    background: #eff6ff;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
+}
+
+.bs-option-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1rem;
+    color: white;
+    font-size: 1.25rem;
+}
+
+.bs-option-icon.standard { background: var(--bs-gradient-primary); }
+.bs-option-icon.advanced { background: var(--bs-gradient-success); }
+.bs-option-icon.ai-powered { background: var(--bs-gradient-warning); }
+
+.bs-option-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--bs-dark);
+}
+
+.bs-option-description {
+    color: var(--bs-secondary);
+    font-size: 0.9rem;
+    margin-bottom: 0;
+}
+
+/* Missing Value Configuration */
+.bs-missing-config {
+    background: white;
+    border-radius: var(--bs-border-radius);
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: var(--bs-shadow-md);
+}
+
+.bs-config-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1rem;
+}
+
+.bs-config-item {
+    background: var(--bs-light);
+    border-radius: 10px;
+    padding: 1.25rem;
+    border: 2px solid transparent;
+    transition: all 0.3s ease;
+}
+
+.bs-config-item:hover {
+    border-color: var(--bs-primary);
+    background: #eff6ff;
+}
+
+.bs-config-item.active {
+    border-color: var(--bs-success);
+    background: #ecfdf5;
+}
+
+.bs-config-checkbox {
+    margin-right: 0.75rem;
+    transform: scale(1.2);
+}
+
+.bs-config-label {
+    font-weight: 600;
+    color: var(--bs-dark);
+    margin-bottom: 0.5rem;
+}
+
+.bs-config-desc {
+    font-size: 0.875rem;
+    color: var(--bs-secondary);
+    margin-bottom: 0;
+}
+
+/* Action Buttons */
+.bs-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 2rem;
+}
+
+.bs-btn {
+    padding: 1rem 2rem;
+    border-radius: var(--bs-border-radius);
+    font-weight: 600;
+    font-size: 1rem;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.bs-btn-primary {
+    background: var(--bs-gradient-primary);
+    color: white;
+}
+
+.bs-btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(37, 99, 235, 0.3);
+}
+
+.bs-btn-primary:disabled {
+    background: #9ca3af;
+    transform: none;
+    box-shadow: none;
+    cursor: not-allowed;
+}
+
+.bs-btn-secondary {
+    background: white;
+    color: var(--bs-secondary);
+    border: 2px solid #e2e8f0;
+}
+
+.bs-btn-secondary:hover {
+    border-color: var(--bs-primary);
+    color: var(--bs-primary);
+    transform: translateY(-1px);
+    box-shadow: var(--bs-shadow-md);
+}
+
+/* Loading Overlay */
+.bs-loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    display: none;
+}
+
+.bs-loading-content {
+    background: white;
+    padding: 2.5rem;
+    border-radius: var(--bs-border-radius-lg);
+    text-align: center;
+    max-width: 400px;
+    box-shadow: var(--bs-shadow-xl);
+}
+
+.bs-loading-spinner {
+    width: 60px;
+    height: 60px;
+    border: 6px solid #f3f3f3;
+    border-top: 6px solid var(--bs-primary);
+    border-radius: 50%;
+    animation: bs-spin 1s linear infinite;
+    margin: 0 auto 1.5rem;
+}
+
+@keyframes bs-spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.bs-loading-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--bs-dark);
+}
+
+.bs-loading-message {
+    color: var(--bs-secondary);
+    margin-bottom: 1.5rem;
+}
+
+.bs-loading-progress {
+    margin-bottom: 1rem;
+}
+
+.bs-loading-text {
+    font-size: 0.875rem;
+    color: var(--bs-secondary);
+}
+
+/* Alert Messages */
+.bs-alert {
+    padding: 1rem 1.25rem;
+    border-radius: 10px;
+    margin: 1rem 0;
+    border-left: 4px solid;
+    position: relative;
+}
+
+.bs-alert-success {
+    background: #ecfdf5;
+    color: #065f46;
+    border-left-color: var(--bs-success);
+}
+
+.bs-alert-warning {
+    background: #fffbeb;
+    color: #92400e;
+    border-left-color: var(--bs-warning);
+}
+
+.bs-alert-error {
+    background: #fef2f2;
+    color: #991b1b;
+    border-left-color: var(--bs-danger);
+}
+
+.bs-alert-info {
+    background: #eff6ff;
+    color: #1e40af;
+    border-left-color: var(--bs-info);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .bs-main-container {
+        padding: 1rem;
+    }
+    
+    .bs-page-header {
+        padding: 1.5rem;
+    }
+    
+    .bs-page-header h1 {
+        font-size: 2rem;
+    }
+    
+    .bs-upload-zone {
+        padding: 2rem 1rem;
+    }
+    
+    .bs-actions {
+        flex-direction: column;
+    }
+    
+    .bs-btn {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .bs-config-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    .bs-file-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+    }
+    
+    .bs-file-info {
+        width: 100%;
+    }
+    
+    .bs-upload-icon {
+        width: 60px;
+        height: 60px;
+        font-size: 1.5rem;
+    }
+}

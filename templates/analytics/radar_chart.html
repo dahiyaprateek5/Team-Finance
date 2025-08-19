@@ -1,0 +1,1505 @@
+{% extends "base.html" %}
+
+{% block title %}Radar Chart Analysis - Financial Risk Assessment{% endblock %}
+
+{% block content %}
+<div class="radar-analytics-container">
+    <!-- Header Section -->
+    <div class="analytics-header">
+        <div class="container-fluid">
+            <div class="row align-items-center">
+                <div class="col">
+                    <div class="header-content">
+                        <h1 class="page-title">
+                            <i class="fas fa-chart-radar me-2"></i>
+                            Radar Chart Analysis
+                        </h1>
+                        <p class="page-subtitle">Multi-dimensional financial health visualization from cash flow data</p>
+                    </div>
+                </div>
+                <div class="col-auto">
+                    <div class="header-actions">
+                        <button class="btn btn-primary" onclick="exportRadarChart()">
+                            <i class="fas fa-download"></i> Export Chart
+                        </button>
+                        <button class="btn btn-secondary" onclick="compareCompanies()">
+                            <i class="fas fa-balance-scale"></i> Compare
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container-fluid py-4">
+        <!-- Controls Section -->
+        <div class="controls-section mb-4">
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="control-group">
+                        <label for="companySelect">Select Company</label>
+                        <select id="companySelect" class="form-select">
+                            <option value="">Choose a company...</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="control-group">
+                        <label for="yearSelect">Year</label>
+                        <select id="yearSelect" class="form-select">
+                            <option value="2024">2024</option>
+                            <option value="2023">2023</option>
+                            <option value="2022">2022</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="control-group">
+                        <label for="metricsSelect">Metrics Focus</label>
+                        <select id="metricsSelect" class="form-select">
+                            <option value="comprehensive">Comprehensive</option>
+                            <option value="cashflow">Cash Flow Focus</option>
+                            <option value="profitability">Profitability Focus</option>
+                            <option value="risk">Risk Assessment</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="control-group">
+                        <label>&nbsp;</label>
+                        <button class="btn btn-success w-100" onclick="generateRadarChart()">
+                            <i class="fas fa-chart-area"></i> Generate Chart
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content Grid -->
+        <div class="radar-content-grid">
+            <!-- Radar Chart Section -->
+            <div class="chart-card main-radar">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-chart-radar me-2"></i>
+                        Financial Health Radar
+                    </h3>
+                    <div class="chart-controls">
+                        <button class="control-btn" onclick="toggleAnimation()">
+                            <i class="fas fa-play" id="animationIcon"></i>
+                        </button>
+                        <button class="control-btn" onclick="resetZoom()">
+                            <i class="fas fa-expand-arrows-alt"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="radar-chart-container">
+                        <canvas id="radarChart"></canvas>
+                    </div>
+                    <div class="chart-legend">
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #059669;"></div>
+                            <span>Current Performance</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #6366f1;"></div>
+                            <span>Industry Average</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #d97706;"></div>
+                            <span>Benchmark</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cash Flow Metrics Breakdown -->
+            <div class="chart-card metrics-breakdown">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-coins me-2"></i>
+                        Cash Flow Metrics
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="metrics-list" id="metricsBreakdown">
+                        <div class="metric-item">
+                            <div class="metric-info">
+                                <span class="metric-name">Operating Cash Flow</span>
+                                <span class="metric-description">Net cash from operating activities</span>
+                            </div>
+                            <div class="metric-value">
+                                <span class="value" id="ocfValue">-</span>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: 0%"></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="metric-item">
+                            <div class="metric-info">
+                                <span class="metric-name">Free Cash Flow</span>
+                                <span class="metric-description">OCF minus capital expenditures</span>
+                            </div>
+                            <div class="metric-value">
+                                <span class="value" id="fcfValue">-</span>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: 0%"></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="metric-item">
+                            <div class="metric-info">
+                                <span class="metric-name">Net Income</span>
+                                <span class="metric-description">Bottom line profitability</span>
+                            </div>
+                            <div class="metric-value">
+                                <span class="value" id="netIncomeValue">-</span>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: 0%"></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="metric-item">
+                            <div class="metric-info">
+                                <span class="metric-name">OCF to Net Income Ratio</span>
+                                <span class="metric-description">Cash conversion efficiency</span>
+                            </div>
+                            <div class="metric-value">
+                                <span class="value" id="ocfRatioValue">-</span>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: 0%"></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="metric-item">
+                            <div class="metric-info">
+                                <span class="metric-name">Debt to Equity</span>
+                                <span class="metric-description">Financial leverage ratio</span>
+                            </div>
+                            <div class="metric-value">
+                                <span class="value" id="debtEquityValue">-</span>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: 0%"></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="metric-item">
+                            <div class="metric-info">
+                                <span class="metric-name">Working Capital Changes</span>
+                                <span class="metric-description">Short-term liquidity management</span>
+                            </div>
+                            <div class="metric-value">
+                                <span class="value" id="workingCapitalValue">-</span>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: 0%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Industry Comparison -->
+            <div class="chart-card comparison-table">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-table me-2"></i>
+                        Industry Comparison
+                    </h3>
+                    <button class="btn btn-sm btn-outline-primary" onclick="addComparison()">
+                        <i class="fas fa-plus"></i> Add Company
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div class="comparison-table-container">
+                        <table class="comparison-table" id="comparisonTable">
+                            <thead>
+                                <tr>
+                                    <th>Cash Flow Metric</th>
+                                    <th>Current Company</th>
+                                    <th>Industry Avg</th>
+                                    <th>Best in Sector</th>
+                                    <th>Performance</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Operating Cash Flow</td>
+                                    <td><span class="metric-badge current" id="compOcf">-</span></td>
+                                    <td><span class="metric-badge average">$2.5M</span></td>
+                                    <td><span class="metric-badge best">$15M</span></td>
+                                    <td><span class="ranking-badge" id="ocfRank">-</span></td>
+                                </tr>
+                                <tr>
+                                    <td>Free Cash Flow</td>
+                                    <td><span class="metric-badge current" id="compFcf">-</span></td>
+                                    <td><span class="metric-badge average">$1.8M</span></td>
+                                    <td><span class="metric-badge best">$12M</span></td>
+                                    <td><span class="ranking-badge" id="fcfRank">-</span></td>
+                                </tr>
+                                <tr>
+                                    <td>Net Income</td>
+                                    <td><span class="metric-badge current" id="compNi">-</span></td>
+                                    <td><span class="metric-badge average">$1.2M</span></td>
+                                    <td><span class="metric-badge best">$8M</span></td>
+                                    <td><span class="ranking-badge" id="niRank">-</span></td>
+                                </tr>
+                                <tr>
+                                    <td>Liquidation Risk</td>
+                                    <td><span class="metric-badge current" id="compRisk">-</span></td>
+                                    <td><span class="metric-badge average">Low</span></td>
+                                    <td><span class="metric-badge best">None</span></td>
+                                    <td><span class="ranking-badge" id="riskRank">-</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Financial Insights Panel -->
+            <div class="chart-card insights-panel">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-brain me-2"></i>
+                        Cash Flow Insights
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="insights-container" id="insightsContainer">
+                        <div class="insight-item strength">
+                            <div class="insight-icon">
+                                <i class="fas fa-thumbs-up"></i>
+                            </div>
+                            <div class="insight-content">
+                                <h4>Cash Flow Strengths</h4>
+                                <ul id="strengthsList">
+                                    <li>Select a company to view cash flow insights</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="insight-item weakness">
+                            <div class="insight-icon">
+                                <i class="fas fa-exclamation-triangle"></i>
+                            </div>
+                            <div class="insight-content">
+                                <h4>Areas Needing Attention</h4>
+                                <ul id="weaknessesList">
+                                    <li>Select a company to view potential issues</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="insight-item recommendation">
+                            <div class="insight-icon">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                            <div class="insight-content">
+                                <h4>Financial Recommendations</h4>
+                                <ul id="recommendationsList">
+                                    <li>Select a company to view recommendations</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Loading Overlay -->
+<div class="loading-overlay" id="loadingOverlay" style="display: none;">
+    <div class="loading-content">
+        <div class="spinner"></div>
+        <p>Generating radar chart from cash flow data...</p>
+    </div>
+</div>
+
+<style>
+:root {
+    --primary-color: #059669;
+    --secondary-color: #6366f1;
+    --warning-color: #d97706;
+    --danger-color: #dc2626;
+    --success-color: #059669;
+    --text-primary: #1e293b;
+    --text-secondary: #64748b;
+    --bg-light: #f8fafc;
+    --border-light: rgba(0, 0, 0, 0.1);
+}
+
+body {
+    background: #ffffff;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.radar-analytics-container {
+    min-height: 100vh;
+}
+
+.analytics-header {
+    background: linear-gradient(135deg, var(--primary-color) 0%, #10b981 100%);
+    color: white;
+    padding: 2rem 0;
+    margin-bottom: 2rem;
+}
+
+.page-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.page-subtitle {
+    font-size: 1.1rem;
+    opacity: 0.9;
+    margin: 0;
+}
+
+.header-actions {
+    display: flex;
+    gap: 1rem;
+}
+
+.btn {
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-primary {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+}
+
+.btn-secondary {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.controls-section {
+    background: white;
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.control-group label {
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+.form-select {
+    border: 1px solid var(--border-light);
+    border-radius: 8px;
+    padding: 0.75rem;
+    background: white;
+    color: var(--text-primary);
+}
+
+.btn-success {
+    background: var(--primary-color);
+    color: white;
+}
+
+.radar-content-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    grid-template-rows: auto auto;
+    gap: 2rem;
+    grid-template-areas:
+        "main-radar metrics-breakdown"
+        "comparison-table insights-panel";
+}
+
+.main-radar {
+    grid-area: main-radar;
+}
+
+.metrics-breakdown {
+    grid-area: metrics-breakdown;
+}
+
+.comparison-table {
+    grid-area: comparison-table;
+}
+
+.insights-panel {
+    grid-area: insights-panel;
+}
+
+.chart-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.card-header {
+    padding: 1.5rem 2rem;
+    background: var(--bg-light);
+    border-bottom: 1px solid var(--border-light);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.card-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.chart-controls {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.control-btn {
+    width: 36px;
+    height: 36px;
+    border: 1px solid var(--border-light);
+    background: white;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.control-btn:hover {
+    background: var(--bg-light);
+    color: var(--primary-color);
+}
+
+.card-body {
+    padding: 2rem;
+}
+
+.radar-chart-container {
+    position: relative;
+    height: 400px;
+    margin-bottom: 1rem;
+}
+
+.chart-legend {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    flex-wrap: wrap;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.legend-color {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+}
+
+.metrics-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.metric-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    background: var(--bg-light);
+    border-radius: 8px;
+}
+
+.metric-info {
+    flex: 1;
+}
+
+.metric-name {
+    font-weight: 600;
+    color: var(--text-primary);
+    display: block;
+}
+
+.metric-description {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+.metric-value {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    min-width: 120px;
+}
+
+.value {
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.progress-bar {
+    width: 60px;
+    height: 6px;
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: var(--primary-color);
+    border-radius: 3px;
+    transition: width 0.5s ease;
+}
+
+.comparison-table-container {
+    overflow-x: auto;
+}
+
+.comparison-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.comparison-table th,
+.comparison-table td {
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 1px solid var(--border-light);
+}
+
+.comparison-table th {
+    background: var(--bg-light);
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.metric-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.metric-badge.current {
+    background: rgba(5, 150, 105, 0.1);
+    color: var(--primary-color);
+}
+
+.metric-badge.average {
+    background: rgba(99, 102, 241, 0.1);
+    color: var(--secondary-color);
+}
+
+.metric-badge.best {
+    background: rgba(217, 119, 6, 0.1);
+    color: var(--warning-color);
+}
+
+.ranking-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    background: var(--bg-light);
+    color: var(--text-primary);
+}
+
+.insights-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.insight-item {
+    padding: 1.5rem;
+    border-radius: 8px;
+    border-left: 4px solid;
+}
+
+.insight-item.strength {
+    background: rgba(5, 150, 105, 0.05);
+    border-left-color: var(--success-color);
+}
+
+.insight-item.weakness {
+    background: rgba(220, 38, 38, 0.05);
+    border-left-color: var(--danger-color);
+}
+
+.insight-item.recommendation {
+    background: rgba(99, 102, 241, 0.05);
+    border-left-color: var(--secondary-color);
+}
+
+.insight-content h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+    color: var(--text-primary);
+}
+
+.insight-content ul {
+    margin: 0;
+    padding-left: 1.25rem;
+}
+
+.insight-content li {
+    color: var(--text-secondary);
+    margin-bottom: 0.5rem;
+}
+
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+
+.loading-content {
+    text-align: center;
+    color: white;
+}
+
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid rgba(255, 255, 255, 0.1);
+    border-top: 4px solid var(--primary-color);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 1rem;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+@media (max-width: 1200px) {
+    .radar-content-grid {
+        grid-template-columns: 1fr;
+        grid-template-areas:
+            "main-radar"
+            "metrics-breakdown"
+            "comparison-table"
+            "insights-panel";
+    }
+}
+
+@media (max-width: 768px) {
+    .page-title {
+        font-size: 2rem;
+    }
+    
+    .header-actions {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .controls-section .row > div {
+        margin-bottom: 1rem;
+    }
+    
+    .card-body {
+        padding: 1rem;
+    }
+}
+</style>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+<script>
+let companiesData = [];
+let currentChart = null;
+
+// Initialize page
+document.addEventListener('DOMContentLoaded', function() {
+    loadCompanies();
+    setupEventListeners();
+});
+
+function setupEventListeners() {
+    document.getElementById('companySelect').addEventListener('change', function() {
+        if (this.value) {
+            generateRadarChart();
+        }
+    });
+    
+    document.getElementById('yearSelect').addEventListener('change', function() {
+        const selectedCompany = document.getElementById('companySelect').value;
+        if (selectedCompany) {
+            generateRadarChart();
+        }
+    });
+}
+
+let companyDisplayLimit = null; // null means show all companies
+
+async function loadCompanies() {
+    try {
+        showLoading(true);
+        const response = await fetch('/api/companies');
+        const data = await response.json();
+        
+        if (data.success && data.companies) {
+            console.log(`Raw API data: ${data.companies.length} records`);
+            
+            // Enhanced duplicate removal
+            const uniqueCompanies = [];
+            const seenCompanies = new Set();
+            
+            data.companies.forEach(company => {
+                if (!company || !company.company_name) return;
+                
+                let normalizedName = company.company_name.trim();
+                
+                // Remove common duplicate indicators
+                normalizedName = normalizedName
+                    .replace(/\s*\(\d+\)$/g, '')  // Remove (1), (2), etc.
+                    .replace(/\s*Inc\.?$/i, '')   // Remove Inc/Inc.
+                    .replace(/\s*Corporation$/i, '') // Remove Corporation
+                    .replace(/\s*Ltd\.?$/i, '')   // Remove Ltd/Ltd.
+                    .replace(/\s*Plc$/i, '')      // Remove Plc
+                    .trim();
+                
+                const key = normalizedName.toLowerCase();
+                
+                if (!seenCompanies.has(key)) {
+                    seenCompanies.add(key);
+                    // Use original name for display, but check normalized for duplicates
+                    uniqueCompanies.push({
+                        ...company,
+                        normalized_name: normalizedName
+                    });
+                }
+            });
+            
+            console.log(`After duplicate removal: ${uniqueCompanies.length} unique companies`);
+            
+            // Apply limit if set
+            if (companyDisplayLimit && companyDisplayLimit > 0) {
+                companiesData = uniqueCompanies.slice(0, companyDisplayLimit);
+            } else {
+                companiesData = uniqueCompanies;
+            }
+            
+            // Verify no duplicates remain
+            const finalNames = companiesData.map(c => c.company_name);
+            const finalDuplicates = finalNames.filter((name, index) => finalNames.indexOf(name) !== index);
+            console.log(`Final duplicates remaining: ${finalDuplicates.length}`, finalDuplicates);
+            
+        } else {
+            throw new Error('Invalid API response structure');
+        }
+        
+        populateCompanySelect();
+        
+    } catch (error) {
+        console.error('Error loading companies:', error);
+        companiesData = [];
+        populateCompanySelect();
+    } finally {
+        showLoading(false);
+    }
+}
+
+// Force reload companies with new logic
+loadCompanies();
+
+function populateCompanySelect() {
+    const select = document.getElementById('companySelect');
+    if (!select) {
+        console.error('Company select element not found');
+        return;
+    }
+    
+    select.innerHTML = '<option value="">Choose a company...</option>';
+    
+    // Safety check and sort alphabetically
+    const safeCompanies = (companiesData || []).sort((a, b) => {
+        const nameA = (a.company_name || '').toLowerCase();
+        const nameB = (b.company_name || '').toLowerCase();
+        return nameA.localeCompare(nameB);
+    });
+    
+    safeCompanies.forEach(company => {
+        if (company && company.company_name) {
+            const option = document.createElement('option');
+            option.value = company.company_name;
+            option.textContent = `${company.company_name} (${company.industry || 'General'})`;
+            select.appendChild(option);
+        }
+    });
+    
+    const limitText = companyDisplayLimit ? ` (limited to ${companyDisplayLimit})` : ' (showing all)';
+    console.log(`Showing ${safeCompanies.length} companies in dropdown${limitText} - sorted A-Z`);
+}
+
+// Helper functions to control company display limit
+function setCompanyLimit(limit) {
+    companyDisplayLimit = limit;
+    loadCompanies(); // Reload with new limit
+    console.log(`Company limit set to: ${limit}`);
+}
+
+function showAllCompanies() {
+    companyDisplayLimit = null;
+    loadCompanies(); // Reload without limit
+    console.log('Showing all companies');
+}
+
+function getCurrentCompanyLimit() {
+    return companyDisplayLimit || 'No limit (showing all)';
+}
+
+// Quick access functions
+function show5Companies() { setCompanyLimit(5); }
+function show10Companies() { setCompanyLimit(10); }
+function show20Companies() { setCompanyLimit(20); }
+function show50Companies() { setCompanyLimit(50); }
+
+// Updated generateRadarChart function for analytics API
+async function generateRadarChart() {
+    const companyName = document.getElementById('companySelect').value;
+    const year = document.getElementById('yearSelect').value;
+    
+    if (!companyName) {
+        showError('Please select a company first');
+        return;
+    }
+    
+    try {
+        showLoading(true);
+        
+        console.log(`Fetching data for: ${companyName}, Year: ${year}`);
+        
+        // Use analytics API endpoint
+        const response = await fetch(`/api/companies/${encodeURIComponent(companyName)}/${year}`);
+        const data = await response.json();
+        
+        if (!data.success) {
+            throw new Error(data.error || 'Failed to fetch company data');
+        }
+        
+        // Handle analytics API response structure
+        const yearData = data.company_data;
+        
+        if (!yearData) {
+            throw new Error('No data available for selected year');
+        }
+        
+        console.log(`Using data for year ${yearData.year}:`, yearData);
+        
+        // Create chart with real data
+        createRadarChart(yearData);
+        updateMetricsBreakdown(yearData);
+        updateComparisonTable(yearData);
+        
+        // Get trends data for insights
+        try {
+            const trendsResponse = await fetch(`/api/companies/${encodeURIComponent(companyName)}/trends`);
+            const trendsData = await trendsResponse.json();
+            
+            if (trendsData.success && trendsData.data) {
+                generateInsightsFromAllYears(trendsData.data, yearData);
+            } else {
+                generateInsightsFromAllYears([yearData], yearData);
+            }
+        } catch (trendsError) {
+            console.log('Trends data not available, using single year');
+            generateInsightsFromAllYears([yearData], yearData);
+        }
+        
+        console.log('Radar chart generated successfully');
+        
+    } catch (error) {
+        console.error('Error generating radar chart:', error);
+        showError('Failed to generate chart: ' + error.message);
+    } finally {
+        showLoading(false);
+    }
+}
+
+
+function createRadarChart(data) {
+    const ctx = document.getElementById('radarChart').getContext('2d');
+    
+    // Destroy existing chart
+    if (currentChart) {
+        currentChart.destroy();
+    }
+    
+    // Calculate normalized scores (0-100)
+    const metrics = calculateRadarMetrics(data);
+    
+    currentChart = new Chart(ctx, {
+        type: 'radar',
+        data: {
+            labels: [
+                'Operating Cash Flow',
+                'Free Cash Flow', 
+                'Net Income',
+                'OCF/NI Ratio',
+                'Financial Health',
+                'Liquidity Risk'
+            ],
+            datasets: [{
+                label: 'Current Performance',
+                data: [
+                    metrics.ocf_score,
+                    metrics.fcf_score,
+                    metrics.ni_score,
+                    metrics.ratio_score,
+                    metrics.health_score,
+                    metrics.liquidity_score
+                ],
+                backgroundColor: 'rgba(5, 150, 105, 0.2)',
+                borderColor: '#059669',
+                borderWidth: 2,
+                pointBackgroundColor: '#059669',
+                pointBorderColor: '#fff',
+                pointHoverBackgroundColor: '#fff',
+                pointHoverBorderColor: '#059669'
+            }, {
+                label: 'Industry Average',
+                data: [70, 65, 60, 75, 70, 80], // Industry benchmarks
+                backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                borderColor: '#6366f1',
+                borderWidth: 2,
+                pointBackgroundColor: '#6366f1',
+                pointBorderColor: '#fff',
+                pointHoverBackgroundColor: '#fff',
+                pointHoverBorderColor: '#6366f1'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                r: {
+                    beginAtZero: true,
+                    max: 100,
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.1)'
+                    },
+                    angleLines: {
+                        color: 'rgba(0, 0, 0, 0.1)'
+                    },
+                    pointLabels: {
+                        font: {
+                            size: 12,
+                            family: 'Inter'
+                        },
+                        color: '#64748b'
+                    },
+                    ticks: {
+                        display: false
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    titleColor: '#fff',
+                    bodyColor: '#fff',
+                    cornerRadius: 8,
+                    callbacks: {
+                        label: function(context) {
+                            return context.dataset.label + ': ' + context.parsed.r.toFixed(1) + '/100';
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+function calculateRadarMetrics(data) {
+    // Normalize cash flow metrics to 0-100 scale
+    const ocf = parseFloat(data.net_cash_from_operating_activities) || 0;
+    const fcf = parseFloat(data.free_cash_flow) || 0;
+    const netIncome = parseFloat(data.net_income) || 0;
+    const ocfRatio = parseFloat(data.ocf_to_net_income_ratio) || 0;
+    const liquidationLabel = parseInt(data.liquidation_label) || 0;
+    
+    // Calculate scores (0-100)
+    const ocf_score = Math.min(100, Math.max(0, (ocf + 5000000) / 100000)); // Normalize around 5M
+    const fcf_score = Math.min(100, Math.max(0, (fcf + 3000000) / 60000)); // Normalize around 3M
+    const ni_score = Math.min(100, Math.max(0, (netIncome + 2000000) / 40000)); // Normalize around 2M
+    const ratio_score = Math.min(100, Math.max(0, ocfRatio * 50)); // OCF ratio to percentage
+    const health_score = calculateHealthScore(data);
+    const liquidity_score = liquidationLabel === 1 ? 20 : 80; // Risk inversion
+    
+    return {
+        ocf_score: Math.round(ocf_score),
+        fcf_score: Math.round(fcf_score),
+        ni_score: Math.round(ni_score),
+        ratio_score: Math.round(ratio_score),
+        health_score: Math.round(health_score),
+        liquidity_score: Math.round(liquidity_score)
+    };
+}
+
+function calculateHealthScore(data) {
+    let score = 50; // Base score
+    
+    const ocf = parseFloat(data.net_cash_from_operating_activities) || 0;
+    const netIncome = parseFloat(data.net_income) || 0;
+    const fcf = parseFloat(data.free_cash_flow) || 0;
+    const liquidationLabel = parseInt(data.liquidation_label) || 0;
+    
+    // Operating cash flow impact
+    if (ocf > 1000000) score += 20;
+    else if (ocf > 0) score += 10;
+    else if (ocf < -1000000) score -= 25;
+    else if (ocf < 0) score -= 15;
+    
+    // Net income impact
+    if (netIncome > 500000) score += 15;
+    else if (netIncome > 0) score += 8;
+    else if (netIncome < -500000) score -= 20;
+    else if (netIncome < 0) score -= 12;
+    
+    // Free cash flow impact
+    if (fcf > 500000) score += 15;
+    else if (fcf > 0) score += 8;
+    else if (fcf < -500000) score -= 15;
+    else if (fcf < 0) score -= 8;
+    
+    // Liquidation risk impact
+    if (liquidationLabel === 1) score -= 20;
+    else score += 10;
+    
+    return Math.max(0, Math.min(100, score));
+}
+
+function updateMetricsBreakdown(data) {
+    // ✅ SAFE PARSING - Convert to number first
+    const ocfRatio = parseFloat(data.ocf_to_net_income_ratio) || 0;
+    const debtEquityRatio = parseFloat(data.debt_to_equity_ratio) || 0;
+    
+    // Update metric values from cash flow data
+    document.getElementById('ocfValue').textContent = formatCurrency(data.net_cash_from_operating_activities);
+    document.getElementById('fcfValue').textContent = formatCurrency(data.free_cash_flow);
+    document.getElementById('netIncomeValue').textContent = formatCurrency(data.net_income);
+    
+    // ✅ FIX - Use parsed number instead of direct toFixed
+    document.getElementById('ocfRatioValue').textContent = ocfRatio.toFixed(2);
+    document.getElementById('debtEquityValue').textContent = debtEquityRatio.toFixed(2);
+    document.getElementById('workingCapitalValue').textContent = formatCurrency(data.changes_in_working_capital);
+    
+    // Update progress bars
+    const metrics = calculateRadarMetrics(data);
+    updateProgressBar('ocfValue', metrics.ocf_score);
+    updateProgressBar('fcfValue', metrics.fcf_score);
+    updateProgressBar('netIncomeValue', metrics.ni_score);
+    updateProgressBar('ocfRatioValue', metrics.ratio_score);
+    
+    // ✅ FIX - Safe debt ratio calculation
+    const safeDebtRatio = Math.min(100, 100 - (debtEquityRatio * 20));
+    updateProgressBar('debtEquityValue', safeDebtRatio);
+    updateProgressBar('workingCapitalValue', 50); // Neutral for working capital changes
+}
+
+function updateProgressBar(valueId, percentage) {
+    const valueElement = document.getElementById(valueId);
+    const progressBar = valueElement.parentElement.querySelector('.progress-fill');
+    if (progressBar) {
+        progressBar.style.width = percentage + '%';
+        
+        // Color based on performance
+        if (percentage >= 70) {
+            progressBar.style.background = '#059669';
+        } else if (percentage >= 40) {
+            progressBar.style.background = '#d97706';
+        } else {
+            progressBar.style.background = '#dc2626';
+        }
+    }
+}
+
+function updateComparisonTable(data) {
+    // Update comparison table with actual data
+    document.getElementById('compOcf').textContent = formatCurrency(data.net_cash_from_operating_activities);
+    document.getElementById('compFcf').textContent = formatCurrency(data.free_cash_flow);
+    document.getElementById('compNi').textContent = formatCurrency(data.net_income);
+    document.getElementById('compRisk').textContent = data.liquidation_label == 1 ? 'High' : 'Low';
+    
+    // Calculate rankings
+    const ocf = parseFloat(data.net_cash_from_operating_activities) || 0;
+    const fcf = parseFloat(data.free_cash_flow) || 0;
+    const netIncome = parseFloat(data.net_income) || 0;
+    
+    document.getElementById('ocfRank').textContent = getRanking(ocf, 2500000);
+    document.getElementById('fcfRank').textContent = getRanking(fcf, 1800000);
+    document.getElementById('niRank').textContent = getRanking(netIncome, 1200000);
+    document.getElementById('riskRank').textContent = data.liquidation_label == 1 ? 'Below Avg' : 'Above Avg';
+}
+
+function getRanking(value, average) {
+    if (value > average * 2) return 'Excellent';
+    else if (value > average) return 'Above Avg';
+    else if (value > 0) return 'Average';
+    else return 'Below Avg';
+}
+
+function generateInsights(data) {
+    const strengthsList = document.getElementById('strengthsList');
+    const weaknessesList = document.getElementById('weaknessesList');
+    const recommendationsList = document.getElementById('recommendationsList');
+    
+    // Clear existing insights
+    strengthsList.innerHTML = '';
+    weaknessesList.innerHTML = '';
+    recommendationsList.innerHTML = '';
+    
+    const ocf = parseFloat(data.net_cash_from_operating_activities) || 0;
+    const fcf = parseFloat(data.free_cash_flow) || 0;
+    const netIncome = parseFloat(data.net_income) || 0;
+    const liquidationRisk = data.liquidation_label == 1;
+    
+    // Generate strengths
+    if (ocf > 1000000) {
+        strengthsList.innerHTML += '<li>Strong operating cash flow generation</li>';
+    }
+    if (fcf > 500000) {
+        strengthsList.innerHTML += '<li>Positive free cash flow indicates good capital efficiency</li>';
+    }
+    if (netIncome > 0) {
+        strengthsList.innerHTML += '<li>Profitable operations with positive net income</li>';
+    }
+    if (!liquidationRisk) {
+        strengthsList.innerHTML += '<li>Low liquidation risk shows financial stability</li>';
+    }
+    
+    // Generate weaknesses
+    if (ocf < 0) {
+        weaknessesList.innerHTML += '<li>Negative operating cash flow needs immediate attention</li>';
+    }
+    if (fcf < 0) {
+        weaknessesList.innerHTML += '<li>Negative free cash flow indicates capital allocation issues</li>';
+    }
+    if (netIncome < 0) {
+        weaknessesList.innerHTML += '<li>Operating losses impacting financial health</li>';
+    }
+    if (liquidationRisk) {
+        weaknessesList.innerHTML += '<li>High liquidation risk requires urgent intervention</li>';
+    }
+    
+    // Generate recommendations
+    if (ocf < 0) {
+        recommendationsList.innerHTML += '<li>Focus on improving working capital management</li>';
+    }
+    if (fcf < 0) {
+        recommendationsList.innerHTML += '<li>Review capital expenditure priorities and timing</li>';
+    }
+    if (liquidationRisk) {
+        recommendationsList.innerHTML += '<li>Implement immediate cash conservation measures</li>';
+    }
+    if (ocf > 0 && fcf > 0) {
+        recommendationsList.innerHTML += '<li>Consider strategic investments for growth</li>';
+    }
+    
+    // Default messages if empty
+    if (strengthsList.children.length === 0) {
+        strengthsList.innerHTML = '<li>Areas of strength will appear after analysis</li>';
+    }
+    if (weaknessesList.children.length === 0) {
+        weaknessesList.innerHTML = '<li>No significant weaknesses identified</li>';
+    }
+    if (recommendationsList.children.length === 0) {
+        recommendationsList.innerHTML = '<li>Continue current financial practices</li>';
+    }
+}
+
+
+// ✅ ADD THESE MISSING FUNCTIONS
+
+// Generate insights from all years analysis
+function generateInsightsFromAllYears(allYearsData, currentYearData) {
+    const strengthsList = document.getElementById('strengthsList');
+    const weaknessesList = document.getElementById('weaknessesList');
+    const recommendationsList = document.getElementById('recommendationsList');
+    
+    strengthsList.innerHTML = '';
+    weaknessesList.innerHTML = '';
+    recommendationsList.innerHTML = '';
+    
+    // Current year data
+    const currentOcf = parseFloat(currentYearData.net_cash_from_operating_activities) || 0;
+    const currentFcf = parseFloat(currentYearData.free_cash_flow) || 0;
+    const currentNi = parseFloat(currentYearData.net_income) || 0;
+    
+    // Multi-year analysis
+    const sortedYears = allYearsData.sort((a, b) => a.year - b.year);
+    const trends = calculateTrends(sortedYears);
+    
+    console.log('📈 Multi-year trends analysis:', trends);
+    
+    // Strengths based on trends
+    if (trends.ocf_trend === 'improving') {
+        strengthsList.innerHTML += '<li>Operating cash flow improving over time (3-year trend)</li>';
+    }
+    if (trends.fcf_trend === 'improving') {
+        strengthsList.innerHTML += '<li>Free cash flow showing positive trend across years</li>';
+    }
+    if (trends.ni_trend === 'improving') {
+        strengthsList.innerHTML += '<li>Net income growth trajectory is positive</li>';
+    }
+    if (currentOcf > 0 && trends.ocf_consistency > 1) {
+        strengthsList.innerHTML += '<li>Consistent positive operating cash flow across multiple years</li>';
+    }
+    
+    // Current year strengths
+    if (currentOcf > 1000000) {
+        strengthsList.innerHTML += '<li>Strong current year operating cash flow generation</li>';
+    }
+    if (currentFcf > 500000) {
+        strengthsList.innerHTML += '<li>Positive free cash flow indicates good capital efficiency</li>';
+    }
+    
+    // Weaknesses based on trends
+    if (trends.ocf_trend === 'declining') {
+        weaknessesList.innerHTML += '<li>Operating cash flow declining over time - concerning trend</li>';
+    }
+    if (trends.volatility_high) {
+        weaknessesList.innerHTML += '<li>High financial volatility across years indicates instability</li>';
+    }
+    if (trends.consecutive_losses >= 2) {
+        weaknessesList.innerHTML += '<li>Multiple years of consecutive losses showing persistent issues</li>';
+    }
+    
+    // Current year weaknesses
+    if (currentOcf < 0) {
+        weaknessesList.innerHTML += '<li>Current negative operating cash flow needs immediate attention</li>';
+    }
+    if (currentNi < 0) {
+        weaknessesList.innerHTML += '<li>Current year losses impacting financial health</li>';
+    }
+    
+    // Recommendations based on multi-year analysis
+    if (trends.ocf_trend === 'declining') {
+        recommendationsList.innerHTML += '<li>Urgent focus needed on operational efficiency improvement</li>';
+    }
+    if (trends.volatility_high) {
+        recommendationsList.innerHTML += '<li>Implement better financial planning and forecasting</li>';
+    }
+    if (trends.recovery_potential) {
+        recommendationsList.innerHTML += '<li>Company shows recovery signs - consider strategic investments</li>';
+    }
+    if (trends.ocf_consistency >= 2) {
+        recommendationsList.innerHTML += '<li>Leverage consistent cash flow for strategic growth initiatives</li>';
+    }
+    
+    // Default messages
+    if (strengthsList.children.length === 0) {
+        strengthsList.innerHTML = '<li>Multi-year analysis shows stable performance with room for growth</li>';
+    }
+    if (weaknessesList.children.length === 0) {
+        weaknessesList.innerHTML = '<li>No significant multi-year concerns identified</li>';
+    }
+    if (recommendationsList.children.length === 0) {
+        recommendationsList.innerHTML = '<li>Continue monitoring financial trends and maintain current practices</li>';
+    }
+}
+
+// Calculate trends from multiple years
+function calculateTrends(sortedYears) {
+    if (sortedYears.length < 2) return {
+        ocf_trend: 'stable',
+        fcf_trend: 'stable', 
+        ni_trend: 'stable',
+        ocf_consistency: 1,
+        consecutive_losses: 0,
+        volatility_high: false,
+        recovery_potential: true
+    };
+    
+    const latest = sortedYears[sortedYears.length - 1];
+    const earliest = sortedYears[0];
+    
+    const latestOcf = parseFloat(latest.net_cash_from_operating_activities) || 0;
+    const earliestOcf = parseFloat(earliest.net_cash_from_operating_activities) || 0;
+    
+    const latestFcf = parseFloat(latest.free_cash_flow) || 0;
+    const earliestFcf = parseFloat(earliest.free_cash_flow) || 0;
+    
+    const latestNi = parseFloat(latest.net_income) || 0;
+    const earliestNi = parseFloat(earliest.net_income) || 0;
+    
+    // Calculate trends
+    const ocf_trend = latestOcf > earliestOcf ? 'improving' : 'declining';
+    const fcf_trend = latestFcf > earliestFcf ? 'improving' : 'declining';
+    const ni_trend = latestNi > earliestNi ? 'improving' : 'declining';
+    
+    // Count positive OCF years
+    const ocf_consistency = sortedYears.filter(year => 
+        parseFloat(year.net_cash_from_operating_activities) > 0
+    ).length;
+    
+    // Count consecutive losses
+    let consecutive_losses = 0;
+    const reversedYears = [...sortedYears].reverse();
+    for (let year of reversedYears) {
+        if (parseFloat(year.net_income) < 0) {
+            consecutive_losses++;
+        } else {
+            break;
+        }
+    }
+    
+    // Calculate volatility (simplified)
+    const ocfValues = sortedYears.map(y => parseFloat(y.net_cash_from_operating_activities) || 0);
+    const ocfMean = ocfValues.reduce((a, b) => a + b, 0) / ocfValues.length;
+    const volatility_high = ocfValues.some(val => Math.abs(val - ocfMean) > Math.abs(ocfMean) * 0.5);
+    
+    // Recovery potential
+    const recovery_potential = ocf_trend === 'improving' && consecutive_losses <= 1;
+    
+    return {
+        ocf_trend,
+        fcf_trend, 
+        ni_trend,
+        ocf_consistency,
+        consecutive_losses,
+        volatility_high,
+        recovery_potential
+    };
+}
+
+// Utility functions
+function formatCurrency(value) {
+    if (value === null || value === undefined) return 'N/A';
+    
+    const num = parseFloat(value);
+    if (isNaN(num)) return 'N/A';
+    
+    if (Math.abs(num) >= 1e9) {
+        return `${(num/1e9).toFixed(1)}B`;
+    } else if (Math.abs(num) >= 1e6) {
+        return `${(num/1e6).toFixed(1)}M`;
+    } else if (Math.abs(num) >= 1e3) {
+        return `${(num/1e3).toFixed(1)}K`;
+    } else {
+        return `${num.toFixed(0)}`;
+    }
+}
+
+function showLoading(show) {
+    const overlay = document.getElementById('loadingOverlay');
+    overlay.style.display = show ? 'flex' : 'none';
+}
+
+function showError(message) {
+    alert('Error: ' + message);
+}
+
+function showSuccess(message) {
+    // Create a simple success notification
+    const notification = document.createElement('div');
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: #059669;
+        color: white;
+        padding: 1rem 1.5rem;
+        border-radius: 8px;
+        z-index: 10000;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    `;
+    notification.textContent = message;
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.remove();
+    }, 3000);
+}
+
+// Action functions
+function exportRadarChart() {
+    if (currentChart) {
+        const link = document.createElement('a');
+        link.download = 'financial-radar-chart.png';
+        link.href = currentChart.toBase64Image();
+        link.click();
+        showSuccess('Radar chart exported successfully!');
+    } else {
+        showError('Please generate a chart first');
+    }
+}
+
+function compareCompanies() {
+    // Open company comparison modal (placeholder)
+    alert('Company comparison feature coming soon!');
+}
+
+function addComparison() {
+    // Add comparison functionality (placeholder)
+    alert('Add comparison feature coming soon!');
+}
+
+function toggleAnimation() {
+    const icon = document.getElementById('animationIcon');
+    const isPlaying = icon.classList.contains('fa-pause');
+    
+    if (isPlaying) {
+        icon.classList.remove('fa-pause');
+        icon.classList.add('fa-play');
+        // Stop animation
+    } else {
+        icon.classList.remove('fa-play');
+        icon.classList.add('fa-pause');
+        // Start animation
+        if (currentChart) {
+            currentChart.update('active');
+        }
+    }
+}
+
+function resetZoom() {
+    if (currentChart) {
+        currentChart.resetZoom();
+        showSuccess('Chart zoom reset!');
+    }
+}
+
+console.log('Radar Chart Analytics initialized - Ready to visualize cash flow data');
+</script>
+
+{% endblock %}

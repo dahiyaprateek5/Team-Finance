@@ -1,0 +1,220 @@
+{% extends "base.html" %}
+
+{% block title %}Server Error - Team Finance{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 text-center">
+            <div class="error-page">
+                <div class="error-illustration mb-4">
+                    <i class="fas fa-server fa-5x text-danger opacity-50"></i>
+                </div>
+                
+                <div class="error-code">
+                    <h1 class="display-1 text-danger fw-bold">500</h1>
+                </div>
+                
+                <div class="error-message">
+                    <h2 class="mb-3">Internal Server Error</h2>
+                    <p class="lead text-muted mb-4">
+                        Something went wrong on our server. We're working to fix it!
+                    </p>
+                    
+                    <div class="error-actions mb-5">
+                        <a href="{{ url_for('home') }}" class="btn btn-primary btn-lg me-3">
+                            <i class="fas fa-home me-2"></i>Go Home
+                        </a>
+                        <button onclick="window.location.reload()" class="btn btn-outline-primary btn-lg">
+                            <i class="fas fa-redo me-2"></i>Try Again
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Error Details -->
+                <div class="error-details">
+                    <div class="card border-warning">
+                        <div class="card-header bg-warning bg-opacity-10">
+                            <h6 class="mb-0">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                What can you do?
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6>Immediate Actions:</h6>
+                                    <ul class="list-unstyled">
+                                        <li><i class="fas fa-arrow-right me-2 text-primary"></i>Try refreshing the page</li>
+                                        <li><i class="fas fa-arrow-right me-2 text-primary"></i>Wait a few minutes and try again</li>
+                                        <li><i class="fas fa-arrow-right me-2 text-primary"></i>Check your internet connection</li>
+                                    </ul>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6>Technical Checks:</h6>
+                                    <ul class="list-unstyled">
+                                        <li><i class="fas fa-arrow-right me-2 text-danger"></i>Database connection status</li>
+                                        <li><i class="fas fa-arrow-right me-2 text-danger"></i>API endpoints availability</li>
+                                        <li><i class="fas fa-arrow-right me-2 text-danger"></i>Server resource usage</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- System Status -->
+                <div class="system-status mt-4">
+                    <div class="card border-info">
+                        <div class="card-header bg-info bg-opacity-10">
+                            <h6 class="mb-0">
+                                <i class="fas fa-info-circle me-2"></i>
+                                System Status
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row text-center">
+                                <div class="col-4">
+                                    <div class="status-item">
+                                        <i class="fas fa-database fa-2x text-warning mb-2"></i>
+                                        <p class="mb-0 small">Database</p>
+                                        <span class="badge bg-warning">Checking...</span>
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="status-item">
+                                        <i class="fas fa-cloud fa-2x text-warning mb-2"></i>
+                                        <p class="mb-0 small">API Services</p>
+                                        <span class="badge bg-warning">Checking...</span>
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="status-item">
+                                        <i class="fas fa-cogs fa-2x text-warning mb-2"></i>
+                                        <p class="mb-0 small">ML Models</p>
+                                        <span class="badge bg-warning">Checking...</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Contact Support -->
+                <div class="contact-support mt-4">
+                    <p class="text-muted mb-3">If the problem persists, please contact our support team:</p>
+                    <div class="btn-group" role="group">
+                        <a href="mailto:support@teamfinance.com" class="btn btn-outline-secondary">
+                            <i class="fas fa-envelope me-2"></i>Email Support
+                        </a>
+                        <button class="btn btn-outline-secondary" onclick="copyErrorInfo()">
+                            <i class="fas fa-copy me-2"></i>Copy Error Info
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.error-page {
+    padding: 3rem 0;
+}
+
+.error-code h1 {
+    font-size: 8rem;
+    font-weight: 900;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+    line-height: 0.8;
+}
+
+.error-illustration i {
+    animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+.status-item {
+    padding: 1rem;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.status-item:hover {
+    background: rgba(0,0,0,0.05);
+}
+
+@media (max-width: 768px) {
+    .error-code h1 {
+        font-size: 4rem;
+    }
+    
+    .error-actions .btn {
+        width: 100%;
+        margin-bottom: 1rem;
+    }
+    
+    .btn-group {
+        flex-direction: column;
+    }
+    
+    .btn-group .btn {
+        margin-bottom: 0.5rem;
+    }
+}
+</style>
+
+<script>
+function copyErrorInfo() {
+    const errorInfo = {
+        timestamp: new Date().toISOString(),
+        error: '500 Internal Server Error',
+        url: window.location.href,
+        userAgent: navigator.userAgent,
+        referrer: document.referrer
+    };
+    
+    const errorText = JSON.stringify(errorInfo, null, 2);
+    
+    if (navigator.clipboard) {
+        navigator.clipboard.writeText(errorText).then(() => {
+            alert('Error information copied to clipboard!');
+        });
+    } else {
+        // Fallback for older browsers
+        const textArea = document.createElement('textarea');
+        textArea.value = errorText;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+        alert('Error information copied to clipboard!');
+    }
+}
+
+// Auto-check system status
+document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(() => {
+        // Simulate status checks
+        const statusItems = document.querySelectorAll('.status-item');
+        statusItems.forEach((item, index) => {
+            setTimeout(() => {
+                const badge = item.querySelector('.badge');
+                const random = Math.random();
+                if (random > 0.7) {
+                    badge.className = 'badge bg-success';
+                    badge.textContent = 'Online';
+                } else {
+                    badge.className = 'badge bg-danger';
+                    badge.textContent = 'Error';
+                }
+            }, (index + 1) * 1000);
+        });
+    }, 2000);
+});
+</script>
+{% endblock %}

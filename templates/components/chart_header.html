@@ -1,0 +1,799 @@
+<!-- Chart Header Component -->
+<div class="chart-header-container">
+    <div class="chart-header">
+        <div class="header-left">
+            <div class="chart-title-section">
+                <h2 class="chart-title" id="chartTitle">Financial Overview</h2>
+                <p class="chart-subtitle" id="chartSubtitle">Comprehensive analysis of financial performance</p>
+            </div>
+            <div class="chart-meta">
+                <span class="data-period" id="dataPeriod">
+                    <i class="fas fa-calendar-alt"></i>
+                    Q4 2024
+                </span>
+                <span class="last-updated" id="lastUpdated">
+                    <i class="fas fa-clock"></i>
+                    Updated 2 hours ago
+                </span>
+            </div>
+        </div>
+
+        <div class="header-right">
+            <!-- Chart Type Selector -->
+            <div class="chart-controls">
+                <div class="control-group">
+                    <label for="chartType">Chart Type:</label>
+                    <select id="chartType" class="chart-selector" onchange="changeChartType(this.value)">
+                        <option value="line">Line Chart</option>
+                        <option value="bar">Bar Chart</option>
+                        <option value="area">Area Chart</option>
+                        <option value="combo">Combo Chart</option>
+                        <option value="pie">Pie Chart</option>
+                        <option value="radar">Radar Chart</option>
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <label for="timePeriod">Time Period:</label>
+                    <select id="timePeriod" class="period-selector" onchange="changePeriod(this.value)">
+                        <option value="1M">1 Month</option>
+                        <option value="3M">3 Months</option>
+                        <option value="6M">6 Months</option>
+                        <option value="1Y" selected>1 Year</option>
+                        <option value="2Y">2 Years</option>
+                        <option value="5Y">5 Years</option>
+                        <option value="ALL">All Time</option>
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <label for="dataMetrics">Metrics:</label>
+                    <div class="metrics-dropdown">
+                        <button class="metrics-btn" onclick="toggleMetricsDropdown()">
+                            <span id="selectedMetrics">Revenue, Profit</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                        <div class="metrics-dropdown-content" id="metricsDropdown">
+                            <div class="metric-item">
+                                <input type="checkbox" id="revenue" checked onchange="updateMetrics()">
+                                <label for="revenue">Revenue</label>
+                            </div>
+                            <div class="metric-item">
+                                <input type="checkbox" id="profit" checked onchange="updateMetrics()">
+                                <label for="profit">Net Profit</label>
+                            </div>
+                            <div class="metric-item">
+                                <input type="checkbox" id="cashflow" onchange="updateMetrics()">
+                                <label for="cashflow">Cash Flow</label>
+                            </div>
+                            <div class="metric-item">
+                                <input type="checkbox" id="expenses" onchange="updateMetrics()">
+                                <label for="expenses">Expenses</label>
+                            </div>
+                            <div class="metric-item">
+                                <input type="checkbox" id="assets" onchange="updateMetrics()">
+                                <label for="assets">Total Assets</label>
+                            </div>
+                            <div class="metric-item">
+                                <input type="checkbox" id="liabilities" onchange="updateMetrics()">
+                                <label for="liabilities">Liabilities</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="header-actions">
+                <button class="action-btn export-btn" onclick="exportChart()" title="Export Chart">
+                    <i class="fas fa-download"></i>
+                </button>
+                <button class="action-btn fullscreen-btn" onclick="toggleFullscreen()" title="Fullscreen">
+                    <i class="fas fa-expand"></i>
+                </button>
+                <button class="action-btn refresh-btn" onclick="refreshChart()" title="Refresh Data">
+                    <i class="fas fa-sync-alt"></i>
+                </button>
+                <button class="action-btn settings-btn" onclick="openChartSettings()" title="Chart Settings">
+                    <i class="fas fa-cog"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Stats Bar -->
+    <div class="quick-stats-bar">
+        <div class="stat-item">
+            <div class="stat-icon revenue-icon">
+                <i class="fas fa-dollar-sign"></i>
+            </div>
+            <div class="stat-content">
+                <div class="stat-label">Total Revenue</div>
+                <div class="stat-value" id="totalRevenue">$12.5M</div>
+                <div class="stat-change positive" id="revenueChange">+8.5%</div>
+            </div>
+        </div>
+
+        <div class="stat-item">
+            <div class="stat-icon profit-icon">
+                <i class="fas fa-chart-line"></i>
+            </div>
+            <div class="stat-content">
+                <div class="stat-label">Net Profit</div>
+                <div class="stat-value" id="netProfit">$2.3M</div>
+                <div class="stat-change positive" id="profitChange">+12.3%</div>
+            </div>
+        </div>
+
+        <div class="stat-item">
+            <div class="stat-icon cashflow-icon">
+                <i class="fas fa-water"></i>
+            </div>
+            <div class="stat-content">
+                <div class="stat-label">Cash Flow</div>
+                <div class="stat-value" id="cashFlow">$3.8M</div>
+                <div class="stat-change positive" id="cashflowChange">+5.7%</div>
+            </div>
+        </div>
+
+        <div class="stat-item">
+            <div class="stat-icon margin-icon">
+                <i class="fas fa-percentage"></i>
+            </div>
+            <div class="stat-content">
+                <div class="stat-label">Profit Margin</div>
+                <div class="stat-value" id="profitMargin">18.4%</div>
+                <div class="stat-change neutral" id="marginChange">+0.2%</div>
+            </div>
+        </div>
+
+        <div class="stat-item">
+            <div class="stat-icon growth-icon">
+                <i class="fas fa-trending-up"></i>
+            </div>
+            <div class="stat-content">
+                <div class="stat-label">Growth Rate</div>
+                <div class="stat-value" id="growthRate">23.1%</div>
+                <div class="stat-change positive" id="growthChange">+3.4%</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.chart-header-container {
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+    overflow: hidden;
+}
+
+.chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 20px 25px;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.header-left {
+    flex: 1;
+}
+
+.chart-title-section {
+    margin-bottom: 10px;
+}
+
+.chart-title {
+    font-size: 24px;
+    font-weight: 600;
+    color: #2c3e50;
+    margin: 0 0 5px 0;
+}
+
+.chart-subtitle {
+    font-size: 14px;
+    color: #7f8c8d;
+    margin: 0;
+}
+
+.chart-meta {
+    display: flex;
+    gap: 20px;
+    font-size: 13px;
+    color: #95a5a6;
+}
+
+.chart-meta span {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.header-right {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    align-items: flex-end;
+}
+
+.chart-controls {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+}
+
+.control-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.control-group label {
+    font-size: 12px;
+    font-weight: 500;
+    color: #34495e;
+}
+
+.chart-selector, .period-selector {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    background: white;
+    font-size: 13px;
+    min-width: 120px;
+    cursor: pointer;
+}
+
+.chart-selector:focus, .period-selector:focus {
+    outline: none;
+    border-color: #3498db;
+    box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.1);
+}
+
+.metrics-dropdown {
+    position: relative;
+}
+
+.metrics-btn {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    background: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 150px;
+    font-size: 13px;
+}
+
+.metrics-btn:hover {
+    border-color: #3498db;
+}
+
+.metrics-dropdown-content {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    z-index: 1000;
+    min-width: 200px;
+    display: none;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.metrics-dropdown-content.show {
+    display: block;
+}
+
+.metric-item {
+    padding: 10px 15px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.metric-item:hover {
+    background-color: #f8f9fa;
+}
+
+.metric-item input[type="checkbox"] {
+    margin: 0;
+}
+
+.metric-item label {
+    cursor: pointer;
+    font-size: 13px;
+    margin: 0;
+}
+
+.header-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.action-btn {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    background: white;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+}
+
+.action-btn:hover {
+    background: #f8f9fa;
+    border-color: #3498db;
+    color: #3498db;
+}
+
+.quick-stats-bar {
+    display: flex;
+    padding: 20px 25px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    gap: 20px;
+    overflow-x: auto;
+}
+
+.stat-item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    background: rgba(255,255,255,0.1);
+    backdrop-filter: blur(10px);
+    padding: 15px 20px;
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.2);
+    min-width: 200px;
+    color: white;
+}
+
+.stat-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+}
+
+.revenue-icon { background: linear-gradient(45deg, #4CAF50, #45a049); }
+.profit-icon { background: linear-gradient(45deg, #2196F3, #1976d2); }
+.cashflow-icon { background: linear-gradient(45deg, #FF9800, #f57c00); }
+.margin-icon { background: linear-gradient(45deg, #9C27B0, #7b1fa2); }
+.growth-icon { background: linear-gradient(45deg, #f44336, #d32f2f); }
+
+.stat-content {
+    flex: 1;
+}
+
+.stat-label {
+    font-size: 12px;
+    opacity: 0.8;
+    margin-bottom: 5px;
+}
+
+.stat-value {
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 3px;
+}
+
+.stat-change {
+    font-size: 12px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 3px;
+}
+
+.stat-change.positive { color: #4CAF50; }
+.stat-change.negative { color: #f44336; }
+.stat-change.neutral { color: #FF9800; }
+
+.stat-change.positive::before { content: "↗"; }
+.stat-change.negative::before { content: "↘"; }
+.stat-change.neutral::before { content: "→"; }
+
+@media (max-width: 1200px) {
+    .chart-header {
+        flex-direction: column;
+        gap: 20px;
+    }
+    
+    .header-right {
+        width: 100%;
+        align-items: stretch;
+    }
+    
+    .chart-controls {
+        flex-wrap: wrap;
+        gap: 15px;
+    }
+}
+
+@media (max-width: 768px) {
+    .chart-controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .control-group {
+        width: 100%;
+    }
+    
+    .chart-selector, .period-selector, .metrics-btn {
+        width: 100%;
+    }
+    
+    .quick-stats-bar {
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .stat-item {
+        min-width: auto;
+    }
+}
+</style>
+
+<script>
+let currentChartType = 'line';
+let currentPeriod = '1Y';
+let selectedMetrics = ['revenue', 'profit'];
+
+function changeChartType(type) {
+    currentChartType = type;
+    updateChartTitle();
+    // Trigger chart update
+    if (typeof updateChart === 'function') {
+        updateChart();
+    }
+    console.log('Chart type changed to:', type);
+}
+
+function changePeriod(period) {
+    currentPeriod = period;
+    updateDataPeriod(period);
+    // Trigger data refresh
+    refreshChart();
+    console.log('Period changed to:', period);
+}
+
+function updateDataPeriod(period) {
+    const periodMap = {
+        '1M': 'Last Month',
+        '3M': 'Last 3 Months',
+        '6M': 'Last 6 Months',
+        '1Y': 'Last Year',
+        '2Y': 'Last 2 Years',
+        '5Y': 'Last 5 Years',
+        'ALL': 'All Time'
+    };
+    
+    document.getElementById('dataPeriod').innerHTML = 
+        `<i class="fas fa-calendar-alt"></i> ${periodMap[period]}`;
+}
+
+function toggleMetricsDropdown() {
+    const dropdown = document.getElementById('metricsDropdown');
+    dropdown.classList.toggle('show');
+}
+
+function updateMetrics() {
+    const checkboxes = document.querySelectorAll('#metricsDropdown input[type="checkbox"]:checked');
+    const selected = Array.from(checkboxes).map(cb => cb.nextElementSibling.textContent);
+    
+    selectedMetrics = Array.from(checkboxes).map(cb => cb.id);
+    
+    document.getElementById('selectedMetrics').textContent = 
+        selected.length > 0 ? selected.join(', ') : 'No metrics selected';
+    
+    // Trigger chart update
+    if (typeof updateChart === 'function') {
+        updateChart();
+    }
+}
+
+function exportChart() {
+    // Show export options
+    const exportOptions = [
+        { format: 'PNG', action: () => exportChartAs('png') },
+        { format: 'PDF', action: () => exportChartAs('pdf') },
+        { format: 'SVG', action: () => exportChartAs('svg') },
+        { format: 'Excel', action: () => exportChartAs('excel') }
+    ];
+    
+    showExportMenu(exportOptions);
+}
+
+function exportChartAs(format) {
+    console.log(`Exporting chart as ${format}`);
+    // Implement export functionality based on chart library
+    
+    // Show success message
+    showNotification(`Chart exported as ${format.toUpperCase()}`, 'success');
+}
+
+function showExportMenu(options) {
+    // Create temporary export menu
+    const menu = document.createElement('div');
+    menu.className = 'export-menu';
+    menu.innerHTML = options.map(opt => 
+        `<button onclick="exportChartAs('${opt.format.toLowerCase()}')">${opt.format}</button>`
+    ).join('');
+    
+    // Position and show menu
+    const exportBtn = document.querySelector('.export-btn');
+    const rect = exportBtn.getBoundingClientRect();
+    menu.style.position = 'absolute';
+    menu.style.top = rect.bottom + 5 + 'px';
+    menu.style.right = '25px';
+    
+    document.body.appendChild(menu);
+    
+    // Remove menu after 3 seconds or on click outside
+    setTimeout(() => menu.remove(), 3000);
+}
+
+function toggleFullscreen() {
+    const chartContainer = document.querySelector('.chart-header-container').parentElement;
+    
+    if (!document.fullscreenElement) {
+        chartContainer.requestFullscreen();
+        document.querySelector('.fullscreen-btn i').className = 'fas fa-compress';
+    } else {
+        document.exitFullscreen();
+        document.querySelector('.fullscreen-btn i').className = 'fas fa-expand';
+    }
+}
+
+function refreshChart() {
+    const refreshBtn = document.querySelector('.refresh-btn i');
+    refreshBtn.style.animation = 'spin 1s linear infinite';
+    
+    // Update last updated time
+    const now = new Date();
+    document.getElementById('lastUpdated').innerHTML = 
+        `<i class="fas fa-clock"></i> Updated just now`;
+    
+    // Simulate data refresh
+    setTimeout(() => {
+        refreshBtn.style.animation = '';
+        updateQuickStats();
+        showNotification('Chart data refreshed successfully', 'success');
+    }, 1500);
+}
+
+function openChartSettings() {
+    // Create settings modal
+    const modal = document.createElement('div');
+    modal.className = 'settings-modal';
+    modal.innerHTML = `
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Chart Settings</h3>
+                <button onclick="this.closest('.settings-modal').remove()">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="setting-group">
+                    <label>Chart Theme:</label>
+                    <select onchange="changeTheme(this.value)">
+                        <option value="light">Light</option>
+                        <option value="dark">Dark</option>
+                        <option value="auto">Auto</option>
+                    </select>
+                </div>
+                <div class="setting-group">
+                    <label>Animation:</label>
+                    <input type="checkbox" checked onchange="toggleAnimation(this.checked)">
+                </div>
+                <div class="setting-group">
+                    <label>Show Grid:</label>
+                    <input type="checkbox" checked onchange="toggleGrid(this.checked)">
+                </div>
+                <div class="setting-group">
+                    <label>Auto Refresh:</label>
+                    <select onchange="setAutoRefresh(this.value)">
+                        <option value="0">Disabled</option>
+                        <option value="30">30 seconds</option>
+                        <option value="60">1 minute</option>
+                        <option value="300">5 minutes</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+}
+
+function updateQuickStats() {
+    // Simulate real-time data updates
+    const stats = {
+        totalRevenue: { value: (Math.random() * 5 + 10).toFixed(1) + 'M', change: (Math.random() * 10 + 5).toFixed(1) },
+        netProfit: { value: (Math.random() * 1 + 2).toFixed(1) + 'M', change: (Math.random() * 15 + 8).toFixed(1) },
+        cashFlow: { value: (Math.random() * 2 + 3).toFixed(1) + 'M', change: (Math.random() * 8 + 3).toFixed(1) },
+        profitMargin: { value: (Math.random() * 5 + 16).toFixed(1) + '%', change: (Math.random() * 2).toFixed(1) },
+        growthRate: { value: (Math.random() * 10 + 20).toFixed(1) + '%', change: (Math.random() * 5 + 2).toFixed(1) }
+    };
+    
+    Object.keys(stats).forEach(key => {
+        const element = document.getElementById(key);
+        if (element) {
+            element.textContent = '$' + stats[key].value;
+        }
+    });
+}
+
+function updateChartTitle() {
+    const titles = {
+        'line': 'Financial Trends Analysis',
+        'bar': 'Financial Performance Comparison',
+        'area': 'Financial Growth Overview',
+        'combo': 'Comprehensive Financial View',
+        'pie': 'Financial Distribution Analysis',
+        'radar': 'Financial Health Assessment'
+    };
+    
+    document.getElementById('chartTitle').textContent = titles[currentChartType] || 'Financial Overview';
+}
+
+function showNotification(message, type = 'info') {
+    const notification = document.createElement('div');
+    notification.className = `notification ${type}`;
+    notification.textContent = message;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.style.opacity = '0';
+        setTimeout(() => notification.remove(), 300);
+    }, 3000);
+}
+
+// Close metrics dropdown when clicking outside
+document.addEventListener('click', function(event) {
+    if (!event.target.closest('.metrics-dropdown')) {
+        document.getElementById('metricsDropdown').classList.remove('show');
+    }
+});
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', function() {
+    updateChartTitle();
+    updateQuickStats();
+});
+
+// Add CSS animations
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+    
+    .export-menu {
+        background: white;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        z-index: 1000;
+        padding: 10px;
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
+    
+    .export-menu button {
+        padding: 8px 15px;
+        border: none;
+        background: none;
+        cursor: pointer;
+        text-align: left;
+        border-radius: 4px;
+        transition: background-color 0.2s;
+    }
+    
+    .export-menu button:hover {
+        background-color: #f8f9fa;
+    }
+    
+    .settings-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 2000;
+    }
+    
+    .modal-content {
+        background: white;
+        border-radius: 10px;
+        width: 400px;
+        max-width: 90vw;
+    }
+    
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px;
+        border-bottom: 1px solid #eee;
+    }
+    
+    .modal-header button {
+        background: none;
+        border: none;
+        font-size: 20px;
+        cursor: pointer;
+    }
+    
+    .modal-body {
+        padding: 20px;
+    }
+    
+    .setting-group {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+    
+    .setting-group label {
+        font-weight: 500;
+    }
+    
+    .setting-group select,
+    .setting-group input {
+        padding: 5px 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+    }
+    
+    .notification {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 15px 20px;
+        border-radius: 6px;
+        color: white;
+        font-weight: 500;
+        z-index: 3000;
+        transition: opacity 0.3s;
+    }
+    
+    .notification.success {
+        background: #4CAF50;
+    }
+    
+    .notification.error {
+        background: #f44336;
+    }
+    
+    .notification.info {
+        background: #2196F3;
+    }
+`;
+
+document.head.appendChild(style);
+</script>

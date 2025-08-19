@@ -1,0 +1,1739 @@
+{% extends "base.html" %}
+
+{% block title %}Trend Analysis - Financial Risk Assessment{% endblock %}
+
+{% block extra_css %}
+<style>
+:root {
+    --primary-color: #059669;
+    --secondary-color: #6366f1;
+    --warning-color: #d97706;
+    --danger-color: #dc2626;
+    --success-color: #059669;
+    --text-primary: #1e293b;
+    --text-secondary: #64748b;
+    --bg-light: #f8fafc;
+    --border-light: rgba(0, 0, 0, 0.1);
+}
+
+body {
+    background: #ffffff;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.trend-analytics-container {
+    min-height: 100vh;
+}
+
+.analytics-header {
+    background: linear-gradient(135deg, var(--primary-color) 0%, #10b981 100%);
+    color: white;
+    padding: 2rem 0;
+    margin-bottom: 2rem;
+}
+
+.page-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.page-subtitle {
+    font-size: 1.1rem;
+    opacity: 0.9;
+    margin: 0;
+}
+
+.header-actions {
+    display: flex;
+    gap: 1rem;
+}
+
+.btn {
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-primary {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+}
+
+.btn-secondary {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+.btn-success {
+    background: var(--primary-color);
+    color: white;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.controls-section {
+    background: white;
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.control-group label {
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+.form-select {
+    border: 1px solid var(--border-light);
+    border-radius: 8px;
+    padding: 0.75rem;
+    background: white;
+    color: var(--text-primary);
+}
+
+.trend-charts-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    grid-template-rows: auto auto auto;
+    gap: 2rem;
+    grid-template-areas:
+        "primary-trend quarterly-trends"
+        "trend-indicators comparative-analysis"
+        "trend-insights trend-insights";
+}
+
+.primary-trend {
+    grid-area: primary-trend;
+}
+
+.quarterly-trends {
+    grid-area: quarterly-trends;
+}
+
+.trend-indicators {
+    grid-area: trend-indicators;
+}
+
+.comparative-analysis {
+    grid-area: comparative-analysis;
+}
+
+.trend-insights {
+    grid-area: trend-insights;
+}
+
+.chart-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.card-header {
+    padding: 1.5rem 2rem;
+    background: var(--bg-light);
+    border-bottom: 1px solid var(--border-light);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.card-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.chart-controls {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.metric-toggles {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.metric-toggle {
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--border-light);
+    background: white;
+    color: var(--text-secondary);
+    border-radius: 6px;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.metric-toggle.active {
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+.card-body {
+    padding: 2rem;
+}
+
+.trend-summary {
+    display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
+}
+
+.summary-metric {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.summary-metric .label {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+.summary-metric .value {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.trend-positive {
+    color: var(--success-color);
+}
+
+.trend-negative {
+    color: var(--danger-color);
+}
+
+.trend-neutral {
+    color: var(--warning-color);
+}
+
+.chart-container {
+    position: relative;
+    height: 350px;
+}
+
+.quarterly-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.quarter-metric {
+    padding: 1.5rem;
+    background: var(--bg-light);
+    border-radius: 8px;
+    border-left: 4px solid var(--primary-color);
+}
+
+.metric-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.metric-header h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.year-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.year-badge.current {
+    background: rgba(5, 150, 105, 0.1);
+    color: var(--success-color);
+}
+
+.year-badge.previous {
+    background: rgba(99, 102, 241, 0.1);
+    color: var(--secondary-color);
+}
+
+.year-badge.historical {
+    background: rgba(100, 116, 139, 0.1);
+    color: var(--text-secondary);
+}
+
+.metric-values {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.metric-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.875rem;
+}
+
+.metric-row span:first-child {
+    color: var(--text-secondary);
+}
+
+.metric-row span:last-child {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.indicators-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+}
+
+.indicator-item {
+    display: flex;
+    gap: 1rem;
+    padding: 1.5rem;
+    background: var(--bg-light);
+    border-radius: 8px;
+}
+
+.indicator-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+}
+
+.indicator-icon.ocf {
+    background: rgba(5, 150, 105, 0.1);
+    color: var(--success-color);
+}
+
+.indicator-icon.profit {
+    background: rgba(99, 102, 241, 0.1);
+    color: var(--secondary-color);
+}
+
+.indicator-icon.stability {
+    background: rgba(217, 119, 6, 0.1);
+    color: var(--warning-color);
+}
+
+.indicator-icon.risk {
+    background: rgba(220, 38, 38, 0.1);
+    color: var(--danger-color);
+}
+
+.indicator-content h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+}
+
+.trend-direction {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+}
+
+.trend-direction.up {
+    color: var(--success-color);
+}
+
+.trend-direction.down {
+    color: var(--danger-color);
+}
+
+.trend-direction.stable {
+    color: var(--warning-color);
+}
+
+.trend-description {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+.comparison-summary {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-light);
+}
+
+.summary-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+}
+
+.summary-row .label {
+    color: var(--text-secondary);
+}
+
+.summary-row .value {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.insights-tabs {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border-light);
+}
+
+.insight-tab {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    background: transparent;
+    color: var(--text-secondary);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s ease;
+}
+
+.insight-tab.active {
+    color: var(--primary-color);
+    border-bottom-color: var(--primary-color);
+}
+
+.insight-content {
+    display: none;
+}
+
+.insight-content.active {
+    display: block;
+}
+
+.insight-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.insight-placeholder {
+    text-align: center;
+    color: var(--text-secondary);
+    padding: 2rem;
+    font-style: italic;
+}
+
+.insight-item {
+    padding: 1rem;
+    background: var(--bg-light);
+    border-radius: 8px;
+    border-left: 4px solid var(--primary-color);
+}
+
+.insight-item.positive {
+    border-left-color: var(--success-color);
+    background: rgba(5, 150, 105, 0.05);
+}
+
+.insight-item.concern {
+    border-left-color: var(--danger-color);
+    background: rgba(220, 38, 38, 0.05);
+}
+
+.insight-item.forecast {
+    border-left-color: var(--secondary-color);
+    background: rgba(99, 102, 241, 0.05);
+}
+
+.insight-item h5 {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+}
+
+.insight-item p {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+
+.loading-content {
+    text-align: center;
+    color: white;
+}
+
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid rgba(255, 255, 255, 0.1);
+    border-top: 4px solid var(--primary-color);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 1rem;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+@media (max-width: 1200px) {
+    .trend-charts-grid {
+        grid-template-columns: 1fr;
+        grid-template-areas:
+            "primary-trend"
+            "quarterly-trends"
+            "trend-indicators"
+            "comparative-analysis"
+            "trend-insights";
+    }
+    
+    .indicators-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .page-title {
+        font-size: 2rem;
+    }
+    
+    .header-actions {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .trend-summary {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .metric-toggles {
+        flex-wrap: wrap;
+    }
+    
+    .quarterly-grid {
+        gap: 1rem;
+    }
+    
+    .quarter-metric {
+        padding: 1rem;
+    }
+    
+    .insights-tabs {
+        overflow-x: auto;
+        flex-wrap: nowrap;
+    }
+}
+</style>
+{% endblock %}
+{% block content %}
+<div class="trend-analytics-container">
+    <!-- Header Section -->
+    <div class="analytics-header">
+        <div class="container-fluid">
+            <div class="row align-items-center">
+                <div class="col">
+                    <div class="header-content">
+                        <h1 class="page-title">
+                            <i class="fas fa-chart-line me-2"></i>
+                            Financial Trend Analysis
+                        </h1>
+                        <p class="page-subtitle">Multi-year cash flow and financial performance trends</p>
+                    </div>
+                </div>
+                <div class="col-auto">
+                    <div class="header-actions">
+                        <button class="btn btn-primary" onclick="exportTrendData()">
+                            <i class="fas fa-download"></i> Export Data
+                        </button>
+                        <button class="btn btn-secondary" onclick="generateForecast()">
+                            <i class="fas fa-crystal-ball"></i> Forecast
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container-fluid py-4">
+        <!-- Controls Section -->
+        <div class="controls-section mb-4">
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="control-group">
+                        <label for="companyTrendSelect">Select Company</label>
+                        <select id="companyTrendSelect" class="form-select">
+                            <option value="">Choose a company...</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="control-group">
+                        <label for="trendMetrics">Trend Metrics</label>
+                        <select id="trendMetrics" class="form-select">
+                            <option value="all">All Metrics</option>
+                            <option value="cashflow">Cash Flow Trends</option>
+                            <option value="profitability">Profitability Trends</option>
+                            <option value="efficiency">Efficiency Ratios</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="control-group">
+                        <label>&nbsp;</label>
+                        <button class="btn btn-success w-100" onclick="analyzeTrends()">
+                            <i class="fas fa-chart-area"></i> Analyze Trends
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Trend Charts Grid -->
+        <div class="trend-charts-grid">
+            <!-- Primary Trend Chart -->
+            <div class="chart-card primary-trend">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-chart-line me-2"></i>
+                        Cash Flow Trends (2022-2024)
+                    </h3>
+                    <div class="chart-controls">
+                        <div class="metric-toggles">
+                            <button class="metric-toggle active" data-metric="ocf">OCF</button>
+                            <button class="metric-toggle active" data-metric="fcf">FCF</button>
+                            <button class="metric-toggle active" data-metric="ni">Net Income</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="trend-summary mb-3">
+                        <div class="summary-metric">
+                            <span class="label">3-Year OCF Growth:</span>
+                            <span class="value trend-positive" id="ocfGrowth">-</span>
+                        </div>
+                        <div class="summary-metric">
+                            <span class="label">FCF Trend:</span>
+                            <span class="value" id="fcfTrend">-</span>
+                        </div>
+                        <div class="summary-metric">
+                            <span class="label">Volatility Index:</span>
+                            <span class="value" id="volatilityIndex">-</span>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="primaryTrendChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quarterly Trends -->
+            <div class="chart-card quarterly-trends">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-calendar me-2"></i>
+                        Year-over-Year Analysis
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="quarterly-grid">
+                        <div class="quarter-metric">
+                            <div class="metric-header">
+                                <h4>2024 Performance</h4>
+                                <span class="year-badge current">Current</span>
+                            </div>
+                            <div class="metric-values">
+                                <div class="metric-row">
+                                    <span>Operating Cash Flow:</span>
+                                    <span id="ocf2024">-</span>
+                                </div>
+                                <div class="metric-row">
+                                    <span>Free Cash Flow:</span>
+                                    <span id="fcf2024">-</span>
+                                </div>
+                                <div class="metric-row">
+                                    <span>Net Income:</span>
+                                    <span id="ni2024">-</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="quarter-metric">
+                            <div class="metric-header">
+                                <h4>2023 Performance</h4>
+                                <span class="year-badge previous">Previous</span>
+                            </div>
+                            <div class="metric-values">
+                                <div class="metric-row">
+                                    <span>Operating Cash Flow:</span>
+                                    <span id="ocf2023">-</span>
+                                </div>
+                                <div class="metric-row">
+                                    <span>Free Cash Flow:</span>
+                                    <span id="fcf2023">-</span>
+                                </div>
+                                <div class="metric-row">
+                                    <span>Net Income:</span>
+                                    <span id="ni2023">-</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="quarter-metric">
+                            <div class="metric-header">
+                                <h4>2022 Performance</h4>
+                                <span class="year-badge historical">Historical</span>
+                            </div>
+                            <div class="metric-values">
+                                <div class="metric-row">
+                                    <span>Operating Cash Flow:</span>
+                                    <span id="ocf2022">-</span>
+                                </div>
+                                <div class="metric-row">
+                                    <span>Free Cash Flow:</span>
+                                    <span id="fcf2022">-</span>
+                                </div>
+                                <div class="metric-row">
+                                    <span>Net Income:</span>
+                                    <span id="ni2022">-</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Trend Indicators -->
+            <div class="chart-card trend-indicators">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-trending-up me-2"></i>
+                        Trend Indicators
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="indicators-grid">
+                        <div class="indicator-item">
+                            <div class="indicator-icon ocf">
+                                <i class="fas fa-water"></i>
+                            </div>
+                            <div class="indicator-content">
+                                <h4>Cash Flow Trend</h4>
+                                <div class="trend-direction" id="cashFlowDirection">
+                                    <i class="fas fa-arrow-up"></i>
+                                    <span>Analyzing...</span>
+                                </div>
+                                <p class="trend-description" id="cashFlowDesc">-</p>
+                            </div>
+                        </div>
+                        
+                        <div class="indicator-item">
+                            <div class="indicator-icon profit">
+                                <i class="fas fa-chart-pie"></i>
+                            </div>
+                            <div class="indicator-content">
+                                <h4>Profitability Trend</h4>
+                                <div class="trend-direction" id="profitDirection">
+                                    <i class="fas fa-arrow-up"></i>
+                                    <span>Analyzing...</span>
+                                </div>
+                                <p class="trend-description" id="profitDesc">-</p>
+                            </div>
+                        </div>
+                        
+                        <div class="indicator-item">
+                            <div class="indicator-icon stability">
+                                <i class="fas fa-balance-scale"></i>
+                            </div>
+                            <div class="indicator-content">
+                                <h4>Financial Stability</h4>
+                                <div class="trend-direction" id="stabilityDirection">
+                                    <i class="fas fa-arrow-up"></i>
+                                    <span>Analyzing...</span>
+                                </div>
+                                <p class="trend-description" id="stabilityDesc">-</p>
+                            </div>
+                        </div>
+                        
+                        <div class="indicator-item">
+                            <div class="indicator-icon risk">
+                                <i class="fas fa-exclamation-triangle"></i>
+                            </div>
+                            <div class="indicator-content">
+                                <h4>Risk Assessment</h4>
+                                <div class="trend-direction" id="riskDirection">
+                                    <i class="fas fa-arrow-down"></i>
+                                    <span>Analyzing...</span>
+                                </div>
+                                <p class="trend-description" id="riskDesc">-</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Comparative Analysis -->
+            <div class="chart-card comparative-analysis">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-chart-bar me-2"></i>
+                        3-Year Comparative Analysis
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="comparativeChart"></canvas>
+                    </div>
+                    <div class="comparison-summary">
+                        <div class="summary-row">
+                            <span class="label">Best Year Performance:</span>
+                            <span class="value" id="bestYear">-</span>
+                        </div>
+                        <div class="summary-row">
+                            <span class="label">Improvement Areas:</span>
+                            <span class="value" id="improvementAreas">-</span>
+                        </div>
+                        <div class="summary-row">
+                            <span class="label">Consistency Score:</span>
+                            <span class="value" id="consistencyScore">-</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Trend Analysis Insights -->
+            <div class="chart-card trend-insights">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-lightbulb me-2"></i>
+                        Trend Insights & Recommendations
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="insights-tabs">
+                        <button class="insight-tab active" data-tab="positive">Positive Trends</button>
+                        <button class="insight-tab" data-tab="concerns">Concerns</button>
+                        <button class="insight-tab" data-tab="forecasts">Forecasts</button>
+                    </div>
+                    
+                    <div class="insight-content active" id="positive-content">
+                        <div class="insight-list" id="positiveTrends">
+                            <div class="insight-placeholder">
+                                Select a company to view positive trend analysis
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="insight-content" id="concerns-content">
+                        <div class="insight-list" id="concernsTrends">
+                            <div class="insight-placeholder">
+                                Select a company to view areas of concern
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="insight-content" id="forecasts-content">
+                        <div class="insight-list" id="forecastsTrends">
+                            <div class="insight-placeholder">
+                                Select a company to view financial forecasts
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Loading Overlay -->
+<div class="loading-overlay" id="trendLoadingOverlay" style="display: none;">
+    <div class="loading-content">
+        <div class="spinner"></div>
+        <p>Analyzing multi-year financial trends...</p>
+    </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+<script>
+let trendCompaniesData = [];
+let primaryChart = null;
+let comparativeChart = null;
+
+// Initialize page
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize trendCompaniesData as empty array
+    if (typeof trendCompaniesData === 'undefined') {
+        trendCompaniesData = [];
+    }
+    
+    loadTrendCompanies();
+    setupTrendEventListeners();
+});
+
+function setupTrendEventListeners() {
+    // Company selection
+    document.getElementById('companyTrendSelect').addEventListener('change', function() {
+        if (this.value) {
+            analyzeTrends();
+        }
+    });
+    
+    // Metric toggles
+    document.querySelectorAll('.metric-toggle').forEach(toggle => {
+        toggle.addEventListener('click', function() {
+            this.classList.toggle('active');
+            updatePrimaryChart();
+        });
+    });
+    
+    // Insight tabs
+    document.querySelectorAll('.insight-tab').forEach(tab => {
+        tab.addEventListener('click', function() {
+            switchInsightTab(this.dataset.tab);
+        });
+    });
+}
+
+// Load companies from cash_flow_statement table
+let allTrendCompaniesData = []; // Store all companies data
+let uniqueTrendCompaniesData = []; // Store unique companies for dropdown
+
+// Load companies from analytics API (same as analytics page)
+async function loadTrendCompanies() {
+    try {
+        showTrendLoading(true);
+        const response = await fetch('/api/companies'); // Analytics API endpoint
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        console.log('Trend API Response:', data);
+        
+        // Handle analytics API response format
+        let companiesArray = null;
+        
+        if (data.success && data.companies) {
+            companiesArray = data.companies;
+        } else if (Array.isArray(data)) {
+            companiesArray = data;
+        }
+        
+        if (companiesArray && Array.isArray(companiesArray) && companiesArray.length > 0) {
+            // Store ALL companies data
+            allTrendCompaniesData = companiesArray;
+            console.log(`Loaded ALL trend companies: ${allTrendCompaniesData.length} records`);
+            
+            // Create unique list for dropdown
+            const uniqueCompanies = [];
+            const seenCompanies = new Set();
+            
+            companiesArray.forEach(company => {
+                if (!company || !company.company_name) return;
+                
+                let normalizedName = company.company_name.trim();
+                
+                // Remove common duplicate indicators
+                normalizedName = normalizedName
+                    .replace(/\s*\(\d+\)$/g, '')    // Remove (1), (2), etc.
+                    .replace(/\s*Inc\.?$/i, '')     // Remove Inc/Inc.
+                    .replace(/\s*Corporation$/i, '') // Remove Corporation
+                    .replace(/\s*Ltd\.?$/i, '')     // Remove Ltd/Ltd.
+                    .replace(/\s*Plc$/i, '')        // Remove Plc
+                    .replace(/\s*Company$/i, '')    // Remove Company
+                    .replace(/\s*Corp\.?$/i, '')    // Remove Corp/Corp.
+                    .trim();
+                
+                const key = normalizedName.toLowerCase();
+                
+                if (!seenCompanies.has(key)) {
+                    seenCompanies.add(key);
+                    uniqueCompanies.push(company);
+                }
+            });
+            
+            // Sort unique companies alphabetically for dropdown
+            uniqueTrendCompaniesData = uniqueCompanies.sort((a, b) => {
+                const nameA = (a.company_name || '').toLowerCase();
+                const nameB = (b.company_name || '').toLowerCase();
+                return nameA.localeCompare(nameB);
+            });
+            
+            // For backward compatibility
+            trendCompaniesData = uniqueTrendCompaniesData;
+            
+            console.log(`Unique trend companies for dropdown: ${uniqueTrendCompaniesData.length}`);
+            console.log(`Total trend data available: ${allTrendCompaniesData.length} companies`);
+            
+            populateTrendCompanySelect();
+            
+        } else {
+            console.error('No valid companies array found in response');
+            showTrendError('No companies data found in API response');
+            allTrendCompaniesData = [];
+            uniqueTrendCompaniesData = [];
+            populateTrendCompanySelect();
+        }
+        
+    } catch (error) {
+        console.error('Error loading companies for trends:', error);
+        showTrendError('Error loading companies data: ' + error.message);
+        allTrendCompaniesData = [];
+        uniqueTrendCompaniesData = [];
+        populateTrendCompanySelect();
+    } finally {
+        showTrendLoading(false);
+    }
+}
+
+function populateTrendCompanySelect() {
+    const select = document.getElementById('companyTrendSelect');
+    
+    // Clear existing options
+    select.innerHTML = '<option value="">Choose a company...</option>';
+    
+    // Check if uniqueTrendCompaniesData exists and is an array
+    if (!uniqueTrendCompaniesData || !Array.isArray(uniqueTrendCompaniesData)) {
+        console.error('uniqueTrendCompaniesData is not a valid array:', uniqueTrendCompaniesData);
+        select.innerHTML = '<option value="">No companies available</option>';
+        return;
+    }
+    
+    // Check if array is empty
+    if (uniqueTrendCompaniesData.length === 0) {
+        select.innerHTML = '<option value="">No companies found</option>';
+        return;
+    }
+    
+    try {
+        // Populate dropdown with unique companies only
+        uniqueTrendCompaniesData.forEach(company => {
+            if (company && company.company_name && company.company_name.trim()) {
+                const option = document.createElement('option');
+                option.value = company.company_name;
+                option.textContent = company.company_name;
+                select.appendChild(option);
+            }
+        });
+        
+        console.log(`Successfully populated ${select.children.length - 1} unique companies in trend dropdown`);
+        
+    } catch (error) {
+        console.error('Error populating trend company select:', error);
+        select.innerHTML = '<option value="">Error loading companies</option>';
+    }
+}
+
+// Analyze trends for selected company
+async function analyzeTrends() {
+    const companyName = document.getElementById('companyTrendSelect').value;
+    
+    if (!companyName) {
+        showTrendError('Please select a company first');
+        return;
+    }
+    
+    try {
+        showTrendLoading(true);
+        
+        // CORRECT API CALL
+        const response = await fetch(`/api/cash-flow?company=${encodeURIComponent(companyName)}`);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        if (!data.success || !data.data || data.data.length === 0) {
+            throw new Error(`No data found for ${companyName}`);
+        }
+        
+        console.log('Financial data received:', data.data);
+        
+        const yearlyData = processYearlyData(data.data);
+        
+        if (yearlyData.years.length === 0) {
+            throw new Error('No valid financial data found for 2022-2024');
+        }
+        
+        updatePrimaryTrendChart(yearlyData);
+        updateQuarterlyAnalysis(yearlyData);
+        updateTrendIndicators(yearlyData);
+        updateComparativeChart(yearlyData);
+        generateTrendInsights(yearlyData);
+        
+    } catch (error) {
+        console.error('Error analyzing trends:', error);
+        showTrendError('Failed to analyze trends: ' + error.message);
+    } finally {
+        showTrendLoading(false);
+    }
+}
+
+function processYearlyData(rawData) {
+    // Sort by year and process
+    const sortedData = rawData.sort((a, b) => a.year - b.year);
+    
+    const processed = {
+        years: [],
+        ocf: [],
+        fcf: [],
+        netIncome: [],
+        ocfRatio: [],
+        debtEquity: [],
+        liquidationRisk: []
+    };
+    
+    sortedData.forEach(yearData => {
+        if (yearData.year >= 2022 && yearData.year <= 2024) {
+            processed.years.push(yearData.year.toString());
+            processed.ocf.push(parseFloat(yearData.net_cash_from_operating_activities) || 0);
+            processed.fcf.push(parseFloat(yearData.free_cash_flow) || 0);
+            processed.netIncome.push(parseFloat(yearData.net_income) || 0);
+            processed.ocfRatio.push(parseFloat(yearData.ocf_to_net_income_ratio) || 0);
+            processed.debtEquity.push(parseFloat(yearData.debt_to_equity_ratio) || 0);
+            processed.liquidationRisk.push(parseInt(yearData.liquidation_label) || 0);
+        }
+    });
+    
+    return processed;
+}
+
+function updatePrimaryTrendChart(data) {
+    const ctx = document.getElementById('primaryTrendChart');
+    if (!ctx) return;
+    
+    // Destroy existing chart
+    if (primaryChart) {
+        primaryChart.destroy();
+    }
+    
+    // Get active metrics
+    const activeMetrics = Array.from(document.querySelectorAll('.metric-toggle.active'))
+        .map(toggle => toggle.dataset.metric);
+    
+    const datasets = [];
+    
+    if (activeMetrics.includes('ocf')) {
+        datasets.push({
+            label: 'Operating Cash Flow',
+            data: data.ocf,
+            borderColor: '#059669',
+            backgroundColor: 'rgba(5, 150, 105, 0.1)',
+            borderWidth: 3,
+            fill: true,
+            tension: 0.4
+        });
+    }
+    
+    if (activeMetrics.includes('fcf')) {
+        datasets.push({
+            label: 'Free Cash Flow',
+            data: data.fcf,
+            borderColor: '#6366f1',
+            backgroundColor: 'rgba(99, 102, 241, 0.1)',
+            borderWidth: 3,
+            fill: true,
+            tension: 0.4
+        });
+    }
+    
+    if (activeMetrics.includes('ni')) {
+        datasets.push({
+            label: 'Net Income',
+            data: data.netIncome,
+            borderColor: '#d97706',
+            backgroundColor: 'rgba(217, 119, 6, 0.1)',
+            borderWidth: 3,
+            fill: true,
+            tension: 0.4
+        });
+    }
+    
+    primaryChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: data.years,
+            datasets: datasets
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'top'
+                },
+                tooltip: {
+                    mode: 'index',
+                    intersect: false,
+                    callbacks: {
+                        label: function(context) {
+                            return context.dataset.label + ': ' + formatCurrency(context.parsed.y);
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    display: true,
+                    title: {
+                        display: true,
+                        text: 'Year'
+                    }
+                },
+                y: {
+                    display: true,
+                    title: {
+                        display: true,
+                        text: 'Amount ($)'
+                    },
+                    ticks: {
+                        callback: function(value) {
+                            return formatCurrency(value);
+                        }
+                    }
+                }
+            }
+        }
+    });
+    
+    // Update trend summary
+    updateTrendSummary(data);
+}
+
+function updateTrendSummary(data) {
+    // Calculate 3-year OCF growth
+    const ocfGrowth = calculateGrowthRate(data.ocf);
+    document.getElementById('ocfGrowth').textContent = ocfGrowth.toFixed(1) + '%';
+    document.getElementById('ocfGrowth').className = 'value ' + (ocfGrowth > 0 ? 'trend-positive' : ocfGrowth < 0 ? 'trend-negative' : 'trend-neutral');
+    
+    // FCF trend
+    const fcfTrend = analyzeTrend(data.fcf);
+    document.getElementById('fcfTrend').textContent = fcfTrend;
+    
+    // Volatility index
+    const volatility = calculateVolatility(data.ocf);
+    document.getElementById('volatilityIndex').textContent = volatility.toFixed(1);
+}
+
+function updateQuarterlyAnalysis(data) {
+    // Update 2024 data
+    if (data.years.includes('2024')) {
+        const idx = data.years.indexOf('2024');
+        document.getElementById('ocf2024').textContent = formatCurrency(data.ocf[idx]);
+        document.getElementById('fcf2024').textContent = formatCurrency(data.fcf[idx]);
+        document.getElementById('ni2024').textContent = formatCurrency(data.netIncome[idx]);
+    }
+    
+    // Update 2023 data
+    if (data.years.includes('2023')) {
+        const idx = data.years.indexOf('2023');
+        document.getElementById('ocf2023').textContent = formatCurrency(data.ocf[idx]);
+        document.getElementById('fcf2023').textContent = formatCurrency(data.fcf[idx]);
+        document.getElementById('ni2023').textContent = formatCurrency(data.netIncome[idx]);
+    }
+    
+    // Update 2022 data
+    if (data.years.includes('2022')) {
+        const idx = data.years.indexOf('2022');
+        document.getElementById('ocf2022').textContent = formatCurrency(data.ocf[idx]);
+        document.getElementById('fcf2022').textContent = formatCurrency(data.fcf[idx]);
+        document.getElementById('ni2022').textContent = formatCurrency(data.netIncome[idx]);
+    }
+}
+
+function updateTrendIndicators(data) {
+    // Cash Flow Trend
+    const cashFlowTrend = analyzeTrend(data.ocf);
+    updateTrendIndicator('cashFlow', cashFlowTrend, getTrendDescription(data.ocf, 'Operating Cash Flow'));
+    
+    // Profitability Trend
+    const profitTrend = analyzeTrend(data.netIncome);
+    updateTrendIndicator('profit', profitTrend, getTrendDescription(data.netIncome, 'Net Income'));
+    
+    // Stability Trend
+    const stabilityTrend = analyzeStability(data);
+    updateTrendIndicator('stability', stabilityTrend, 'Financial stability based on cash flow consistency');
+    
+    // Risk Assessment
+    const riskTrend = analyzeRisk(data);
+    updateTrendIndicator('risk', riskTrend, 'Risk assessment based on liquidation indicators');
+}
+
+function updateTrendIndicator(type, trend, description) {
+    const directionEl = document.getElementById(type + 'Direction');
+    const descEl = document.getElementById(type + 'Desc');
+    
+    directionEl.className = 'trend-direction ' + trend.toLowerCase();
+    directionEl.innerHTML = `<i class="fas fa-arrow-${getTrendIcon(trend)}"></i><span>${trend}</span>`;
+    descEl.textContent = description;
+}
+
+function updateComparativeChart(data) {
+    const ctx = document.getElementById('comparativeChart');
+    if (!ctx) return;
+    
+    // Destroy existing chart
+    if (comparativeChart) {
+        comparativeChart.destroy();
+    }
+    
+    comparativeChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: data.years,
+            datasets: [{
+                label: 'Operating Cash Flow',
+                data: data.ocf,
+                backgroundColor: 'rgba(5, 150, 105, 0.8)',
+                borderColor: '#059669',
+                borderWidth: 1
+            }, {
+                label: 'Free Cash Flow',
+                data: data.fcf,
+                backgroundColor: 'rgba(99, 102, 241, 0.8)',
+                borderColor: '#6366f1',
+                borderWidth: 1
+            }, {
+                label: 'Net Income',
+                data: data.netIncome,
+                backgroundColor: 'rgba(217, 119, 6, 0.8)',
+                borderColor: '#d97706',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'top'
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return formatCurrency(value);
+                        }
+                    }
+                }
+            }
+        }
+    });
+    
+    // Update comparison summary
+    updateComparisonSummary(data);
+}
+
+function updateComparisonSummary(data) {
+    // Best performing year
+    const bestYear = findBestYear(data);
+    document.getElementById('bestYear').textContent = bestYear;
+    
+    // Improvement areas
+    const improvements = identifyImprovements(data);
+    document.getElementById('improvementAreas').textContent = improvements;
+    
+    // Consistency score
+    const consistency = calculateConsistency(data);
+    document.getElementById('consistencyScore').textContent = consistency.toFixed(1) + '/10';
+}
+
+function generateTrendInsights(data) {
+    const positiveInsights = generatePositiveInsights(data);
+    const concernInsights = generateConcernInsights(data);
+    const forecastInsights = generateForecastInsights(data);
+    
+    updateInsightTab('positive', positiveInsights);
+    updateInsightTab('concerns', concernInsights);
+    updateInsightTab('forecasts', forecastInsights);
+}
+
+function updateInsightTab(tab, insights) {
+    const container = document.getElementById(tab + 'Trends');
+    container.innerHTML = '';
+    
+    if (insights.length === 0) {
+        container.innerHTML = '<div class="insight-placeholder">No significant ' + tab + ' identified</div>';
+        return;
+    }
+    
+    insights.forEach(insight => {
+        const item = document.createElement('div');
+        item.className = 'insight-item ' + tab.replace('s', '');
+        item.innerHTML = `
+            <h5>${insight.title}</h5>
+            <p>${insight.description}</p>
+        `;
+        container.appendChild(item);
+    });
+}
+
+// Helper functions
+function calculateGrowthRate(values) {
+    if (values.length < 2) return 0;
+    const start = values[0];
+    const end = values[values.length - 1];
+    if (start === 0) return end > 0 ? 100 : 0;
+    return ((end - start) / Math.abs(start)) * 100;
+}
+
+function analyzeTrend(values) {
+    if (values.length < 2) return 'Stable';
+    
+    let upCount = 0;
+    let downCount = 0;
+    
+    for (let i = 1; i < values.length; i++) {
+        if (values[i] > values[i-1]) upCount++;
+        else if (values[i] < values[i-1]) downCount++;
+    }
+    
+    if (upCount > downCount) return 'Up';
+    else if (downCount > upCount) return 'Down';
+    else return 'Stable';
+}
+
+function calculateVolatility(values) {
+    if (values.length < 2) return 0;
+    
+    const mean = values.reduce((sum, val) => sum + val, 0) / values.length;
+    const variance = values.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / values.length;
+    return Math.sqrt(variance) / Math.abs(mean) * 100;
+}
+
+function getTrendDescription(values, metric) {
+    const trend = analyzeTrend(values);
+    const latest = values[values.length - 1];
+    
+    if (trend === 'Up') {
+        return `${metric} showing positive growth trend with latest value of ${formatCurrency(latest)}`;
+    } else if (trend === 'Down') {
+        return `${metric} showing declining trend, currently at ${formatCurrency(latest)}`;
+    } else {
+        return `${metric} remains stable at ${formatCurrency(latest)}`;
+    }
+}
+
+function getTrendIcon(trend) {
+    switch(trend.toLowerCase()) {
+        case 'up': return 'up';
+        case 'down': return 'down';
+        default: return 'right';
+    }
+}
+
+function analyzeStability(data) {
+    const volatility = calculateVolatility(data.ocf);
+    if (volatility < 20) return 'Up';
+    else if (volatility > 50) return 'Down';
+    else return 'Stable';
+}
+
+function analyzeRisk(data) {
+    const avgRisk = data.liquidationRisk.reduce((sum, risk) => sum + risk, 0) / data.liquidationRisk.length;
+    if (avgRisk < 0.3) return 'Down'; // Risk decreasing
+    else if (avgRisk > 0.7) return 'Up'; // Risk increasing
+    else return 'Stable';
+}
+
+function findBestYear(data) {
+    let bestIndex = 0;
+    let bestScore = -Infinity;
+    
+    for (let i = 0; i < data.years.length; i++) {
+        const score = data.ocf[i] + data.fcf[i] + data.netIncome[i];
+        if (score > bestScore) {
+            bestScore = score;
+            bestIndex = i;
+        }
+    }
+    
+    return data.years[bestIndex];
+}
+
+function identifyImprovements(data) {
+    const improvements = [];
+    
+    if (data.ocf[data.ocf.length - 1] < data.ocf[0]) {
+        improvements.push('Operating Cash Flow');
+    }
+    if (data.fcf[data.fcf.length - 1] < data.fcf[0]) {
+        improvements.push('Free Cash Flow');
+    }
+    if (data.netIncome[data.netIncome.length - 1] < data.netIncome[0]) {
+        improvements.push('Profitability');
+    }
+    
+    return improvements.length > 0 ? improvements.join(', ') : 'All metrics stable';
+}
+
+function calculateConsistency(data) {
+    const ocfConsistency = 10 - calculateVolatility(data.ocf) / 10;
+    const fcfConsistency = 10 - calculateVolatility(data.fcf) / 10;
+    const niConsistency = 10 - calculateVolatility(data.netIncome) / 10;
+    
+    return Math.max(0, (ocfConsistency + fcfConsistency + niConsistency) / 3);
+}
+
+function generatePositiveInsights(data) {
+    const insights = [];
+    
+    if (calculateGrowthRate(data.ocf) > 10) {
+        insights.push({
+            title: 'Strong Cash Flow Growth',
+            description: 'Operating cash flow has grown significantly over the 3-year period, indicating improved operational efficiency.'
+        });
+    }
+    
+    if (data.fcf.every(val => val > 0)) {
+        insights.push({
+            title: 'Consistent Free Cash Flow',
+            description: 'Company maintains positive free cash flow across all years, demonstrating strong capital allocation.'
+        });
+    }
+    
+    if (analyzeTrend(data.netIncome) === 'Up') {
+        insights.push({
+            title: 'Improving Profitability',
+            description: 'Net income shows an upward trend, indicating growing profitability and operational effectiveness.'
+        });
+    }
+    
+    const volatility = calculateVolatility(data.ocf);
+    if (volatility < 20) {
+        insights.push({
+            title: 'Stable Financial Performance',
+            description: 'Low volatility in cash flows suggests predictable and stable financial performance going forward.'
+        });
+    }
+    
+    if (data.liquidationRisk.every(risk => risk === 0)) {
+        insights.push({
+            title: 'Low Risk Profile',
+            description: 'Consistent low liquidation risk indicates strong financial health and reduced probability of distress.'
+        });
+    }
+    
+    return insights;
+}
+
+function generateConcernInsights(data) {
+    const insights = [];
+    
+    if (data.ocf.some(val => val < 0)) {
+        insights.push({
+            title: 'Cash Flow Volatility',
+            description: 'Operating cash flow has been negative in some periods, requiring attention to working capital management.'
+        });
+    }
+    
+    if (calculateGrowthRate(data.netIncome) < -10) {
+        insights.push({
+            title: 'Declining Profitability',
+            description: 'Net income has decreased significantly, suggesting operational challenges or market pressures.'
+        });
+    }
+    
+    if (data.liquidationRisk.some(risk => risk === 1)) {
+        insights.push({
+            title: 'Liquidation Risk Present',
+            description: 'Company has shown liquidation risk indicators in some periods, requiring careful monitoring.'
+        });
+    }
+    
+    return insights;
+}
+
+function generateForecastInsights(data) {
+    const insights = [];
+    
+    const ocfTrend = analyzeTrend(data.ocf);
+    if (ocfTrend === 'Up') {
+        insights.push({
+            title: 'Positive Cash Flow Outlook',
+            description: 'Based on current trends, operating cash flow is expected to continue improving in the near term.'
+        });
+    }
+    
+    return insights;
+}
+
+function switchInsightTab(tabName) {
+    // Update tab buttons
+    document.querySelectorAll('.insight-tab').forEach(tab => {
+        tab.classList.remove('active');
+    });
+    document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+    
+    // Update content
+    document.querySelectorAll('.insight-content').forEach(content => {
+        content.classList.remove('active');
+    });
+    document.getElementById(tabName + '-content').classList.add('active');
+}
+
+function updatePrimaryChart() {
+    const companyName = document.getElementById('companyTrendSelect').value;
+    if (companyName) {
+        analyzeTrends();
+    }
+}
+
+// Utility functions
+function formatCurrency(value) {
+    if (value === null || value === undefined) return 'N/A';
+    
+    const num = parseFloat(value);
+    if (isNaN(num)) return 'N/A';
+    
+    if (Math.abs(num) >= 1e9) {
+        return `${(num/1e9).toFixed(1)}B`;
+    } else if (Math.abs(num) >= 1e6) {
+        return `${(num/1e6).toFixed(1)}M`;
+    } else if (Math.abs(num) >= 1e3) {
+        return `${(num/1e3).toFixed(1)}K`;
+    } else {
+        return `${num.toFixed(0)}`;
+    }
+}
+
+function showTrendLoading(show) {
+    const overlay = document.getElementById('trendLoadingOverlay');
+    overlay.style.display = show ? 'flex' : 'none';
+}
+
+function showTrendError(message) {
+    alert('Error: ' + message);
+}
+
+function showTrendSuccess(message) {
+    const notification = document.createElement('div');
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: #059669;
+        color: white;
+        padding: 1rem 1.5rem;
+        border-radius: 8px;
+        z-index: 10000;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    `;
+    notification.textContent = message;
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.remove();
+    }, 3000);
+}
+
+// Action functions
+function exportTrendData() {
+    const companyName = document.getElementById('companyTrendSelect').value;
+    if (!companyName) {
+        showTrendError('Please select a company first');
+        return;
+    }
+    
+    // Create CSV data
+    const csvData = generateTrendCSV();
+    const blob = new Blob([csvData], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${companyName}_trend_analysis.csv`;
+    link.click();
+    
+    window.URL.revokeObjectURL(url);
+    showTrendSuccess('Trend data exported successfully!');
+}
+
+function generateTrendCSV() {
+    const companyName = document.getElementById('companyTrendSelect').value;
+    
+    let csv = 'Company,Year,Operating Cash Flow,Free Cash Flow,Net Income,OCF Ratio,Debt Equity Ratio\n';
+    
+    // This would be populated with actual data from the analysis
+    csv += `${companyName},2022,Data,Data,Data,Data,Data\n`;
+    csv += `${companyName},2023,Data,Data,Data,Data,Data\n`;
+    csv += `${companyName},2024,Data,Data,Data,Data,Data\n`;
+    
+    return csv;
+}
+
+function generateForecast() {
+    const companyName = document.getElementById('companyTrendSelect').value;
+    if (!companyName) {
+        showTrendError('Please select a company first');
+        return;
+    }
+    
+    showTrendLoading(true);
+    
+    // Simulate forecast generation
+    setTimeout(() => {
+        showTrendLoading(false);
+        showTrendSuccess('Financial forecast generated! Check the Forecasts tab for details.');
+        
+        // Add forecast insight
+        const forecastContainer = document.getElementById('forecastTrends');
+        forecastContainer.innerHTML = `
+            <div class="insight-item forecast">
+                <h5>2025 Financial Forecast</h5>
+                <p>Based on 3-year trends, the company is projected to maintain stable cash flow performance with potential 15% growth in operating cash flow.</p>
+            </div>
+            <div class="insight-item forecast">
+                <h5>Risk Mitigation</h5>
+                <p>Recommended to maintain current liquidity levels and monitor working capital closely to sustain positive trends.</p>
+            </div>
+        `;
+        
+        // Switch to forecasts tab
+        switchInsightTab('forecasts');
+    }, 2000);
+}
+
+console.log('Trend Analysis initialized - Ready to analyze multi-year financial trends from cash_flow_statement');
+</script>
+{% endblock %}

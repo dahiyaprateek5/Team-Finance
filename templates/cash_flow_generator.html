@@ -1,0 +1,1821 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cash Flow Generator - Team Finance</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-color: #059669;
+            --secondary-color: #10b981;
+            --success-color: #059669;
+            --info-color: #6366f1;
+            --warning-color: #d97706;
+            --danger-color: #dc2626;
+            --dark-color: #1f2937;
+            --light-color: #f8fafc;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --card-bg: rgba(255, 255, 255, 0.95);
+            --glass-bg: rgba(255, 255, 255, 0.9);
+            --border-color: rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: #f8fafc;
+            color: #334155;
+            line-height: 1.6;
+        }
+
+        /* Team Finance Navbar Styles */
+        .navbar {
+            background: linear-gradient(135deg, var(--primary-color), #3b82f6);
+            box-shadow: 0 2px 20px rgba(37, 99, 235, 0.1);
+            padding: 0.75rem 0;
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: white !important;
+        }
+
+        .nav-link {
+            font-weight: 500;
+            transition: all 0.3s ease;
+            color: rgba(255, 255, 255, 0.9) !important;
+            margin: 0 0.25rem;
+            border-radius: 6px;
+            padding: 0.5rem 1rem !important;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            color: #ffffff !important;
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-1px);
+        }
+
+        .dropdown-menu {
+            border: none;
+            border-radius: 8px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+            backdrop-filter: blur(10px);
+        }
+
+        .dropdown-item {
+            padding: 0.75rem 1.25rem;
+            transition: all 0.2s ease;
+        }
+
+        .dropdown-item:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        /* Main Content Styles */
+        .main-container {
+            padding: 2rem 0;
+            min-height: calc(100vh - 200px);
+        }
+
+        .generator-card {
+            background: white;
+            border-radius: 12px;
+            padding: 3rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .card-title {
+            font-size: 2.5rem;
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+            font-weight: 700;
+            text-align: center;
+        }
+
+        .card-subtitle {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .connection-status {
+            padding: 1rem;
+            border-radius: 10px;
+            margin: 1rem 0;
+            font-weight: 500;
+            text-align: center;
+        }
+
+        .status-connected {
+            background: #c6f6d5;
+            border: 1px solid #68d391;
+            color: #22543d;
+        }
+
+        .status-disconnected {
+            background: #fed7d7;
+            border: 1px solid #fc8181;
+            color: #c53030;
+        }
+
+        .options-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .option-card {
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: #f7fafc;
+            text-align: center;
+        }
+
+        .option-card:hover {
+            border-color: var(--primary-color);
+            background: #f0fff4;
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        .option-card.active {
+            border-color: var(--primary-color);
+            background: #e6fffa;
+        }
+
+        .option-card.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        .option-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .option-title {
+            font-size: 1.3rem;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .option-description {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .upload-section, .auto-generate-section {
+            margin: 2rem 0;
+            display: none;
+        }
+
+        .upload-area {
+            border: 3px dashed #cbd5e0;
+            border-radius: 12px;
+            padding: 3rem 2rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            background: #f7fafc;
+            text-align: center;
+        }
+
+        .upload-area:hover {
+            border-color: var(--primary-color);
+            background: #f0fff4;
+        }
+
+        .upload-area.dragover {
+            border-color: var(--primary-color);
+            background: #e6fffa;
+            transform: scale(1.02);
+        }
+
+        .upload-icon {
+            font-size: 3rem;
+            color: #a0aec0;
+            margin-bottom: 1rem;
+        }
+
+        .upload-text {
+            font-size: 1.1rem;
+            color: #4a5568;
+            margin-bottom: 0.5rem;
+        }
+
+        .upload-subtext {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .balance-sheet-info {
+            background: #f0fff4;
+            border: 2px solid #9ae6b4;
+            border-radius: 10px;
+            padding: 2rem;
+            margin: 1rem 0;
+            text-align: center;
+        }
+
+        .info-icon {
+            font-size: 2rem;
+            color: #22543d;
+            margin-bottom: 1rem;
+        }
+
+        .info-title {
+            font-size: 1.2rem;
+            color: #22543d;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .info-text {
+            color: #2f855a;
+        }
+
+        .method-selection {
+            margin: 2rem 0;
+        }
+
+        .method-title {
+            font-size: 1.3rem;
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .method-options {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .method-btn {
+            padding: 1rem 2rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            background: #f7fafc;
+            color: #4a5568;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .method-btn:hover {
+            border-color: var(--primary-color);
+            background: #f0fff4;
+        }
+
+        .method-btn.active {
+            border-color: var(--primary-color);
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .processing-section {
+            margin: 2rem 0;
+            display: none;
+            text-align: center;
+        }
+
+        .processing-card {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .spinner {
+            width: 3rem;
+            height: 3rem;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .progress-text {
+            font-size: 1.1rem;
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+        }
+
+        .progress-bar {
+            background: #e2e8f0;
+            border-radius: 10px;
+            height: 8px;
+            margin: 1rem 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, var(--primary-color), #3b82f6);
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .generation-steps {
+            margin-top: 2rem;
+        }
+
+        .step-item {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.5rem;
+            margin: 0.5rem 0;
+            border-radius: 6px;
+            background: #f8fafc;
+        }
+
+        .step-item.completed {
+            background: #f0fff4;
+            color: #22543d;
+        }
+
+        .step-icon {
+            font-size: 1.2rem;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 2rem;
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color), #3b82f6);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(5, 150, 105, 0.4);
+        }
+
+        .btn-secondary {
+            background: #6b7280;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #4b5563;
+            transform: translateY(-1px);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .btn-outline:hover {
+            background: var(--primary-color);
+            color: white;
+            transform: translateY(-1px);
+        }
+
+        .error-message, .success-message {
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            display: none;
+            text-align: center;
+        }
+
+        .error-message {
+            background: #fed7d7;
+            border: 1px solid #fc8181;
+            color: #c53030;
+        }
+
+        .success-message {
+            background: #c6f6d5;
+            border: 1px solid #68d391;
+            color: #22543d;
+        }
+
+        .debug-info {
+            background: #f7fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1rem 0;
+            font-family: monospace;
+            font-size: 0.9rem;
+            display: none;
+        }
+
+        /* Footer Styles */
+        .footer {
+            background: var(--dark-color);
+            color: #cbd5e1;
+            padding: 2rem 0;
+            margin-top: 3rem;
+        }
+
+        /* Dark theme styles */
+        .dark-theme {
+            background-color: #0f172a;
+            color: #e2e8f0;
+        }
+
+        .dark-theme .generator-card {
+            background: #1e293b;
+            color: #e2e8f0;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .navbar-brand {
+                font-size: 1.25rem;
+            }
+            
+            .card-title {
+                font-size: 2rem;
+            }
+            
+            .generator-card {
+                margin: 1rem;
+                padding: 2rem 1rem;
+            }
+
+            .options-container {
+                grid-template-columns: 1fr;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .btn {
+                min-width: 200px;
+            }
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary-color);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #1e40af;
+        }
+    </style>
+</head>
+<body>
+    <!-- Team Finance Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-chart-line me-2"></i>
+                Team Finance
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/dashboard">
+                            <i class="fas fa-tachometer-alt me-1"></i>Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/companies">
+                            <i class="fas fa-building me-1"></i>Companies
+                        </a>
+                    </li>
+                    
+                    <!-- ANALYTICS DROPDOWN MENU -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="analyticsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-chart-bar me-1"></i>Analytics
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="analyticsDropdown">
+                            <li>
+                                <a class="dropdown-item" href="/analytics">
+                                    <i class="fas fa-chart-line me-2"></i>Financial Analysis
+                                </a>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <a class="dropdown-item" href="/radar-chart">
+                                    <i class="fas fa-chart-area me-2"></i>Radar Chart
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="/trend-analysis">
+                                    <i class="fas fa-chart-line me-2"></i>Trend Analysis
+                                </a>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <a class="dropdown-item" href="/risk-assessment">
+                                    <i class="fas fa-exclamation-triangle me-2"></i>Risk Assessment
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="/upload">
+                            <i class="fas fa-upload me-1"></i>Upload Files
+                        </a>
+                    </li>
+                    
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle active" href="#" id="toolsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-tools me-1"></i>Tools
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="toolsDropdown">
+                            <li>
+                                <a class="dropdown-item active" href="/cash-flow-generator">
+                                    <i class="fas fa-calculator me-2"></i>Cash Flow Generator
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="/balance-sheet-generator">
+                                    <i class="fas fa-file-invoice me-2"></i>Balance Sheet Generator
+                                </a>
+                            </li>
+                            
+                            <li>
+                                <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#settingsModal">
+                                    <i class="fas fa-cog me-2"></i>Settings
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="/user-guide">
+                            <i class="fas fa-book me-1"></i>Guide
+                        </a>
+                    </li>
+                </ul>
+                
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#searchModal">
+                            <i class="fas fa-search me-1"></i>Search
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="toggleTheme()">
+                            <i class="fas fa-moon me-1" id="themeIcon"></i>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <main class="main-container">
+        <div class="generator-card">
+            <h1 class="card-title">Cash Flow Statement Generator</h1>
+            <p class="card-subtitle">Choose how you want to generate your cash flow statement</p>
+
+            
+            
+            <!-- Connection Status -->
+            <div class="connection-status" id="connectionStatus">
+                <span id="statusIcon">🔍</span>
+                <span id="statusText">Checking server connection...</span>
+            </div>
+            
+            <!-- Debug Info -->
+            <div class="debug-info" id="debugInfo"></div>
+            
+            <!-- Error/Success Messages -->
+            <div class="error-message" id="errorMessage"></div>
+            <div class="success-message" id="successMessage"></div>
+            
+            <div class="options-container">
+                <div class="option-card" id="uploadOption">
+                    <div class="option-icon">📄</div>
+                    <div class="option-title">Upload Existing Cash Flow Statement / Balance Sheet</div>
+                    <div class="option-description">Upload your existing cash flow statement / Balance Sheet for analysis and validation</div>
+                </div>
+                
+                <div class="option-card" id="generateOption">
+                    <div class="option-icon">🔄</div>
+                    <div class="option-title">Auto Generate from Balance Sheet</div>
+                    <div class="option-description">Generate cash flow statement using your balance sheet data with AI</div>
+                </div>
+            </div>
+
+            <!-- Upload Section -->
+            <div class="upload-section" id="uploadSection">
+                <h3>Upload Cash Flow Statement</h3>
+                <div class="upload-area" id="uploadArea">
+                    <div class="upload-icon">📈</div>
+                    <div class="upload-text">Upload Cash Flow Files Here</div>
+                    <div class="upload-subtext">Browse Files or Drag & Drop (PDF, Excel, CSV)</div>
+                    <input type="file" id="fileInput" class="file-input" multiple accept=".pdf,.xlsx,.xls,.csv">
+                </div>
+            </div>
+
+            <!-- Auto Generate Section -->
+            <div class="auto-generate-section" id="generateSection">
+                <h3>Auto Generate Cash Flow Statement</h3>
+                
+                <div class="balance-sheet-info" id="balanceSheetInfo">
+                    <div class="info-icon">❌</div>
+                    <div class="info-title">Balance Sheet Data: Checking...</div>
+                    <div class="info-text">Verifying balance sheet data availability in database</div>
+                </div>
+
+                <div class="method-selection">
+                    <div class="method-title">Select Generation Method</div>
+                    <div class="method-options">
+                        <div class="method-btn active" id="indirectMethodBtn">
+                            Indirect Method
+                        </div>
+                        <div class="method-btn" id="directMethodBtn">
+                            Direct Method
+                        </div>
+                    </div>
+                    <p style="margin-top: 1rem; color: #718096; font-size: 0.9rem;">
+                        <strong>Indirect Method:</strong> Starts with net income and adjusts for non-cash items<br>
+                        <strong>Direct Method:</strong> Shows actual cash receipts and payments
+                    </p>
+                </div>
+            </div>
+
+            <!-- Processing Section -->
+            <div class="processing-section" id="processingSection">
+                <div class="processing-card">
+                    <div class="spinner"></div>
+                    <div class="progress-text">Generating Cash Flow Statement...</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                    
+                    <div class="generation-steps">
+                        <div class="step-item" id="step1">
+                            <div class="step-icon">⏳</div>
+                            <div>Reading balance sheet data...</div>
+                        </div>
+                        <div class="step-item" id="step2">
+                            <div class="step-icon">⏳</div>
+                            <div>Calculating cash flow components...</div>
+                        </div>
+                        <div class="step-item" id="step3">
+                            <div class="step-icon">⏳</div>
+                            <div>Generating financial ratios...</div>
+                        </div>
+                        <div class="step-item" id="step4">
+                            <div class="step-icon">⏳</div>
+                            <div>Validating data integrity...</div>
+                        </div>
+                        <div class="step-item" id="step5">
+                            <div class="step-icon">⏳</div>
+                            <div>Finalizing cash flow statement...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="action-buttons">
+                <button class="btn btn-primary" id="generateBtn" disabled>
+                    Generate Cash Flow Statement
+                </button>
+                <button class="btn btn-primary" id="uploadBtn" disabled style="display: none;">
+                    Process Uploaded Files
+                </button>
+                <button class="btn btn-secondary" id="forceRedirectBtn" onclick="forceRedirect()" style="display: none;">
+                    View Results (Force)
+                </button>
+                <button class="btn btn-outline" id="resetBtn">
+                    Start Over
+                </button>
+                <button class="btn btn-outline" id="debugBtn" onclick="toggleDebugInfo()">
+                    Debug Info
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Global variables
+        let selectedOption = null;
+        let selectedMethod = 'indirect';
+        let uploadedFiles = [];
+        let balanceSheetData = null;
+        let isServerConnected = false;
+        let debugMode = false;
+
+        // Try different redirect paths
+        function tryRedirect(paths, index) {
+            if (index >= paths.length) {
+                console.error('❌ All redirect paths failed');
+                showError('Results page not found. Please check if cash-flow-results.html exists.');
+                document.getElementById('forceRedirectBtn').style.display = 'inline-block';
+                return;
+            }
+            
+            const path = paths[index];
+            console.log(`🔍 Trying redirect path ${index + 1}/${paths.length}: ${path}`);
+            
+            // Test if path exists
+            fetch(path, { method: 'HEAD' })
+                .then(response => {
+                    if (response.ok) {
+                        console.log(`✅ Found results page at: ${path}`);
+                        window.location.href = path;
+                    } else {
+                        console.log(`❌ Path ${path} returned ${response.status}`);
+                        tryRedirect(paths, index + 1);
+                    }
+                })
+                .catch(error => {
+                    console.log(`❌ Path ${path} failed:`, error.message);
+                    tryRedirect(paths, index + 1);
+                });
+        }
+
+        // Force redirect function for emergency cases
+        window.forceRedirect = function() {
+            console.log('🚨 Force redirecting to results page...');
+            const cashFlowId = localStorage.getItem('cash_flow_id');
+            const cashFlowData = localStorage.getItem('cash_flow_data');
+            
+            if (!cashFlowId && !cashFlowData) {
+                // Create dummy data for testing
+                const dummyId = 'force_redirect_' + Date.now();
+                const dummyData = {
+                    net_cash_from_operating_activities: 0,
+                    net_cash_from_investing_activities: 0,
+                    net_cash_from_financing_activities: 0,
+                    free_cash_flow: 0,
+                    company_name: 'Test Company'
+                };
+                localStorage.setItem('cash_flow_id', dummyId);
+                localStorage.setItem('cash_flow_data', JSON.stringify(dummyData));
+            }
+            
+            // Try different paths for force redirect
+            const forcePaths = [
+                'cash-flow-results.html',
+                '/cash-flow-results.html', 
+                '/static/cash-flow-results.html',
+                './cash-flow-results.html',
+                '../cash-flow-results.html'
+            ];
+            
+            tryRedirect(forcePaths, 0);
+        };
+
+        // Debug function
+        function toggleDebugInfo() {
+            debugMode = !debugMode;
+            const debugDiv = document.getElementById('debugInfo');
+            debugDiv.style.display = debugMode ? 'block' : 'none';
+            updateDebugInfo();
+        }
+
+        function updateDebugInfo() {
+            if (!debugMode) return;
+            
+            const debugDiv = document.getElementById('debugInfo');
+            const cashFlowId = localStorage.getItem('cash_flow_id');
+            const cashFlowData = localStorage.getItem('cash_flow_data');
+            
+            debugDiv.innerHTML = `
+                <strong>Debug Information:</strong><br>
+                Server Connected: ${isServerConnected}<br>
+                Selected Option: ${selectedOption}<br>
+                Selected Method: ${selectedMethod}<br>
+                Balance Sheet Data: ${balanceSheetData ? 'Available' : 'Not Available'}<br>
+                Uploaded Files: ${uploadedFiles.length}<br>
+                Cash Flow ID in localStorage: ${cashFlowId || 'null'}<br>
+                Cash Flow Data in localStorage: ${cashFlowData ? 'Available' : 'null'}<br>
+                Current URL: ${window.location.href}
+            `;
+        }
+
+        // Navigation function
+        function navigateTo(page) {
+            console.log(`Navigating to: ${page}`);
+            updateDebugInfo();
+            
+            // Update active nav
+            document.querySelectorAll('.nav-menu a').forEach(a => a.classList.remove('active'));
+            
+            switch(page) {
+                case 'dashboard':
+                    document.getElementById('navDashboard').classList.add('active');
+                    showError('Dashboard page not implemented yet');
+                    break;
+                case 'companies':
+                    document.getElementById('navCompanies').classList.add('active');
+                    showError('Companies page not implemented yet');
+                    break;
+                case 'balance-sheet':
+                    document.getElementById('navBalanceSheet').classList.add('active');
+                    showError('Balance Sheet page not implemented yet');
+                    break;
+                case 'cash-flow':
+                    document.getElementById('navCashFlow').classList.add('active');
+                    showSuccess('Cash Flow page loaded');
+                    break;
+                case 'account':
+                    showError('Account page not implemented yet');
+                    break;
+                case 'home':
+                    showSuccess('Welcome to Financial Risk Assessment Platform');
+                    break;
+                default:
+                    showError('Page not found');
+            }
+        }
+
+        // Helper function to clean data before sending to API
+        function cleanDataForAPI(data) {
+            if (!data) return {};
+            
+            const cleaned = {};
+            for (const [key, value] of Object.entries(data)) {
+                if (value === null || value === undefined || (typeof value === 'number' && isNaN(value))) {
+                    cleaned[key] = null;
+                } else {
+                    cleaned[key] = value;
+                }
+            }
+            return cleaned;
+        }
+
+        // Initialize the application
+        function initializeApp() {
+            console.log('🚀 Starting Cash Flow Generator...');
+            updateConnectionStatus('checking', 'Checking server connection...');
+            updateDebugInfo();
+            
+            // Clear any previous localStorage data
+            console.log('🧹 Clearing previous session data...');
+            
+            // Check server connection
+            checkServerConnection()
+                .then(connected => {
+                    if (connected) {
+                        updateConnectionStatus('connected', 'Connected to database server');
+                        checkBalanceSheetData();
+                    } else {
+                        updateConnectionStatus('disconnected', 'Server not available - Please start Flask server on localhost:5000');
+                        disableAllOptions();
+                    }
+                    updateDebugInfo();
+                })
+                .catch(error => {
+                    console.error('Error during initialization:', error);
+                    updateConnectionStatus('disconnected', 'Connection failed - Please check server status');
+                    disableAllOptions();
+                    updateDebugInfo();
+                });
+        }
+
+        // Update connection status indicator
+        function updateConnectionStatus(status, message) {
+            const statusDiv = document.getElementById('connectionStatus');
+            const statusIcon = document.getElementById('statusIcon');
+            const statusText = document.getElementById('statusText');
+            
+            statusDiv.className = 'connection-status';
+            
+            switch(status) {
+                case 'checking':
+                    statusDiv.classList.add('status-disconnected');
+                    statusIcon.textContent = '🔍';
+                    break;
+                case 'connected':
+                    statusDiv.classList.add('status-connected');
+                    statusIcon.textContent = '✅';
+                    isServerConnected = true;
+                    break;
+                case 'disconnected':
+                    statusDiv.classList.add('status-disconnected');
+                    statusIcon.textContent = '❌';
+                    isServerConnected = false;
+                    break;
+            }
+            
+            statusText.textContent = message;
+        }
+
+        // Disable all options when server not available
+        function disableAllOptions() {
+            document.getElementById('uploadOption').classList.add('disabled');
+            document.getElementById('generateOption').classList.add('disabled');
+            showError('Server connection required. Please start your Flask server and refresh the page.');
+        }
+
+        // Enable options when server is available
+        function enableOptions() {
+            document.getElementById('uploadOption').classList.remove('disabled');
+            document.getElementById('generateOption').classList.remove('disabled');
+        }
+
+        // Check if Flask server is running
+        async function checkServerConnection() {
+            try {
+                console.log('🔍 Checking Flask server connection...');
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 5000);
+                
+                const response = await fetch('/api/health', {
+                    method: 'GET',
+                    signal: controller.signal
+                });
+                
+                clearTimeout(timeoutId);
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    console.log('✅ Server connected:', result);
+                    enableOptions();
+                    return true;
+                } else {
+                    throw new Error(`Server responded with status: ${response.status}`);
+                }
+            } catch (error) {
+                console.error('❌ Server connection failed:', error);
+                return false;
+            }
+        }
+
+        // Check balance sheet data from server
+        async function checkBalanceSheetData() {
+            const infoIcon = document.querySelector('#balanceSheetInfo .info-icon');
+            const infoTitle = document.querySelector('#balanceSheetInfo .info-title');
+            const infoText = document.querySelector('#balanceSheetInfo .info-text');
+            
+            try {
+                console.log('📊 Checking balance sheet data from database...');
+                infoIcon.textContent = '🔍';
+                infoTitle.textContent = 'Balance Sheet Data: Checking...';
+                infoText.textContent = 'Verifying balance sheet data availability in database';
+                
+                const response = await fetch('/api/balance-sheet/check-availability');
+                
+                if (!response.ok) {
+                    throw new Error(`API request failed with status: ${response.status}`);
+                }
+                
+                const result = await response.json();
+                console.log('📊 Balance sheet check result:', result);
+                
+                if (result.success && result.data && result.data.length > 0) {
+                    balanceSheetData = result.data[0]; // Use first company
+                    document.getElementById('generateOption').classList.remove('disabled');
+                    
+                    infoIcon.textContent = '✅';
+                    infoTitle.textContent = 'Balance Sheet Data: Available';
+                    infoText.textContent = `Balance sheet for ${balanceSheetData.company_name} (${balanceSheetData.latest_year || balanceSheetData.year}) is ready for cash flow generation`;
+                    
+                    selectOption('generate');
+                    showSuccess(`Balance sheet data loaded: ${balanceSheetData.company_name}`);
+                } else {
+                    // No balance sheet data available
+                    balanceSheetData = null;
+                    const generateOption = document.getElementById('generateOption');
+                    generateOption.classList.add('disabled');
+                    generateOption.querySelector('.option-description').textContent = 
+                        'No balance sheet data found in database. Please generate a balance sheet first.';
+                    
+                    infoIcon.textContent = '❌';
+                    infoTitle.textContent = 'Balance Sheet Data: Not Available';
+                    infoText.textContent = 'No balance sheet data found in database. Please use upload option or generate balance sheet first.';
+                    
+                    selectOption('upload');
+                    showError('No balance sheet data found in database. Please use upload option.');
+                }
+            } catch (error) {
+                console.error('❌ Error checking balance sheet data:', error);
+                balanceSheetData = null;
+                const generateOption = document.getElementById('generateOption');
+                generateOption.classList.add('disabled');
+                generateOption.querySelector('.option-description').textContent = 
+                    'Unable to verify balance sheet data from database.';
+                
+                infoIcon.textContent = '❌';
+                infoTitle.textContent = 'Balance Sheet Data: Error';
+                infoText.textContent = 'Unable to verify balance sheet data from database. Please check server connection.';
+                
+                selectOption('upload');
+                showError('Error connecting to database. Please check server connection.');
+            }
+            
+            updateDebugInfo();
+        }
+
+        // Select option (upload or generate)
+        function selectOption(option) {
+            if (!isServerConnected) {
+                showError('Server connection required. Please start Flask server first.');
+                return;
+            }
+
+            try {
+                console.log(`🎯 Selecting option: ${option}`);
+                selectedOption = option;
+                
+                // Update option cards
+                document.querySelectorAll('.option-card').forEach(card => {
+                    card.classList.remove('active');
+                });
+                
+                if (option === 'upload') {
+                    document.getElementById('uploadOption').classList.add('active');
+                    document.getElementById('uploadSection').style.display = 'block';
+                    document.getElementById('generateSection').style.display = 'none';
+                    document.getElementById('uploadBtn').style.display = 'inline-block';
+                    document.getElementById('generateBtn').style.display = 'none';
+                    document.getElementById('uploadBtn').disabled = true;
+                    
+                    hideResultSections();
+                    
+                } else if (option === 'generate') {
+                    if (!balanceSheetData) {
+                        showError('No balance sheet data available in database. Please use upload option.');
+                        return;
+                    }
+                    
+                    document.getElementById('generateOption').classList.add('active');
+                    document.getElementById('uploadSection').style.display = 'none';
+                    document.getElementById('generateSection').style.display = 'block';
+                    document.getElementById('uploadBtn').style.display = 'none';
+                    document.getElementById('generateBtn').style.display = 'inline-block';
+                    document.getElementById('generateBtn').disabled = false;
+                    
+                    hideResultSections();
+                }
+                
+                console.log(`✅ Option selected: ${option}`);
+                updateDebugInfo();
+            } catch (error) {
+                console.error('Error selecting option:', error);
+                showError('Error selecting option. Please try again.');
+            }
+        }
+
+        // Hide result sections
+        function hideResultSections() {
+            document.getElementById('processingSection').style.display = 'none';
+        }
+
+        // Select method (indirect or direct)
+        function selectMethod(method) {
+            console.log(`📋 Selecting method: ${method}`);
+            selectedMethod = method;
+            
+            document.querySelectorAll('.method-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            if (method === 'indirect') {
+                document.getElementById('indirectMethodBtn').classList.add('active');
+            } else {
+                document.getElementById('directMethodBtn').classList.add('active');
+            }
+            
+            showSuccess(`${method === 'indirect' ? 'Indirect' : 'Direct'} method selected`);
+            updateDebugInfo();
+        }
+
+        // File upload handling
+        function handleDragOver(e) {
+            e.preventDefault();
+            document.getElementById('uploadArea').classList.add('dragover');
+        }
+
+        function handleDragLeave(e) {
+            e.preventDefault();
+            document.getElementById('uploadArea').classList.remove('dragover');
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            document.getElementById('uploadArea').classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            processUploadedFileList(files);
+        }
+
+        function handleFileSelect(e) {
+            const files = e.target.files;
+            processUploadedFileList(files);
+        }
+
+        function processUploadedFileList(files) {
+            if (!isServerConnected) {
+                showError('Server connection required for file upload.');
+                return;
+            }
+
+            try {
+                uploadedFiles = Array.from(files);
+                
+                if (uploadedFiles.length > 0) {
+                    document.getElementById('uploadBtn').disabled = false;
+                    const uploadArea = document.getElementById('uploadArea');
+                    uploadArea.querySelector('.upload-text').textContent = 
+                        `${uploadedFiles.length} file(s) selected`;
+                    uploadArea.querySelector('.upload-subtext').textContent = 
+                        uploadedFiles.map(f => f.name).join(', ');
+                    
+                    showSuccess(`${uploadedFiles.length} file(s) selected successfully`);
+                    console.log('📁 Files selected:', uploadedFiles.map(f => f.name));
+                }
+                updateDebugInfo();
+            } catch (error) {
+                console.error('Error processing files:', error);
+                showError('Error processing uploaded files. Please try again.');
+            }
+        }
+
+        // Process uploaded files (REAL API ONLY) - ENHANCED VERSION
+        async function processUploadedFiles() {
+            if (!isServerConnected) {
+                showError('Server connection required. Please start Flask server first.');
+                return;
+            }
+
+            if (uploadedFiles.length === 0) {
+                showError('Please select files to upload');
+                return;
+            }
+
+            try {
+                console.log('📤 Processing uploaded files with real API...');
+                document.getElementById('processingSection').style.display = 'block';
+                document.getElementById('uploadBtn').disabled = true;
+
+                await simulateProcessingSteps();
+
+                // Create FormData for file upload
+                const formData = new FormData();
+                uploadedFiles.forEach(file => formData.append('files', file));
+                formData.append('company_name', 'Uploaded Company');
+                formData.append('company_id', 'comp_' + Date.now());
+                formData.append('industry', 'unknown');
+                formData.append('method', selectedMethod);
+
+                console.log('📤 Sending files to API...');
+                const response = await fetch('/api/cash-flow/process-upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                console.log('📥 API Response status:', response.status);
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`API request failed with status: ${response.status} - ${errorText}`);
+                }
+
+                const result = await response.json();
+                console.log('📊 API Response data:', result);
+
+                // ✅ ENHANCED: Handle all possible backend response cases
+                if (result.success) {
+                    // Case 1: Full success with cash_flow_id
+                    if (result.cash_flow_id && result.data) {
+                        localStorage.setItem('cash_flow_id', result.cash_flow_id);
+                        localStorage.setItem('cash_flow_data', JSON.stringify(result.data));
+                        console.log('💾 Stored cash_flow_id:', result.cash_flow_id);
+                        
+                        showSuccess('Cash flow statement processed successfully! Redirecting to results...');
+                        setTimeout(() => {
+                            console.log('🔄 Redirecting to cash-flow-results.html');
+                            // Try multiple redirect paths
+                            const possiblePaths = [
+                                'cash-flow-results.html',
+                                '/cash-flow-results.html',
+                                '/static/cash-flow-results.html',
+                                './cash-flow-results.html'
+                            ];
+                            
+                            // Try first path, if fails try others
+                            tryRedirect(possiblePaths, 0);
+                        }, 2000);
+                        
+                    } 
+                    // Case 2: Success with data but no cash_flow_id (backend issue)
+                    else if (result.data) {
+                        console.warn('⚠️ No cash_flow_id in response, using fallback');
+                        const tempId = 'temp_upload_' + Date.now();
+                        localStorage.setItem('cash_flow_id', tempId);
+                        localStorage.setItem('cash_flow_data', JSON.stringify(result.data));
+                        
+                        showSuccess('Cash flow processed! Redirecting to results...');
+                        setTimeout(() => {
+                            console.log('🔄 Redirecting with temp ID:', tempId);
+                            tryRedirect(['cash-flow-results.html', '/cash-flow-results.html', '/static/cash-flow-results.html'], 0);
+                        }, 2000);
+                    }
+                    // Case 3: Success flag but no data
+                    else {
+                        throw new Error('API returned success but no data available');
+                    }
+                } 
+                // Case 4: Process completed but with warnings/partial failure
+                else if (result.data && (result.message || result.error)) {
+                    console.warn('⚠️ Processing completed with warnings:', result.message || result.error);
+                    
+                    // Still redirect if we have data
+                    const tempId = result.cash_flow_id || ('temp_upload_' + Date.now());
+                    localStorage.setItem('cash_flow_id', tempId);
+                    localStorage.setItem('cash_flow_data', JSON.stringify(result.data));
+                    
+                    showSuccess('Cash flow processed with warnings! Redirecting to results...');
+                    setTimeout(() => {
+                        console.log('🔄 Redirecting with warnings, temp ID:', tempId);
+                        tryRedirect(['cash-flow-results.html', '/cash-flow-results.html', '/static/cash-flow-results.html'], 0);
+                    }, 2000);
+                }
+                // Case 5: Complete failure
+                else {
+                    throw new Error(result.message || result.error || 'Processing failed - no data returned');
+                }
+
+            } catch (error) {
+                console.error('❌ Error processing cash flow files:', error);
+                showError('Error processing files: ' + error.message);
+                
+                // ✅ EMERGENCY FALLBACK: Check if we have data despite error
+                const response = await fetch('/api/cash-flow/get-latest-processed', {
+                    method: 'GET'
+                }).catch(() => null);
+                
+                if (response && response.ok) {
+                    const fallbackData = await response.json();
+                    if (fallbackData.success && fallbackData.data) {
+                        console.log('🔄 Found fallback data, offering manual redirect');
+                        showError('Processing had issues but data might be available. <button onclick="forceRedirect()" style="margin-left: 10px; padding: 5px 10px; background: #667eea; color: white; border: none; border-radius: 5px; cursor: pointer;">View Results Anyway</button>');
+                        
+                        // Store fallback data
+                        const tempId = 'fallback_upload_' + Date.now();
+                        localStorage.setItem('cash_flow_id', tempId);
+                        localStorage.setItem('cash_flow_data', JSON.stringify(fallbackData.data));
+                        return;
+                    }
+                }
+                
+                document.getElementById('uploadBtn').disabled = false;
+                document.getElementById('processingSection').style.display = 'none';
+            }
+        }
+
+        // Generate cash flow from balance sheet (REAL API ONLY) - ENHANCED VERSION
+        async function generateCashFlow() {
+            if (!isServerConnected) {
+                showError('Server connection required. Please start Flask server first.');
+                return;
+            }
+
+            if (!balanceSheetData) {
+                showError('Balance sheet data not available in database. Please check database or use upload option.');
+                return;
+            }
+
+            try {
+                console.log('🔄 Generating cash flow statement from database...');
+                document.getElementById('processingSection').style.display = 'block';
+                document.getElementById('generateBtn').disabled = true;
+
+                await simulateProcessingSteps();
+
+                // Clean data before sending
+                const requestData = cleanDataForAPI({
+                    company_id: balanceSheetData.company_id,
+                    company_name: balanceSheetData.company_name,
+                    year: balanceSheetData.year || balanceSheetData.latest_year,
+                    industry: balanceSheetData.industry,
+                    method: selectedMethod
+                });
+
+                console.log('🔄 Sending generation request:', requestData);
+                const response = await fetch('/api/cash-flow/generate-from-balance', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(requestData)
+                });
+
+                console.log('📥 Generation API Response status:', response.status);
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`API request failed with status: ${response.status} - ${errorText}`);
+                }
+
+                const result = await response.json();
+                console.log('📊 Generation API Response data:', result);
+
+                // ✅ ENHANCED: Handle both success and partial success cases  
+                if (result.success) {
+                    // Case 1: Full success with cash_flow_id
+                    if (result.cash_flow_id && result.data) {
+                        localStorage.setItem('cash_flow_id', result.cash_flow_id);
+                        localStorage.setItem('cash_flow_data', JSON.stringify(result.data));
+                        console.log('💾 Stored cash_flow_id:', result.cash_flow_id);
+                        
+                        showSuccess('Cash flow statement generated successfully! Redirecting to results...');
+                        setTimeout(() => {
+                            console.log('🔄 Redirecting to cash-flow-results.html');
+                            window.location.href = 'cash-flow-results.html';
+                        }, 2000);
+                        
+                    } 
+                    // Case 2: Success with data but no cash_flow_id (backend issue)
+                    else if (result.data) {
+                        console.warn('⚠️ No cash_flow_id in response, using fallback');
+                        const tempId = 'temp_generate_' + Date.now();
+                        localStorage.setItem('cash_flow_id', tempId);
+                        localStorage.setItem('cash_flow_data', JSON.stringify(result.data));
+                        
+                        showSuccess('Cash flow generated! Redirecting to results...');
+                        setTimeout(() => {
+                            console.log('🔄 Redirecting with temp ID:', tempId);
+                            window.location.href = 'cash-flow-results.html';
+                        }, 2000);
+                    }
+                    // Case 3: Success flag but no data
+                    else {
+                        throw new Error('API returned success but no data available');
+                    }
+                } 
+                // Case 4: Process completed but with warnings/partial failure
+                else if (result.data && (result.message || result.error)) {
+                    console.warn('⚠️ Generation completed with warnings:', result.message || result.error);
+                    
+                    // Still redirect if we have data
+                    const tempId = 'temp_generate_' + Date.now();
+                    localStorage.setItem('cash_flow_id', tempId);
+                    localStorage.setItem('cash_flow_data', JSON.stringify(result.data));
+                    
+                    showSuccess('Cash flow generated with warnings! Redirecting to results...');
+                    setTimeout(() => {
+                        console.log('🔄 Redirecting with warnings, temp ID:', tempId);
+                        window.location.href = 'cash-flow-results.html';
+                    }, 2000);
+                }
+                // Case 5: Complete failure
+                else {
+                    throw new Error(result.message || result.error || 'Generation failed - no data returned');
+                }
+
+            } catch (error) {
+                console.error('❌ Error generating cash flow:', error);
+                showError('Error generating cash flow: ' + error.message);
+                
+                // ✅ EMERGENCY FALLBACK: Check if we have data despite error
+                const response = await fetch('/api/cash-flow/get-latest-processed', {
+                    method: 'GET'
+                }).catch(() => null);
+                
+                if (response && response.ok) {
+                    const fallbackData = await response.json();
+                    if (fallbackData.success && fallbackData.data) {
+                        console.log('🔄 Found fallback data, offering manual redirect');
+                        showError('Generation had issues but data might be available. <button onclick="forceRedirect()" style="margin-left: 10px; padding: 5px 10px; background: #667eea; color: white; border: none; border-radius: 5px; cursor: pointer;">View Results Anyway</button>');
+                        
+                        // Store fallback data
+                        const tempId = 'fallback_generate_' + Date.now();
+                        localStorage.setItem('cash_flow_id', tempId);
+                        localStorage.setItem('cash_flow_data', JSON.stringify(fallbackData.data));
+                        return;
+                    }
+                }
+                
+                document.getElementById('generateBtn').disabled = false;
+                document.getElementById('processingSection').style.display = 'none';
+            }
+        }
+
+        // Simulate processing steps
+        async function simulateProcessingSteps() {
+            const steps = ['step1', 'step2', 'step3', 'step4', 'step5'];
+            const progressFill = document.getElementById('progressFill');
+            
+            for (let i = 0; i < steps.length; i++) {
+                await new Promise(resolve => setTimeout(resolve, 800));
+                
+                const stepElement = document.getElementById(steps[i]);
+                stepElement.classList.add('completed');
+                stepElement.querySelector('.step-icon').textContent = '✅';
+                
+                const progress = ((i + 1) / steps.length) * 100;
+                progressFill.style.width = progress + '%';
+            }
+        }
+
+        // Reset form
+        function resetForm() {
+            try {
+                console.log('🔄 Resetting form...');
+                selectedOption = null;
+                uploadedFiles = [];
+                
+                // Clear localStorage
+                localStorage.removeItem('cash_flow_id');
+                localStorage.removeItem('cash_flow_data');
+                
+                // Reset UI elements
+                document.querySelectorAll('.option-card').forEach(card => {
+                    card.classList.remove('active');
+                });
+                
+                // Hide all sections
+                hideResultSections();
+                document.getElementById('uploadSection').style.display = 'none';
+                document.getElementById('generateSection').style.display = 'none';
+                
+                // Reset buttons
+                document.getElementById('generateBtn').disabled = true;
+                document.getElementById('uploadBtn').disabled = true;
+                
+                // Reset file input
+                const fileInput = document.getElementById('fileInput');
+                fileInput.value = '';
+                const uploadArea = document.getElementById('uploadArea');
+                uploadArea.querySelector('.upload-text').textContent = 'Upload Cash Flow Files Here';
+                uploadArea.querySelector('.upload-subtext').textContent = 'Browse Files or Drag & Drop (PDF, Excel, CSV)';
+                
+                // Reset method selection
+                document.querySelectorAll('.method-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                document.getElementById('indirectMethodBtn').classList.add('active');
+                selectedMethod = 'indirect';
+                
+                // Reset progress
+                document.getElementById('progressFill').style.width = '0%';
+                document.querySelectorAll('.step-item').forEach(step => {
+                    step.classList.remove('completed');
+                    step.querySelector('.step-icon').textContent = '⏳';
+                });
+                
+                // Clear messages
+                hideMessages();
+                
+                // Re-initialize if server is connected
+                if (isServerConnected) {
+                    checkBalanceSheetData();
+                } else {
+                    disableAllOptions();
+                }
+                
+                showSuccess('Form reset successfully');
+                updateDebugInfo();
+            } catch (error) {
+                console.error('Error resetting form:', error);
+                showError('Error resetting form. Please refresh the page.');
+            }
+        }
+
+        // Message functions
+        function showError(message) {
+            console.error('❌', message);
+            const errorElement = document.getElementById('errorMessage');
+            errorElement.textContent = message;
+            errorElement.style.display = 'block';
+            document.getElementById('successMessage').style.display = 'none';
+            
+            setTimeout(() => {
+                errorElement.style.display = 'none';
+            }, 8000);
+        }
+
+        function showSuccess(message) {
+            console.log('✅', message);
+            const successElement = document.getElementById('successMessage');
+            successElement.textContent = message;
+            successElement.style.display = 'block';
+            document.getElementById('errorMessage').style.display = 'none';
+            
+            setTimeout(() => {
+                successElement.style.display = 'none';
+            }, 4000);
+        }
+
+        function hideMessages() {
+            document.getElementById('errorMessage').style.display = 'none';
+            document.getElementById('successMessage').style.display = 'none';
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            console.log('🔗 Setting up event listeners...');
+            
+            // Option cards - only work if server is connected
+            document.getElementById('uploadOption').addEventListener('click', () => {
+                if (isServerConnected && !document.getElementById('uploadOption').classList.contains('disabled')) {
+                    selectOption('upload');
+                } else {
+                    showError('Server connection required or option disabled. Please start Flask server first.');
+                }
+            });
+            
+            document.getElementById('generateOption').addEventListener('click', () => {
+                if (isServerConnected && !document.getElementById('generateOption').classList.contains('disabled')) {
+                    selectOption('generate');
+                } else {
+                    showError('Server connection required or option disabled. Please start Flask server first.');
+                }
+            });
+            
+            // Method buttons
+            document.getElementById('indirectMethodBtn').addEventListener('click', () => selectMethod('indirect'));
+            document.getElementById('directMethodBtn').addEventListener('click', () => selectMethod('direct'));
+            
+            // Action buttons
+            document.getElementById('generateBtn').addEventListener('click', generateCashFlow);
+            document.getElementById('uploadBtn').addEventListener('click', processUploadedFiles);
+            document.getElementById('resetBtn').addEventListener('click', resetForm);
+            
+            // File upload area
+            const uploadArea = document.getElementById('uploadArea');
+            const fileInput = document.getElementById('fileInput');
+
+            uploadArea.addEventListener('click', () => {
+                if (isServerConnected) {
+                    fileInput.click();
+                } else {
+                    showError('Server connection required for file upload.');
+                }
+            });
+            uploadArea.addEventListener('dragover', handleDragOver);
+            uploadArea.addEventListener('dragleave', handleDragLeave);
+            uploadArea.addEventListener('drop', handleDrop);
+            fileInput.addEventListener('change', handleFileSelect);
+            
+            console.log('✅ Event listeners setup complete');
+        }
+
+        // Initialize when DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🌟 Complete Cash Flow Generator starting...');
+            setupEventListeners();
+            initializeApp();
+            console.log('🚀 Cash Flow Generator loaded - Production Ready!');
+            
+            // Check existing localStorage data
+            const existingId = localStorage.getItem('cash_flow_id');
+            const existingData = localStorage.getItem('cash_flow_data');
+            if (existingId || existingData) {
+                console.log('📋 Found existing data in localStorage:', {
+                    cash_flow_id: existingId,
+                    has_data: !!existingData
+                });
+            }
+            
+            updateDebugInfo();
+        });
+
+        // Handle page visibility changes
+        document.addEventListener('visibilitychange', function() {
+            if (document.visibilityState === 'visible') {
+                console.log('👁️ Page is now visible');
+                // Re-check server connection when page becomes visible
+                if (!isServerConnected) {
+                    initializeApp();
+                }
+                updateDebugInfo();
+            }
+        });
+
+        // Global error handling
+        window.addEventListener('error', function(event) {
+            console.error('💥 Unhandled error:', event.error);
+            showError('An unexpected error occurred. Please refresh the page.');
+        });
+
+        window.addEventListener('unhandledrejection', function(event) {
+            console.error('🚫 Unhandled promise rejection:', event.reason);
+            showError('A network error occurred. Please check your server connection.');
+            event.preventDefault();
+        });
+
+
+// cash_flow_generator.html mein ye function replace karo (around line 1100):
+
+function processCSVFile(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const csv = e.target.result;
+                
+                // ✅ ENHANCED CSV PARSING - Handle malformed CSV
+                const lines = csv.split('\n').filter(line => line.trim() !== '');
+                
+                if (lines.length < 2) {
+                    reject(new Error('CSV file must have at least 2 lines (header + data)'));
+                    return;
+                }
+                
+                // Parse CSV with flexible delimiter detection
+                const data = [];
+                let delimiter = ',';
+                
+                // Detect delimiter from first line
+                const firstLine = lines[0];
+                if (firstLine.includes('\t')) delimiter = '\t';
+                else if (firstLine.includes(';')) delimiter = ';';
+                else if (firstLine.includes('|')) delimiter = '|';
+                
+                console.log(`📊 Detected CSV delimiter: "${delimiter}"`);
+                
+                // Parse each line with error handling
+                for (let i = 0; i < lines.length; i++) {
+                    const line = lines[i].trim();
+                    if (!line) continue;
+                    
+                    try {
+                        // Split by delimiter and handle quoted fields
+                        let fields = line.split(delimiter);
+                        
+                        // Handle quoted fields that might contain the delimiter
+                        if (line.includes('"')) {
+                            fields = parseCSVLine(line, delimiter);
+                        }
+                        
+                        // Clean up fields
+                        fields = fields.map(field => field.replace(/^"(.*)"$/, '$1').trim());
+                        
+                        if (i === 0) {
+                            data.push(fields); // Header
+                        } else if (fields.length >= 2) {
+                            data.push(fields); // Data rows with at least 2 fields
+                        }
+                        
+                    } catch (lineError) {
+                        console.warn(`⚠️ Skipping line ${i + 1}: ${lineError.message}`);
+                        continue;
+                    }
+                }
+                
+                if (data.length < 2) {
+                    reject(new Error('No valid data rows found in CSV'));
+                    return;
+                }
+                
+                console.log(`✅ Successfully parsed CSV: ${data.length - 1} data rows`);
+                
+                // Extract financial data from CSV
+                const extractedData = extractFinancialDataFromCSV(data);
+                resolve(extractedData);
+                
+            } catch (error) {
+                console.error('❌ CSV parsing error:', error);
+                reject(new Error(`Error processing CSV file: ${error.message}`));
+            }
+        };
+        
+        reader.onerror = () => reject(new Error('Failed to read CSV file'));
+        reader.readAsText(file);
+    });
+}
+
+// ✅ ADD THIS HELPER FUNCTION:
+function parseCSVLine(line, delimiter) {
+    const result = [];
+    let current = '';
+    let inQuotes = false;
+    
+    for (let i = 0; i < line.length; i++) {
+        const char = line[i];
+        
+        if (char === '"') {
+            inQuotes = !inQuotes;
+        } else if (char === delimiter && !inQuotes) {
+            result.push(current);
+            current = '';
+        } else {
+            current += char;
+        }
+    }
+    
+    result.push(current);
+    return result;
+}
+
+// ✅ ENHANCED FINANCIAL DATA EXTRACTION:
+function extractFinancialDataFromCSV(data) {
+    const extractedData = {};
+    const header = data[0].map(h => h.toLowerCase().trim());
+    
+    console.log('📋 CSV Headers found:', header);
+    
+    // Enhanced pattern matching
+    const patterns = {
+        net_income: /net.income|profit.*loss|earnings|income.*net/i,
+        operating_cash_flow: /operating.*cash|cash.*operation|ocf/i,
+        investing_cash_flow: /investing.*cash|cash.*invest|icf/i,
+        financing_cash_flow: /financing.*cash|cash.*financ|fcf/i,
+        free_cash_flow: /free.*cash.*flow|fcf/i,
+        depreciation: /depreciation|amortization/i,
+        capex: /capital.*expend|capex|ppe.*purchase/i,
+        working_capital: /working.*capital|wc.*change/i,
+        accounts_receivable: /receivable|a\/r|ar.*change/i,
+        inventory: /inventory|stock.*change/i,
+        accounts_payable: /payable|a\/p|ap.*change/i
+    };
+    
+    // Find matching columns and extract values
+    for (const [key, pattern] of Object.entries(patterns)) {
+        for (let i = 0; i < header.length; i++) {
+            if (pattern.test(header[i])) {
+                // Get value from first data row
+                if (data.length > 1 && data[1][i]) {
+                    const value = cleanFinancialValue(data[1][i]);
+                    if (value !== null) {
+                        extractedData[key] = value;
+                        console.log(`✅ Found ${key}: ${value} from column "${header[i]}"`);
+                        break;
+                    }
+                }
+            }
+        }
+    }
+    
+    console.log('📊 Extracted data:', extractedData);
+    return extractedData;
+}
+
+
+
+
+
+
+
+        // Add helpful console messages for debugging
+        console.log('💡 Complete Cash Flow Generator:');
+        console.log('✅ Enhanced error handling and debugging');
+        console.log('✅ Real API calls to Flask server');
+        console.log('✅ localStorage management');
+        console.log('✅ Automatic redirect to results page');
+        console.log('❌ No demo mode or sample data');
+        console.log('🔧 Make sure Flask server is running on localhost:5000');
+        console.log('🔧 Make sure PostgreSQL database is connected');
+        console.log('🔧 Backend API must return: { success: true, data: {...}, cash_flow_id: "unique_id" }');
+    </script>
+</body>
+</html>

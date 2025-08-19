@@ -1,0 +1,1033 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confidence Score Dashboard - Financial ML</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Custom CSS -->
+    <style>
+        .confidence-summary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .confidence-card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+        
+        .confidence-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .confidence-bar {
+            position: relative;
+            width: 100%;
+            height: 25px;
+            background-color: #e9ecef;
+            border-radius: 15px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        
+        .confidence-fill {
+            height: 100%;
+            border-radius: 15px;
+            transition: width 0.5s ease;
+            position: relative;
+        }
+        
+        .confidence-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-weight: bold;
+            font-size: 12px;
+            color: #333;
+        }
+        
+        .confidence-very-high { background: linear-gradient(90deg, #28a745, #20c997); }
+        .confidence-high { background: linear-gradient(90deg, #17a2b8, #20c997); }
+        .confidence-medium { background: linear-gradient(90deg, #ffc107, #fd7e14); }
+        .confidence-low { background: linear-gradient(90deg, #fd7e14, #dc3545); }
+        .confidence-very-low { background: linear-gradient(90deg, #dc3545, #6f42c1); }
+        
+        .prediction-table {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .badge-confidence {
+            font-size: 0.75em;
+            padding: 0.25em 0.5em;
+        }
+        
+        .model-selector {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin: 20px 0;
+        }
+        
+        .recommendations {
+            background: #f8f9fa;
+            border-left: 4px solid #007bff;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 0 10px 10px 0;
+        }
+        
+        .loading-spinner {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 10px 0;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 10px 0;
+            border: 1px solid #c3e6cb;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <!-- Header -->
+        <div class="row">
+            <div class="col-12">
+                <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+                    <div class="container-fluid">
+                        <a class="navbar-brand" href="/">🎯 Financial ML - Confidence Dashboard</a>
+                        <div class="navbar-nav">
+                            <a class="nav-link" href="/">Home</a>
+                            <a class="nav-link" href="/analytics">Analytics</a>
+                            <a class="nav-link active" href="/analytics/confidence">Confidence</a>
+                        </div>
+                    </div>
+                </nav>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="row mt-4">
+            <!-- Model Selection Panel -->
+            <div class="col-12">
+                <div class="model-selector">
+                    <h4>🎛️ Model Selection & Data Input</h4>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <label for="modelSelect" class="form-label">Select Model:</label>
+                            <select class="form-select" id="modelSelect">
+                                <option value="">Choose a model...</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="confidenceThreshold" class="form-label">Confidence Threshold:</label>
+                            <input type="range" class="form-range" id="confidenceThreshold" 
+                                   min="0.5" max="0.95" step="0.05" value="0.7">
+                            <small class="text-muted">Current: <span id="thresholdValue">0.7</span></small>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="dataInput" class="form-label">Sample Data (JSON):</label>
+                            <textarea class="form-control" id="dataInput" rows="3" 
+                                      placeholder='{"X_pred": [[1.2, 0.8, -0.5]], "feature_names": ["f1", "f2", "f3"]}'></textarea>
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <button class="btn btn-primary me-2" onclick="analyzeSingleModel()">
+                                🔍 Analyze Confidence
+                            </button>
+                            <button class="btn btn-info me-2" onclick="compareModels()">
+                                📊 Compare Models
+                            </button>
+                            <button class="btn btn-success" onclick="generateReport()">
+                                📄 Generate Report
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading/Error Messages -->
+        <div class="row">
+            <div class="col-12">
+                <div id="loadingSpinner" class="loading-spinner">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p>Analyzing confidence scores...</p>
+                </div>
+                <div id="errorMessage" class="error-message" style="display: none;"></div>
+                <div id="successMessage" class="success-message" style="display: none;"></div>
+            </div>
+        </div>
+
+        <!-- Confidence Summary -->
+        <div class="row" id="confidenceSummaryRow" style="display: none;">
+            <div class="col-12">
+                <div class="confidence-summary">
+                    <h3>📊 Confidence Analysis Summary</h3>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <h5>Mean Confidence</h5>
+                            <h2 id="meanConfidence">-</h2>
+                        </div>
+                        <div class="col-md-3">
+                            <h5>High Confidence %</h5>
+                            <h2 id="highConfidencePercent">-</h2>
+                        </div>
+                        <div class="col-md-3">
+                            <h5>Total Samples</h5>
+                            <h2 id="totalSamples">-</h2>
+                        </div>
+                        <div class="col-md-3">
+                            <h5>Model Type</h5>
+                            <h2 id="modelType">-</h2>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Row -->
+        <div class="row" id="chartsRow" style="display: none;">
+            <div class="col-md-6">
+                <div class="confidence-card card">
+                    <div class="card-header">
+                        <h5>📈 Confidence Distribution</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container">
+                            <canvas id="confidenceDistChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="confidence-card card">
+                    <div class="card-header">
+                        <h5>🎯 Confidence vs Predictions</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container">
+                            <canvas id="confidenceScatterChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Detailed Results -->
+        <div class="row" id="detailsRow" style="display: none;">
+            <div class="col-md-8">
+                <div class="confidence-card card">
+                    <div class="card-header">
+                        <h5>📋 Detailed Predictions</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="prediction-table">
+                            <table class="table table-striped" id="predictionsTable">
+                                <thead>
+                                    <tr>
+                                        <th>Sample</th>
+                                        <th>Prediction</th>
+                                        <th>Confidence</th>
+                                        <th>Level</th>
+                                        <th>Details</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="predictionsTableBody">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="confidence-card card">
+                    <div class="card-header">
+                        <h5>💡 Recommendations</h5>
+                    </div>
+                    <div class="card-body" id="recommendationsPanel">
+                        <p class="text-muted">Run analysis to get recommendations...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Custom JavaScript -->
+    <script>
+        // Global variables
+        let currentAnalysisData = null;
+        let confidenceDistChart = null;
+        let confidenceScatterChart = null;
+
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            loadAvailableModels();
+            setupEventListeners();
+        });
+
+        function setupEventListeners() {
+            // Confidence threshold slider
+            document.getElementById('confidenceThreshold').addEventListener('input', function(e) {
+                document.getElementById('thresholdValue').textContent = e.target.value;
+            });
+        }
+
+        async function loadAvailableModels() {
+            try {
+                const response = await fetch('/api/models');
+                const data = await response.json();
+                
+                const modelSelect = document.getElementById('modelSelect');
+                modelSelect.innerHTML = '<option value="">Choose a model...</option>';
+                
+                data.models.forEach(model => {
+                    if (model.is_trained) {
+                        const option = document.createElement('option');
+                        option.value = model.name;
+                        option.textContent = `${model.name} (${model.type} - ${model.algorithm})`;
+                        modelSelect.appendChild(option);
+                    }
+                });
+            } catch (error) {
+                showError('Failed to load models: ' + error.message);
+            }
+        }
+
+        async function analyzeSingleModel() {
+            const modelName = document.getElementById('modelSelect').value;
+            const threshold = parseFloat(document.getElementById('confidenceThreshold').value);
+            const dataInput = document.getElementById('dataInput').value;
+
+            if (!modelName) {
+                showError('Please select a model');
+                return;
+            }
+
+            if (!dataInput.trim()) {
+                showError('Please provide sample data');
+                return;
+            }
+
+            let requestData;
+            try {
+                requestData = JSON.parse(dataInput);
+                requestData.model_name = modelName;
+                requestData.confidence_threshold = threshold;
+                requestData.include_details = true;
+            } catch (error) {
+                showError('Invalid JSON format in data input');
+                return;
+            }
+
+            showLoading(true);
+            hideError();
+
+            try {
+                const response = await fetch('/analytics/api/predict_with_confidence', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(requestData)
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error || 'Analysis failed');
+                }
+
+                currentAnalysisData = data;
+                displayConfidenceResults(data);
+                showSuccess('Confidence analysis completed successfully!');
+
+            } catch (error) {
+                showError('Analysis failed: ' + error.message);
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        function displayConfidenceResults(data) {
+            // Update summary
+            updateSummaryPanel(data);
+            
+            // Update charts
+            updateConfidenceCharts(data);
+            
+            // Update detailed table
+            updatePredictionsTable(data);
+            
+            // Update recommendations
+            updateRecommendations(data);
+            
+            // Show all panels
+            document.getElementById('confidenceSummaryRow').style.display = 'block';
+            document.getElementById('chartsRow').style.display = 'block';
+            document.getElementById('detailsRow').style.display = 'block';
+        }
+
+        function updateSummaryPanel(data) {
+            const summary = data.confidence_summary || {};
+            
+            document.getElementById('meanConfidence').textContent = 
+                (summary.mean_confidence || 0).toFixed(3);
+            document.getElementById('highConfidencePercent').textContent = 
+                (summary.high_confidence_percentage || 0).toFixed(1) + '%';
+            document.getElementById('totalSamples').textContent = data.n_samples || 0;
+            document.getElementById('modelType').textContent = 
+                `${data.model_info?.type || 'Unknown'} ${data.model_info?.algorithm || ''}`;
+        }
+
+        function updateConfidenceCharts(data) {
+            // Confidence Distribution Chart
+            updateConfidenceDistribution(data);
+            
+            // Confidence Scatter Chart
+            updateConfidenceScatter(data);
+        }
+
+        function updateConfidenceDistribution(data) {
+            const ctx = document.getElementById('confidenceDistChart').getContext('2d');
+            const distribution = data.confidence_summary?.confidence_distribution || {};
+            
+            if (confidenceDistChart) {
+                confidenceDistChart.destroy();
+            }
+            
+            confidenceDistChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(distribution),
+                    datasets: [{
+                        label: 'Sample Count',
+                        data: Object.values(distribution),
+                        backgroundColor: [
+                            '#dc3545', '#fd7e14', '#ffc107', '#17a2b8', '#28a745'
+                        ],
+                        borderColor: [
+                            '#dc3545', '#fd7e14', '#ffc107', '#17a2b8', '#28a745'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Confidence Level Distribution'
+                        },
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Number of Samples'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Confidence Level'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateConfidenceScatter(data) {
+            const ctx = document.getElementById('confidenceScatterChart').getContext('2d');
+            const confidenceDetails = data.confidence_details || [];
+            
+            if (confidenceScatterChart) {
+                confidenceScatterChart.destroy();
+            }
+            
+            // Prepare scatter data
+            const scatterData = confidenceDetails.map((item, index) => ({
+                x: index + 1,
+                y: item.confidence_score,
+                backgroundColor: getConfidenceColor(item.confidence_score),
+                borderColor: getConfidenceColor(item.confidence_score)
+            }));
+            
+            confidenceScatterChart = new Chart(ctx, {
+                type: 'scatter',
+                data: {
+                    datasets: [{
+                        label: 'Confidence Scores',
+                        data: scatterData,
+                        backgroundColor: scatterData.map(point => point.backgroundColor),
+                        borderColor: scatterData.map(point => point.borderColor),
+                        borderWidth: 1,
+                        pointRadius: 5
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Confidence Score by Sample'
+                        },
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Sample Index'
+                            }
+                        },
+                        y: {
+                            min: 0,
+                            max: 1,
+                            title: {
+                                display: true,
+                                text: 'Confidence Score'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updatePredictionsTable(data) {
+            const tbody = document.getElementById('predictionsTableBody');
+            tbody.innerHTML = '';
+            
+            const confidenceDetails = data.confidence_details || [];
+            
+            confidenceDetails.forEach((item, index) => {
+                const row = document.createElement('tr');
+                
+                // Confidence level styling
+                const confidenceClass = getConfidenceClass(item.confidence_score);
+                
+                row.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td><strong>${item.predicted_class_name || item.prediction}</strong></td>
+                    <td>
+                        <div class="confidence-bar">
+                            <div class="confidence-fill ${confidenceClass}" 
+                                 style="width: ${item.confidence_score * 100}%">
+                                <span class="confidence-text">${(item.confidence_score * 100).toFixed(1)}%</span>
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <span class="badge badge-confidence ${confidenceClass}">
+                            ${item.confidence_level}
+                        </span>
+                    </td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-info" 
+                                onclick="showSampleDetails(${index})">
+                            Details
+                        </button>
+                    </td>
+                `;
+                
+                tbody.appendChild(row);
+            });
+        }
+
+        function updateRecommendations(data) {
+            const panel = document.getElementById('recommendationsPanel');
+            const recommendations = data.recommendations || [];
+            
+            if (recommendations.length === 0) {
+                panel.innerHTML = '<p class="text-muted">No specific recommendations available.</p>';
+                return;
+            }
+            
+            let html = '<div class="recommendations">';
+            recommendations.forEach(rec => {
+                html += `<div class="mb-2">
+                    <i class="fas fa-lightbulb text-warning"></i>
+                    ${rec}
+                </div>`;
+            });
+            html += '</div>';
+            
+            panel.innerHTML = html;
+        }
+
+        function showSampleDetails(index) {
+            if (!currentAnalysisData || !currentAnalysisData.confidence_details) {
+                return;
+            }
+            
+            const item = currentAnalysisData.confidence_details[index];
+            let detailsHtml = `
+                <div class="modal fade" id="sampleDetailsModal" tabindex="-1">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Sample ${index + 1} Details</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <h6>Prediction Information</h6>
+                                <ul>
+                                    <li><strong>Prediction:</strong> ${item.predicted_class_name || item.prediction}</li>
+                                    <li><strong>Confidence Score:</strong> ${(item.confidence_score * 100).toFixed(2)}%</li>
+                                    <li><strong>Confidence Level:</strong> ${item.confidence_level}</li>
+                                    <li><strong>Is Confident:</strong> ${item.is_confident ? 'Yes' : 'No'}</li>
+                                </ul>
+            `;
+            
+            // Add class probabilities for classification
+            if (item.class_probabilities) {
+                detailsHtml += `
+                    <h6>Class Probabilities</h6>
+                    <div class="row">
+                `;
+                
+                Object.entries(item.class_probabilities).forEach(([className, prob]) => {
+                    detailsHtml += `
+                        <div class="col-md-6 mb-2">
+                            <strong>${className}:</strong>
+                            <div class="progress">
+                                <div class="progress-bar" style="width: ${prob * 100}%">
+                                    ${(prob * 100).toFixed(1)}%
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                detailsHtml += '</div>';
+            }
+            
+            // Add confidence interval for regression
+            if (item.confidence_interval) {
+                const interval = item.confidence_interval;
+                detailsHtml += `
+                    <h6>Confidence Interval</h6>
+                    <ul>
+                        <li><strong>Lower Bound:</strong> ${interval.lower?.toFixed(3)}</li>
+                        <li><strong>Upper Bound:</strong> ${interval.upper?.toFixed(3)}</li>
+                        <li><strong>Interval Width:</strong> ${interval.width?.toFixed(3)}</li>
+                        <li><strong>Uncertainty:</strong> ${item.uncertainty?.toFixed(3)}</li>
+                    </ul>
+                `;
+            }
+            
+            detailsHtml += `
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Remove existing modal if any
+            const existingModal = document.getElementById('sampleDetailsModal');
+            if (existingModal) {
+                existingModal.remove();
+            }
+            
+            // Add new modal to body
+            document.body.insertAdjacentHTML('beforeend', detailsHtml);
+            
+            // Show modal
+            const modal = new bootstrap.Modal(document.getElementById('sampleDetailsModal'));
+            modal.show();
+        }
+
+        async function compareModels() {
+            const dataInput = document.getElementById('dataInput').value;
+            
+            if (!dataInput.trim()) {
+                showError('Please provide sample data for comparison');
+                return;
+            }
+            
+            // Get all trained models
+            try {
+                const response = await fetch('/api/models');
+                const data = await response.json();
+                
+                const trainedModels = data.models.filter(model => model.is_trained);
+                
+                if (trainedModels.length < 2) {
+                    showError('At least 2 trained models required for comparison');
+                    return;
+                }
+                
+                // Prepare comparison request
+                let requestData;
+                try {
+                    requestData = JSON.parse(dataInput);
+                    requestData.model_names = trainedModels.map(model => model.name);
+                    requestData.metrics = ['mean_confidence', 'high_confidence_percentage', 'std_confidence'];
+                } catch (error) {
+                    showError('Invalid JSON format in data input');
+                    return;
+                }
+                
+                showLoading(true);
+                hideError();
+                
+                const comparisonResponse = await fetch('/analytics/api/model_comparison_confidence', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(requestData)
+                });
+                
+                const comparisonData = await comparisonResponse.json();
+                
+                if (!comparisonResponse.ok) {
+                    throw new Error(comparisonData.error || 'Comparison failed');
+                }
+                
+                displayComparisonResults(comparisonData);
+                showSuccess('Model comparison completed successfully!');
+                
+            } catch (error) {
+                showError('Comparison failed: ' + error.message);
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        function displayComparisonResults(data) {
+            // Create comparison modal
+            const modalHtml = `
+                <div class="modal fade" id="comparisonModal" tabindex="-1">
+                    <div class="modal-dialog modal-xl">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">📊 Model Confidence Comparison</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div id="comparisonContent"></div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                <button type="button" class="btn btn-primary" onclick="exportComparison()">Export Results</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Remove existing modal
+            const existingModal = document.getElementById('comparisonModal');
+            if (existingModal) {
+                existingModal.remove();
+            }
+            
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+            
+            // Populate comparison content
+            const content = document.getElementById('comparisonContent');
+            let html = '';
+            
+            // Recommendation
+            if (data.recommendation) {
+                html += `
+                    <div class="alert alert-info">
+                        <h6>🏆 Recommended Model</h6>
+                        <strong>${data.recommendation.best_overall_model}</strong> 
+                        (Score: ${data.recommendation.composite_score.toFixed(3)})
+                        <br><small>${data.recommendation.reasoning}</small>
+                    </div>
+                `;
+            }
+            
+            // Rankings table
+            html += '<h6>📈 Model Rankings</h6>';
+            
+            Object.entries(data.rankings || {}).forEach(([metric, rankings]) => {
+                html += `
+                    <div class="mb-4">
+                        <h6>${metric.replace('_', ' ').toUpperCase()}</h6>
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Rank</th>
+                                    <th>Model</th>
+                                    <th>Type</th>
+                                    <th>Score</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                `;
+                
+                rankings.forEach(ranking => {
+                    html += `
+                        <tr>
+                            <td>${ranking.rank}</td>
+                            <td>${ranking.model_name}</td>
+                            <td>${ranking.model_type}</td>
+                            <td>${ranking.value.toFixed(3)}</td>
+                        </tr>
+                    `;
+                });
+                
+                html += '</tbody></table></div>';
+            });
+            
+            content.innerHTML = html;
+            
+            // Show modal
+            const modal = new bootstrap.Modal(document.getElementById('comparisonModal'));
+            modal.show();
+        }
+
+        async function generateReport() {
+            const modelName = document.getElementById('modelSelect').value;
+            const dataInput = document.getElementById('dataInput').value;
+            
+            if (!modelName) {
+                showError('Please select a model');
+                return;
+            }
+            
+            if (!dataInput.trim()) {
+                showError('Please provide sample data');
+                return;
+            }
+            
+            let requestData;
+            try {
+                requestData = JSON.parse(dataInput);
+                requestData.include_recommendations = true;
+            } catch (error) {
+                showError('Invalid JSON format in data input');
+                return;
+            }
+            
+            showLoading(true);
+            hideError();
+            
+            try {
+                const response = await fetch(`/analytics/api/confidence_report/${modelName}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(requestData)
+                });
+                
+                const reportData = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(reportData.error || 'Report generation failed');
+                }
+                
+                displayReport(reportData);
+                showSuccess('Confidence report generated successfully!');
+                
+            } catch (error) {
+                showError('Report generation failed: ' + error.message);
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        function displayReport(reportData) {
+            // Create a new window/tab for the report
+            const reportWindow = window.open('', '_blank');
+            
+            const reportHtml = `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Confidence Analysis Report</title>
+                    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+                    <style>
+                        .report-header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; }
+                        .metric-card { border: 1px solid #dee2e6; padding: 15px; margin: 10px 0; border-radius: 8px; }
+                        @media print { .no-print { display: none; } }
+                    </style>
+                </head>
+                <body>
+                    <div class="container-fluid">
+                        <div class="report-header text-center">
+                            <h1>🎯 Confidence Analysis Report</h1>
+                            <p>Generated on ${new Date().toLocaleString()}</p>
+                        </div>
+                        
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <div class="metric-card">
+                                    <h3>Executive Summary</h3>
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <strong>Overall Confidence:</strong><br>
+                                            ${(reportData.executive_summary?.overall_confidence || 0).toFixed(3)}
+                                        </div>
+                                        <div class="col-md-3">
+                                            <strong>High Confidence Predictions:</strong><br>
+                                            ${reportData.executive_summary?.high_confidence_predictions || '0%'}
+                                        </div>
+                                        <div class="col-md-3">
+                                            <strong>Model Reliability:</strong><br>
+                                            ${reportData.executive_summary?.model_reliability || 'Unknown'}
+                                        </div>
+                                        <div class="col-md-3">
+                                            <strong>Production Ready:</strong><br>
+                                            ${reportData.executive_summary?.ready_for_production ? 'Yes' : 'No'}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="metric-card">
+                                    <h4>Model Information</h4>
+                                    <ul>
+                                        <li><strong>Name:</strong> ${reportData.model_information?.name || 'Unknown'}</li>
+                                        <li><strong>Type:</strong> ${reportData.model_information?.type || 'Unknown'}</li>
+                                        <li><strong>Algorithm:</strong> ${reportData.model_information?.algorithm || 'Unknown'}</li>
+                                        <li><strong>Scenario:</strong> ${reportData.model_information?.scenario || 'Unknown'}</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="metric-card">
+                                    <h4>Confidence Statistics</h4>
+                                    <ul>
+                                        <li><strong>Mean:</strong> ${(reportData.confidence_analysis?.summary?.mean_confidence || 0).toFixed(3)}</li>
+                                        <li><strong>Min:</strong> ${(reportData.confidence_analysis?.summary?.min_confidence || 0).toFixed(3)}</li>
+                                        <li><strong>Max:</strong> ${(reportData.confidence_analysis?.summary?.max_confidence || 0).toFixed(3)}</li>
+                                        <li><strong>Std:</strong> ${(reportData.confidence_analysis?.summary?.std_confidence || 0).toFixed(3)}</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="metric-card">
+                                    <h4>💡 Recommendations</h4>
+                                    ${(reportData.recommendations || []).map(rec => `<div class="mb-2">${rec}</div>`).join('')}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row no-print">
+                            <div class="col-12 text-center mt-3">
+                                <button class="btn btn-primary" onclick="window.print()">🖨️ Print Report</button>
+                                <button class="btn btn-secondary" onclick="window.close()">❌ Close</button>
+                            </div>
+                        </div>
+                    </div>
+                </body>
+                </html>
+            `;
+            
+            reportWindow.document.write(reportHtml);
+            reportWindow.document.close();
+        }
+
+        // Utility functions
+        function getConfidenceClass(confidence) {
+            if (confidence >= 0.9) return 'confidence-very-high';
+            if (confidence >= 0.8) return 'confidence-high';
+            if (confidence >= 0.7) return 'confidence-medium';
+            if (confidence >= 0.6) return 'confidence-low';
+            return 'confidence-very-low';
+        }
+
+        function getConfidenceColor(confidence) {
+            if (confidence >= 0.9) return '#28a745';
+            if (confidence >= 0.8) return '#17a2b8';
+            if (confidence >= 0.7) return '#ffc107';
+            if (confidence >= 0.6) return '#fd7e14';
+            return '#dc3545';
+        }
+
+        function showLoading(show) {
+            document.getElementById('loadingSpinner').style.display = show ? 'block' : 'none';
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+        }
+
+        function hideError() {
+            document.getElementById('errorMessage').style.display = 'none';
+        }
+
+        function showSuccess(message) {
+            const successDiv = document.getElementById('successMessage');
+            successDiv.textContent = message;
+            successDiv.style.display = 'block';
+            
+            // Auto hide after 3 seconds
+            setTimeout(() => {
+                successDiv.style.display = 'none';
+            }, 3000);
+        }
+
+        function exportComparison() {
+            // Implementation for exporting comparison results
+            console.log('Export comparison functionality would be implemented here');
+        }
+    </script>
+</body>
+</html>

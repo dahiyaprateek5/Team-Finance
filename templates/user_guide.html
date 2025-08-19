@@ -1,0 +1,496 @@
+{% extends "base.html" %}
+
+{% block title %}User Guide - Team Finance{% endblock %}
+
+{% block content %}
+<style>
+    .guide-container {
+        max-width: 100%; /* Full width */
+        margin: 0;
+        padding: 2rem 4rem; /* Left-right padding for readability */
+    }
+
+    .guide-header {
+        background: linear-gradient(135deg, #2563eb, #3b82f6);
+        color: white;
+        padding: 3rem 2rem;
+        border-radius: 20px;
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .guide-header h1 {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+        font-weight: 700;
+    }
+
+    .guide-header p {
+        font-size: 1.1rem;
+        opacity: 0.9;
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    .guide-step {
+        background: white;
+        border-radius: 15px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        border-left: 5px solid #2563eb;
+    }
+
+    .step-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .screenshot-container {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 1rem;
+        margin: 2rem 0;
+        text-align: center;
+    }
+
+    .guide-screenshot {
+        max-width: 100%;
+        height: auto;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        margin-bottom: 0.5rem;
+    }
+
+    .screenshot-caption {
+        color: #64748b;
+        font-size: 0.9rem;
+        margin: 0;
+        font-style: italic;
+    }
+
+    .step-number {
+        background: #2563eb;
+        color: white;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 1.2rem;
+    }
+
+    .step-title {
+        color: #2563eb;
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin: 0;
+    }
+
+    .step-content p {
+        color: #64748b;
+        line-height: 1.6;
+        margin-bottom: 1rem;
+    }
+
+    .simple-list {
+        list-style: none;
+        padding: 0;
+    }
+
+    .simple-list li {
+        background: #f8fafc;
+        padding: 1rem;
+        margin-bottom: 0.5rem;
+        border-radius: 8px;
+        border-left: 3px solid #10b981;
+        position: relative;
+        padding-left: 2.5rem;
+    }
+
+    .simple-list li::before {
+        content: "✓";
+        position: absolute;
+        left: 1rem;
+        color: #10b981;
+        font-weight: bold;
+    }
+
+    .screenshot-needed {
+        background: #fff3cd;
+        border: 2px dashed #ffc107;
+        border-radius: 10px;
+        padding: 2rem;
+        text-align: center;
+        margin: 1.5rem 0;
+        color: #856404;
+    }
+
+    .screenshot-needed i {
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+
+    .tips-box {
+        background: #e8f5e8;
+        border: 1px solid #c3e6c3;
+        border-radius: 10px;
+        padding: 1.5rem;
+        margin: 1.5rem 0;
+    }
+
+    .tips-box h4 {
+        color: #2d5a2d;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .tips-box p {
+        color: #4a6741;
+        margin: 0;
+    }
+
+    .quick-links {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin: 2rem 0;
+    }
+
+    .quick-link {
+        background: #f8fafc;
+        padding: 1.5rem;
+        border-radius: 10px;
+        text-align: center;
+        text-decoration: none;
+        color: #2563eb;
+        border: 2px solid #e2e8f0;
+        transition: all 0.3s ease;
+    }
+
+    .quick-link:hover {
+        background: #2563eb;
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    .quick-link i {
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+
+    @media (max-width: 768px) {
+        .guide-container {
+            padding: 1rem; /* Mobile pe kam padding */
+        }
+        
+        .guide-header h1 {
+            font-size: 2rem;
+        }
+        
+        .guide-step {
+            padding: 1.5rem;
+        }
+        
+        .quick-links {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="guide-container">
+    <!-- Header -->
+    <div class="guide-header">
+        <h1>📊 How to Use Team Finance</h1>
+        <p>Simple step-by-step guide to analyze your business finances and get professional insights in minutes.</p>
+    </div>
+
+    <!-- Step 1: Getting Started -->
+    <div class="guide-step">
+        <div class="step-header">
+            <div class="step-number">1</div>
+            <h2 class="step-title">Getting Started</h2>
+        </div>
+        <div class="step-content">
+            <p><strong>What is Team Finance?</strong> It's a simple tool that takes your financial documents and gives you professional business insights - like having a finance expert on your team!</p>
+            
+            <p><strong>What you need:</strong></p>
+            <ul class="simple-list">
+                <li>Your business financial documents (balance sheet, income statement, bank statements)</li>
+                <li>5-10 minutes of your time</li>
+                <li>No finance knowledge required!</li>
+            </ul>
+
+            <div class="screenshot-container">
+                <img src="{{ url_for('static', filename='images/guide/dashboard-navigation.png') }}" 
+                     alt="Dashboard Navigation" 
+                     class="guide-screenshot">
+                <p class="screenshot-caption">Dashboard main page showing navigation menu</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Step 2: Upload Files -->
+    <div class="guide-step">
+        <div class="step-header">
+            <div class="step-number">2</div>
+            <h2 class="step-title">Upload Your Documents</h2>
+        </div>
+        <div class="step-content">
+            <p><strong>How to upload:</strong></p>
+            <ul class="simple-list">
+                <li>Click "Upload Files" in the top menu</li>
+                <li>Drag and drop your files OR click "Choose Files"</li>
+                <li>Wait 5-10 seconds for processing</li>
+                <li>Done! Your files are uploaded</li>
+            </ul>
+
+            <p><strong>What files can you upload?</strong> PDF, Excel, CSV, Word documents</p>
+
+            <div class="screenshot-container">
+                <img src="{{ url_for('static', filename='images/guide/file-upload-page.png') }}" 
+                     alt="File Upload Page" 
+                     class="guide-screenshot">
+                <p class="screenshot-caption">File upload page with drag & drop area</p>
+            </div>
+
+            <div class="tips-box">
+                <h4><i class="fas fa-lightbulb"></i> Quick Tip</h4>
+                <p>Upload clear, readable documents for best results. Bank statements and balance sheets work great!</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Step 3: Generate Balance Sheet -->
+    <div class="guide-step">
+        <div class="step-header">
+            <div class="step-number">3</div>
+            <h2 class="step-title">Create Your Balance Sheet</h2>
+        </div>
+        <div class="step-content">
+            <p><strong>Easy steps:</strong></p>
+            <ul class="simple-list">
+                <li>Go to Tools → Balance Sheet Generator</li>
+                <li>Select your uploaded files</li>
+                <li>Click "Generate Balance Sheet"</li>
+                <li>Review the results</li>
+                <li>Download your professional balance sheet</li>
+            </ul>
+
+            <div class="screenshot-container">
+                <img src="{{ url_for('static', filename='images/guide/balance-sheet-generator.png') }}" 
+                     alt="Balance Sheet Generator" 
+                     class="guide-screenshot">
+                <p class="screenshot-caption">Balance Sheet Generator page with file selection</p>
+            </div>
+
+            <p><strong>What happens?</strong> The system automatically finds your assets, liabilities, and equity from your documents and creates a professional balance sheet.</p>
+        </div>
+    </div>
+
+    <!-- Step 4: Generate Cash Flow -->
+    <div class="guide-step">
+        <div class="step-header">
+            <div class="step-number">4</div>
+            <h2 class="step-title">Create Cash Flow Statement</h2>
+        </div>
+        <div class="step-content">
+            <p><strong>Two options:</strong></p>
+            <ul class="simple-list">
+                <li><strong>Option 1:</strong> Upload existing cash flow statement</li>
+                <li><strong>Option 2:</strong> Auto-generate from your balance sheet</li>
+            </ul>
+
+            <p><strong>For auto-generation:</strong></p>
+            <ul class="simple-list">
+                <li>Go to Tools → Cash Flow Generator</li>
+                <li>Choose "Generate from Balance Sheet"</li>
+                <li>Wait for processing (30-60 seconds)</li>
+                <li>Download your cash flow statement</li>
+            </ul>
+
+            <div class="screenshot-container">
+                <img src="{{ url_for('static', filename='images/guide/cash-flow-generator.png') }}" 
+                     alt="Cash Flow Generator" 
+                     class="guide-screenshot">
+                <p class="screenshot-caption">Cash Flow Generator page showing options</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Step 5: View Analytics -->
+    <div class="guide-step">
+        <div class="step-header">
+            <div class="step-number">5</div>
+            <h2 class="step-title">See Your Business Insights</h2>
+        </div>
+        <div class="step-content">
+            <p><strong>Where to look:</strong></p>
+            <ul class="simple-list">
+                <li>Click "Analytics" in the top menu</li>
+                <li>View your Financial Health Score (0-100)</li>
+                <li>Check the Risk Level (Low/Medium/High)</li>
+                <li>Read AI recommendations</li>
+            </ul>
+
+            <p><strong>What you'll see:</strong></p>
+            <ul class="simple-list">
+                <li><strong>Health Score:</strong> Overall financial health rating</li>
+                <li><strong>Risk Assessment:</strong> Chances of financial problems</li>
+                <li><strong>Recommendations:</strong> What to do to improve</li>
+                <li><strong>Trends:</strong> How your business is performing over time</li>
+            </ul>
+
+            <div class="screenshot-container">
+                <img src="{{ url_for('static', filename='images/guide/analytics-dashboard.png') }}" 
+                     alt="Analytics Dashboard" 
+                     class="guide-screenshot">
+                <p class="screenshot-caption">Analytics dashboard showing health score and charts</p>
+            </div>
+
+            <div class="screenshot-container">
+                <img src="{{ url_for('static', filename='images/guide/radar-chart.png') }}" 
+                     alt="Radar Chart" 
+                     class="guide-screenshot">
+                <p class="screenshot-caption">Radar chart showing financial metrics</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Step 6: Compare with Other Companies -->
+    <div class="guide-step">
+        <div class="step-header">
+            <div class="step-number">6</div>
+            <h2 class="step-title">Compare with Big Companies</h2>
+        </div>
+        <div class="step-content">
+            <p><strong>How to search:</strong></p>
+            <ul class="simple-list">
+                <li>Click "Search" in the top menu</li>
+                <li>Type any company name (Apple, Google, Microsoft)</li>
+                <li>See their financial analysis</li>
+                <li>Compare with your business</li>
+            </ul>
+
+            <div class="screenshot-container">
+                <img src="{{ url_for('static', filename='images/guide/company-search-model.png') }}" 
+                     alt="Search Model" 
+                     class="guide-screenshot">
+                <p class="screenshot-caption">Search model with company results</p>
+            </div>
+
+            <div class="tips-box">
+                <h4><i class="fas fa-star"></i> Smart Tip</h4>
+                <p>Compare your business with companies in the same industry for better insights!</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Problems & Solutions -->
+    <div class="guide-step">
+        <div class="step-header">
+            <div class="step-number">❓</div>
+            <h2 class="step-title">Common Questions</h2>
+        </div>
+        <div class="step-content">
+            <p><strong>File won't upload?</strong></p>
+            <ul class="simple-list">
+                <li>Check file size (must be under 25MB)</li>
+                <li>Make sure it's PDF, Excel, CSV or Word format</li>
+                <li>Try refreshing the page</li>
+            </ul>
+
+            <p><strong>Results don't look right?</strong></p>
+            <ul class="simple-list">
+                <li>Make sure your documents have clear financial tables</li>
+                <li>Try uploading additional supporting documents</li>
+                <li>Check that numbers in your document are readable</li>
+            </ul>
+
+            <p><strong>How accurate are the predictions?</strong></p>
+            <ul class="simple-list">
+                <li>70-85% accurate with good quality documents</li>
+                <li>Better accuracy with 2-3 years of data</li>
+                <li>Use as guidance, not absolute truth</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Quick Action Links -->
+    <div class="quick-links">
+        <a href="{{ url_for('upload_page') }}" class="quick-link">
+            <i class="fas fa-upload"></i>
+            <strong>Start Here</strong><br>
+            Upload Files
+        </a>
+        <a href="{{ url_for('index') }}" class="quick-link">
+            <i class="fas fa-tachometer-alt"></i>
+            <strong>Dashboard</strong><br>
+            View Overview
+        </a>
+        <a href="{{ url_for('analytics_page') }}" class="quick-link">
+            <i class="fas fa-chart-line"></i>
+            <strong>Analytics</strong><br>
+            See Insights
+        </a>
+        <a href="{{ url_for('cash_flow_generator_page') }}" class="quick-link">
+            <i class="fas fa-calculator"></i>
+            <strong>Tools</strong><br>
+            Generate Cash Flow Statement
+        </a>
+    </div>
+
+    <!-- Final Message -->
+    <div class="guide-step">
+        <div class="step-content" style="text-align: center;">
+            <h3 style="color: #2563eb; margin-bottom: 1rem;">🎉 You're Ready to Go!</h3>
+            <p style="font-size: 1.1rem; color: #64748b;">Start with uploading your first document and see your business insights in minutes!</p>
+        </div>
+    </div>
+</div>
+
+<script>
+// Simple scroll to top functionality
+window.addEventListener('scroll', function() {
+    if (window.pageYOffset > 500) {
+        if (!document.querySelector('.back-to-top')) {
+            const backBtn = document.createElement('button');
+            backBtn.className = 'back-to-top';
+            backBtn.innerHTML = '<i class="fas fa-arrow-up"></i>';
+            backBtn.style.cssText = `
+                position: fixed;
+                bottom: 2rem;
+                right: 2rem;
+                background: #2563eb;
+                color: white;
+                border: none;
+                width: 50px;
+                height: 50px;
+                border-radius: 25px;
+                cursor: pointer;
+                box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
+                z-index: 1000;
+                font-size: 1.2rem;
+            `;
+            backBtn.onclick = () => window.scrollTo({top: 0, behavior: 'smooth'});
+            document.body.appendChild(backBtn);
+        }
+    } else {
+        const existing = document.querySelector('.back-to-top');
+        if (existing) existing.remove();
+    }
+});
+
+console.log('📚 Simple Team Finance Guide loaded!');
+</script>
+
+{% endblock %}

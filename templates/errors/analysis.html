@@ -1,0 +1,1134 @@
+{% extends "base.html" %}
+
+{% block title %}Financial Analysis - Team Finance{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --primary-color: #059669;
+        --secondary-color: #10b981;
+        --success-color: #059669;
+        --info-color: #6366f1;
+        --warning-color: #d97706;
+        --danger-color: #dc2626;
+        --dark-color: #1f2937;
+        --light-color: #f8fafc;
+        --text-primary: #1e293b;
+        --text-secondary: #64748b;
+        --card-bg: rgba(255, 255, 255, 0.95);
+        --glass-bg: rgba(255, 255, 255, 0.9);
+        --border-color: rgba(0, 0, 0, 0.1);
+    }
+
+    .analysis-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+
+    .page-header {
+        text-align: center;
+        margin-bottom: 3rem;
+        padding: 2rem;
+        background: linear-gradient(135deg, var(--primary-color), var(--info-color));
+        border-radius: 15px;
+        color: white;
+    }
+
+    .page-header h1 {
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    .page-header p {
+        font-size: 1.1rem;
+        opacity: 0.9;
+        margin-bottom: 0;
+    }
+
+    .analysis-controls {
+        background: white;
+        border-radius: 15px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+
+    .search-section {
+        display: grid;
+        grid-template-columns: 2fr 1fr auto auto;
+        gap: 1.5rem;
+        align-items: end;
+    }
+
+    .form-group label {
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+        color: #333;
+        display: block;
+    }
+
+    .form-group input, 
+    .form-group select {
+        width: 100%;
+        padding: 0.75rem;
+        border: 2px solid #e1e5e9;
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: border-color 0.3s;
+    }
+
+    .form-group input:focus, 
+    .form-group select:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.1);
+    }
+
+    .companies-list {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        max-height: 200px;
+        overflow-y: auto;
+        border: 2px solid #e1e5e9;
+        border-top: none;
+        border-radius: 0 0 8px 8px;
+        background: white;
+        z-index: 1000;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+
+    .company-item {
+        padding: 0.75rem;
+        border-bottom: 1px solid #e1e5e9;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+
+    .company-item:hover {
+        background-color: #f8f9fa;
+    }
+
+    .company-item:last-child {
+        border-bottom: none;
+    }
+
+    .search-wrapper {
+        position: relative;
+    }
+
+    .btn {
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .btn-primary {
+        background: var(--primary-color);
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background: var(--secondary-color);
+        transform: translateY(-2px);
+    }
+
+    .btn-secondary {
+        background: var(--text-secondary);
+        color: white;
+    }
+
+    .btn-secondary:hover {
+        background: var(--dark-color);
+        transform: translateY(-2px);
+    }
+
+    .btn-outline-secondary {
+        background: transparent;
+        color: var(--text-secondary);
+        border: 2px solid var(--text-secondary);
+    }
+
+    .btn-outline-secondary:hover {
+        background: var(--text-secondary);
+        color: white;
+    }
+
+    .analysis-results {
+        display: none;
+        grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+        gap: 2rem;
+    }
+
+    .analysis-card {
+        background: white;
+        border-radius: 15px;
+        padding: 2rem;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease;
+        border: 1px solid var(--border-color);
+    }
+
+    .analysis-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1);
+    }
+
+    .card-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid #f1f5f9;
+    }
+
+    .card-header i {
+        font-size: 1.5rem;
+        margin-right: 0.75rem;
+        color: var(--primary-color);
+    }
+
+    .card-header h3 {
+        color: #333;
+        margin: 0;
+        font-size: 1.25rem;
+    }
+
+    .metric-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    .metric-row:last-child {
+        border-bottom: none;
+    }
+
+    .metric-label {
+        font-weight: 600;
+        color: #333333;
+        font-size: 0.95rem;
+    }
+
+    .metric-value {
+        font-weight: bold;
+        text-align: right;
+        color: #1a1a1a;
+        font-size: 0.95rem;
+    }
+
+    .positive {
+        color: #059669 !important;
+        font-weight: bold;
+    }
+
+    .negative {
+        color: #dc2626 !important;
+        font-weight: bold;
+    }
+
+    .neutral {
+        color: #374151 !important;
+        font-weight: bold;
+    }
+
+    .health-score {
+        text-align: center;
+        margin: 2rem 0;
+    }
+
+    .score-circle {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        margin: 0 auto 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        font-weight: bold;
+        color: white;
+        position: relative;
+    }
+
+    .score-excellent {
+        background: linear-gradient(135deg, var(--success-color), #059669);
+    }
+
+    .score-good {
+        background: linear-gradient(135deg, var(--warning-color), #d97706);
+    }
+
+    .score-poor {
+        background: linear-gradient(135deg, var(--danger-color), #dc2626);
+    }
+
+    .score-description {
+        font-weight: 600;
+        color: #333;
+    }
+
+    .loading {
+        text-align: center;
+        padding: 3rem;
+        color: var(--primary-color);
+    }
+
+    .loading i {
+        font-size: 3rem;
+        animation: spin 1s linear infinite;
+        margin-bottom: 1rem;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    .chart-container {
+        margin-top: 1.5rem;
+        height: 300px;
+        background: #f8f9fa;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #666;
+        border: 2px dashed #dee2e6;
+    }
+
+    .risk-badge {
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .risk-low {
+        background: linear-gradient(135deg, #ecfdf5, #d1fae5);
+        color: #065f46;
+    }
+
+    .risk-medium {
+        background: linear-gradient(135deg, #fffbeb, #fef3c7);
+        color: #78350f;
+    }
+
+    .risk-high {
+        background: linear-gradient(135deg, #fef2f2, #fecaca);
+        color: #7f1d1d;
+    }
+
+    .ml-status {
+        padding: 0.75rem;
+        border-radius: 8px;
+        margin-top: 1rem;
+        text-align: center;
+        font-weight: 600;
+        color: #1a1a1a;
+    }
+
+    .ml-available {
+        background: #d1fae5;
+        color: #065f46;
+        border: 2px solid #059669;
+    }
+
+    .ml-unavailable {
+        background: #fecaca;
+        color: #7f1d1d;
+        border: 2px solid #dc2626;
+    }
+
+    /* Ensure all text is properly visible */
+    .analysis-card * {
+        color: inherit;
+    }
+
+    .analysis-card {
+        background: white;
+        border-radius: 15px;
+        padding: 2rem;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease;
+        border: 2px solid #e5e7eb;
+        color: #1a1a1a;
+    }
+
+    .alert {
+        padding: 0.75rem 1rem;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+        border: 1px solid transparent;
+    }
+
+    .alert-success {
+        background: linear-gradient(135deg, #ecfdf5, #d1fae5);
+        color: #065f46;
+        border-color: #a7f3d0;
+    }
+
+    .alert-danger {
+        background: linear-gradient(135deg, #fef2f2, #fecaca);
+        color: #7f1d1d;
+        border-color: #fca5a5;
+    }
+
+    .alert-dismissible .btn-close {
+        background: none;
+        border: none;
+        font-size: 1.25rem;
+        opacity: 0.5;
+        cursor: pointer;
+    }
+
+    .me-2 {
+        margin-right: 0.5rem;
+    }
+
+    .mb-3 {
+        margin-bottom: 1rem;
+    }
+
+    .text-muted {
+        color: var(--text-secondary);
+    }
+
+    @media (max-width: 768px) {
+        .search-section {
+            grid-template-columns: 1fr;
+        }
+
+        .analysis-results {
+            grid-template-columns: 1fr;
+        }
+
+        .page-header h1 {
+            font-size: 2rem;
+        }
+
+        .analysis-container {
+            padding: 1rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="analysis-container">
+    <!-- Page Header -->
+    <div class="page-header">
+        <h1><i class="fas fa-chart-bar"></i> Financial Analysis</h1>
+        <p>Deep dive into company financial health and risk assessment with AI-powered insights</p>
+    </div>
+
+    <!-- Analysis Controls -->
+    <div class="analysis-controls">
+        <div class="search-section">
+            <div class="form-group">
+                <label for="companySearch">Search Company</label>
+                <div class="search-wrapper">
+                    <input type="text" id="companySearch" placeholder="Start typing company name..." autocomplete="off">
+                    <div id="companiesList" class="companies-list" style="display: none;"></div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="analysisYear">Analysis Year</label>
+                <select id="analysisYear">
+                    <option value="2024">2024</option>
+                    <option value="2023">2023</option>
+                    <option value="2022">2022</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <button class="btn btn-primary" onclick="performAnalysis()">
+                    <i class="fas fa-search"></i> Analyze
+                </button>
+            </div>
+            <div class="form-group">
+                <button class="btn btn-outline-secondary" id="exportButton" onclick="exportAnalysisData()" style="display: none;">
+                    <i class="fas fa-download"></i> Export
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading -->
+    <div id="loadingIndicator" class="loading" style="display: none;">
+        <i class="fas fa-spinner"></i>
+        <p>Analyzing financial data with AI...</p>
+    </div>
+
+    <!-- Analysis Results -->
+    <div id="analysisResults" class="analysis-results">
+        <!-- Company Overview -->
+        <div class="analysis-card">
+            <div class="card-header">
+                <i class="fas fa-building"></i>
+                <h3>Company Overview</h3>
+            </div>
+            <div id="companyOverview">
+                <div class="metric-row">
+                    <span class="metric-label">Company Name:</span>
+                    <span class="metric-value" id="companyName">-</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Industry:</span>
+                    <span class="metric-value" id="companyIndustry">-</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Analysis Year:</span>
+                    <span class="metric-value" id="companyYear">-</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Risk Level:</span>
+                    <span class="metric-value" id="riskLevel">-</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Data Source:</span>
+                    <span class="metric-value">Cash Flow Statement</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Financial Health Score -->
+        <div class="analysis-card">
+            <div class="card-header">
+                <i class="fas fa-heartbeat"></i>
+                <h3>Financial Health Score</h3>
+            </div>
+            <div class="health-score">
+                <div id="scoreCircle" class="score-circle">
+                    <span id="healthScore">-</span>
+                </div>
+                <p id="scoreDescription" class="score-description">Calculate score to see health status</p>
+            </div>
+        </div>
+
+        <!-- Cash Flow Analysis -->
+        <div class="analysis-card">
+            <div class="card-header">
+                <i class="fas fa-money-bill-wave"></i>
+                <h3>Cash Flow Analysis</h3>
+            </div>
+            <div id="cashFlowMetrics">
+                <div class="metric-row">
+                    <span class="metric-label">Net Income:</span>
+                    <span class="metric-value" id="netIncome">-</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Operating Cash Flow:</span>
+                    <span class="metric-value" id="operatingCashFlow">-</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Free Cash Flow:</span>
+                    <span class="metric-value" id="freeCashFlow">-</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">OCF to Net Income Ratio:</span>
+                    <span class="metric-value" id="ocfRatio">-</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Working Capital Change:</span>
+                    <span class="metric-value" id="workingCapitalChange">-</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Financial Ratios -->
+        <div class="analysis-card">
+            <div class="card-header">
+                <i class="fas fa-calculator"></i>
+                <h3>Financial Ratios</h3>
+            </div>
+            <div id="financialRatios">
+                <div class="metric-row">
+                    <span class="metric-label">Debt to Equity Ratio:</span>
+                    <span class="metric-value" id="debtEquityRatio">-</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Interest Coverage Ratio:</span>
+                    <span class="metric-value" id="interestCoverage">-</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Capital Expenditure:</span>
+                    <span class="metric-value" id="capex">-</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Liquidation Risk:</span>
+                    <span class="metric-value" id="liquidationLabel">-</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Depreciation:</span>
+                    <span class="metric-value" id="depreciation">-</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- AI/ML Analysis -->
+        <div class="analysis-card">
+            <div class="card-header">
+                <i class="fas fa-robot"></i>
+                <h3>AI-Powered Analysis</h3>
+            </div>
+            <div id="mlAnalysis">
+                <div class="metric-row">
+                    <span class="metric-label">ML Health Score:</span>
+                    <span class="metric-value" id="mlHealthScore">-</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Risk Category:</span>
+                    <span class="metric-value" id="mlRiskCategory">-</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Prediction Confidence:</span>
+                    <span class="metric-value" id="mlConfidence">-</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Models Used:</span>
+                    <span class="metric-value" id="mlModels">-</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Recommendation:</span>
+                    <span class="metric-value" id="mlRecommendation" style="font-size: 0.9rem;">-</span>
+                </div>
+            </div>
+            <div id="mlStatus" class="ml-status">
+                <i class="fas fa-info-circle"></i> ML analysis loading...
+            </div>
+        </div>
+
+        <!-- Historical Trend -->
+        <div class="analysis-card">
+            <div class="card-header">
+                <i class="fas fa-chart-line"></i>
+                <h3>Historical Trends</h3>
+            </div>
+            <div class="chart-container" id="trendChart">
+                <div>
+                    <i class="fas fa-chart-area fa-3x mb-3" style="color: #ccc;"></i>
+                    <p>Historical trend analysis will be displayed here</p>
+                    <small class="text-muted">Multi-year financial performance visualization</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    let companiesData = [];
+    let selectedCompany = null;
+
+    // Load companies data on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        loadCompanies();
+        setupEventListeners();
+    });
+
+    function setupEventListeners() {
+        const companySearch = document.getElementById('companySearch');
+        const companiesList = document.getElementById('companiesList');
+
+        companySearch.addEventListener('input', function() {
+            const query = this.value.toLowerCase().trim();
+            if (query.length > 1) {
+                filterAndShowCompanies(query);
+                companiesList.style.display = 'block';
+            } else {
+                companiesList.style.display = 'none';
+            }
+        });
+
+        // Hide companies list when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.search-wrapper')) {
+                companiesList.style.display = 'none';
+            }
+        });
+
+        // Enter key to analyze
+        companySearch.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && selectedCompany) {
+                performAnalysis();
+            }
+        });
+    }
+
+    async function loadCompanies() {
+        try {
+            showLoading(true, 'Loading companies database...');
+            
+            const response = await fetch('/api/cash-flow/companies');
+            const data = await response.json();
+            
+            if (data.success) {
+                companiesData = data.companies;
+                console.log(`✅ Loaded ${companiesData.length} companies`);
+                
+                // Show success message
+                setTimeout(() => {
+                    showAlert('success', `Loaded ${companiesData.length} companies from database`);
+                }, 500);
+                
+            } else {
+                throw new Error(data.error || 'Failed to load companies');
+            }
+        } catch (error) {
+            console.error('❌ Error loading companies:', error);
+            showAlert('danger', 'Failed to load companies: ' + error.message);
+        } finally {
+            showLoading(false);
+        }
+    }
+
+    function filterAndShowCompanies(query) {
+        const companiesList = document.getElementById('companiesList');
+        const filteredCompanies = companiesData.filter(company => 
+            company.company_name.toLowerCase().includes(query) ||
+            (company.industry && company.industry.toLowerCase().includes(query))
+        ).slice(0, 10); // Show max 10 results
+
+        companiesList.innerHTML = '';
+        
+        if (filteredCompanies.length === 0) {
+            companiesList.innerHTML = '<div class="company-item">No companies found</div>';
+            return;
+        }
+
+        filteredCompanies.forEach(company => {
+            const div = document.createElement('div');
+            div.className = 'company-item';
+            div.innerHTML = `
+                <div>
+                    <strong>${company.company_name}</strong>
+                    <br>
+                    <small class="text-muted">
+                        <i class="fas fa-industry me-1"></i>${company.industry || 'General'} • 
+                        <i class="fas fa-calendar me-1"></i>${company.year || 'N/A'} •
+                        <i class="fas fa-chart-line me-1"></i>Score: ${company.financial_health_score || 'N/A'}
+                    </small>
+                </div>
+            `;
+            div.onclick = () => selectCompany(company);
+            companiesList.appendChild(div);
+        });
+    }
+
+    function selectCompany(company) {
+        selectedCompany = company;
+        document.getElementById('companySearch').value = company.company_name;
+        document.getElementById('companiesList').style.display = 'none';
+        
+        console.log('Selected company:', company.company_name);
+    }
+
+    async function performAnalysis() {
+        if (!selectedCompany) {
+            showAlert('danger', 'Please select a company first');
+            return;
+        }
+
+        const year = document.getElementById('analysisYear').value;
+        showLoading(true, `Analyzing ${selectedCompany.company_name} for ${year}...`);
+        hideAlert();
+
+        try {
+            // Get detailed cash flow data for the company
+            const cashFlowResponse = await fetch(`/api/cash-flow/${encodeURIComponent(selectedCompany.company_name)}`);
+            const cashFlowData = await cashFlowResponse.json();
+
+            if (!cashFlowData.success) {
+                throw new Error(cashFlowData.error || 'Failed to fetch cash flow data');
+            }
+
+            // Get ML analysis
+            const mlResponse = await fetch(`/api/ml-analysis/${encodeURIComponent(selectedCompany.company_name)}`);
+            const mlData = await mlResponse.json();
+
+            // Find data for selected year or use latest
+            const yearData = cashFlowData.data.find(d => d.year == year) || cashFlowData.data[0];
+            
+            if (!yearData) {
+                throw new Error('No data available for selected year');
+            }
+
+            displayAnalysisResults(yearData, mlData.success ? mlData : null);
+            
+        } catch (error) {
+            console.error('❌ Analysis error:', error);
+            showAlert('danger', 'Analysis failed: ' + error.message);
+        } finally {
+            showLoading(false);
+        }
+    }
+
+    function displayAnalysisResults(data, mlData) {
+        console.log('Displaying results for:', data);
+
+        // Company Overview
+        document.getElementById('companyName').textContent = data.company_name || '-';
+        document.getElementById('companyIndustry').textContent = data.industry || 'General';
+        document.getElementById('companyYear').textContent = data.year || '-';
+        
+        // Risk Level
+        const liquidationLabel = parseInt(data.liquidation_label) || 0;
+        const riskLevel = liquidationLabel === 1 ? 'High Risk' : 'Low Risk';
+        const riskElement = document.getElementById('riskLevel');
+        riskElement.innerHTML = `<span class="risk-badge ${liquidationLabel === 1 ? 'risk-high' : 'risk-low'}">${riskLevel}</span>`;
+
+        // Financial Health Score
+        const healthScore = calculateHealthScore(data);
+        displayHealthScore(healthScore);
+
+        // Cash Flow Analysis
+        document.getElementById('netIncome').textContent = formatCurrency(data.net_income);
+        document.getElementById('netIncome').className = `metric-value ${(data.net_income || 0) >= 0 ? 'positive' : 'negative'}`;
+        
+        document.getElementById('operatingCashFlow').textContent = formatCurrency(data.net_cash_from_operating_activities);
+        document.getElementById('operatingCashFlow').className = `metric-value ${(data.net_cash_from_operating_activities || 0) >= 0 ? 'positive' : 'negative'}`;
+        
+        document.getElementById('freeCashFlow').textContent = formatCurrency(data.free_cash_flow);
+        document.getElementById('freeCashFlow').className = `metric-value ${(data.free_cash_flow || 0) >= 0 ? 'positive' : 'negative'}`;
+        
+        document.getElementById('ocfRatio').textContent = (data.ocf_to_net_income_ratio || 0).toFixed(2);
+        document.getElementById('workingCapitalChange').textContent = formatCurrency(data.changes_in_working_capital);
+
+        // Financial Ratios
+        document.getElementById('debtEquityRatio').textContent = (data.debt_to_equity_ratio || 0).toFixed(2);
+        document.getElementById('interestCoverage').textContent = (data.interest_coverage_ratio || 0).toFixed(2);
+        document.getElementById('capex').textContent = formatCurrency(data.capital_expenditures);
+        document.getElementById('depreciation').textContent = formatCurrency(data.depreciation_and_amortization);
+        
+        const liquidationElement = document.getElementById('liquidationLabel');
+        liquidationElement.innerHTML = `<span class="risk-badge ${liquidationLabel === 1 ? 'risk-high' : 'risk-low'}">${liquidationLabel === 1 ? 'Yes' : 'No'}</span>`;
+
+        // ML Analysis
+        if (mlData && mlData.ml_analysis) {
+            const ml = mlData.ml_analysis;
+            document.getElementById('mlHealthScore').textContent = ml.ml_ensemble_health_score || '-';
+            document.getElementById('mlRiskCategory').textContent = ml.ml_ensemble_risk_category || '-';
+            document.getElementById('mlConfidence').textContent = ml.ml_prediction_confidence ? ml.ml_prediction_confidence.toFixed(1) + '%' : '-';
+            document.getElementById('mlModels').textContent = (ml.ml_models_used || []).join(', ') || '-';
+            document.getElementById('mlRecommendation').textContent = ml.ml_recommendation || '-';
+            
+            document.getElementById('mlStatus').innerHTML = '<i class="fas fa-check-circle"></i> AI analysis completed successfully';
+            document.getElementById('mlStatus').className = 'ml-status ml-available';
+        } else {
+            document.getElementById('mlHealthScore').textContent = 'Not Available';
+            document.getElementById('mlRiskCategory').textContent = 'Traditional Analysis';
+            document.getElementById('mlConfidence').textContent = '75%';
+            document.getElementById('mlModels').textContent = 'Rule-based System';
+            document.getElementById('mlRecommendation').textContent = 'Install ML libraries for advanced predictions';
+            
+            document.getElementById('mlStatus').innerHTML = '<i class="fas fa-exclamation-triangle"></i> ML analysis not available - using traditional methods';
+            document.getElementById('mlStatus').className = 'ml-status ml-unavailable';
+        }
+
+        // Show results and export button
+        document.getElementById('analysisResults').style.display = 'grid';
+        document.getElementById('exportButton').style.display = 'block';
+        
+        // Scroll to results
+        document.getElementById('analysisResults').scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'start' 
+        });
+    }
+
+    function calculateHealthScore(data) {
+        let score = 50; // Base score
+
+        // Operating cash flow impact (30% weight)
+        const ocf = parseFloat(data.net_cash_from_operating_activities) || 0;
+        if (ocf > 1000000) score += 20;
+        else if (ocf > 0) score += 10;
+        else if (ocf < -1000000) score -= 25;
+        else if (ocf < 0) score -= 15;
+
+        // Net income impact (25% weight)
+        const netIncome = parseFloat(data.net_income) || 0;
+        if (netIncome > 500000) score += 15;
+        else if (netIncome > 0) score += 8;
+        else if (netIncome < -500000) score -= 20;
+        else if (netIncome < 0) score -= 12;
+
+        // Free cash flow impact (25% weight)
+        const fcf = parseFloat(data.free_cash_flow) || 0;
+        if (fcf > 500000) score += 15;
+        else if (fcf > 0) score += 8;
+        else if (fcf < -500000) score -= 15;
+        else if (fcf < 0) score -= 8;
+
+        // Liquidation warning impact (20% weight)
+        const liquidationLabel = parseInt(data.liquidation_label) || 0;
+        if (liquidationLabel === 1) score -= 20;
+        else score += 10;
+
+        return Math.max(0, Math.min(100, Math.round(score)));
+    }
+
+    function displayHealthScore(score) {
+        const scoreElement = document.getElementById('healthScore');
+        const scoreCircle = document.getElementById('scoreCircle');
+        const scoreDescription = document.getElementById('scoreDescription');
+
+        scoreElement.textContent = score;
+
+        // Remove existing score classes
+        scoreCircle.classList.remove('score-excellent', 'score-good', 'score-poor');
+
+        if (score >= 75) {
+            scoreCircle.classList.add('score-excellent');
+            scoreDescription.textContent = 'Excellent Financial Health';
+        } else if (score >= 50) {
+            scoreCircle.classList.add('score-good');
+            scoreDescription.textContent = 'Good Financial Health';
+        } else {
+            scoreCircle.classList.add('score-poor');
+            scoreDescription.textContent = 'Poor Financial Health - Needs Attention';
+        }
+    }
+
+    function formatCurrency(value) {
+        if (value === null || value === undefined || value === '') return 'N/A';
+        
+        const num = parseFloat(value);
+        if (isNaN(num)) return 'N/A';
+        
+        const absNum = Math.abs(num);
+        const sign = num < 0 ? '-' : '';
+        
+        if (absNum >= 1e12) {
+            return `${sign}${(absNum/1e12).toFixed(1)}T`;
+        } else if (absNum >= 1e9) {
+            return `${sign}${(absNum/1e9).toFixed(1)}B`;
+        } else if (absNum >= 1e6) {
+            return `${sign}${(absNum/1e6).toFixed(1)}M`;
+        } else if (absNum >= 1e3) {
+            return `${sign}${(absNum/1e3).toFixed(1)}K`;
+        } else {
+            return `${sign}${absNum.toFixed(2)}`;
+        }
+    }
+
+    function showLoading(show, message = 'Analyzing financial data...') {
+        const loading = document.getElementById('loadingIndicator');
+        const results = document.getElementById('analysisResults');
+        
+        if (show) {
+            loading.style.display = 'block';
+            loading.querySelector('p').textContent = message;
+            results.style.display = 'none';
+        } else {
+            loading.style.display = 'none';
+        }
+    }
+
+    function showAlert(type, message) {
+        // Remove existing alerts
+        const existingAlerts = document.querySelectorAll('.alert');
+        existingAlerts.forEach(alert => alert.remove());
+
+        // Create new alert
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `alert alert-${type}`;
+        alertDiv.innerHTML = `
+            <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-triangle'} me-2"></i>
+            ${message}
+            <button type="button" class="btn-close" onclick="this.parentElement.remove()"></button>
+        `;
+        
+        document.querySelector('.analysis-container').insertBefore(alertDiv, document.querySelector('.analysis-controls'));
+        
+        // Auto-hide after 8 seconds
+        setTimeout(() => {
+            if (alertDiv.parentNode) {
+                alertDiv.remove();
+            }
+        }, 8000);
+    }
+
+    function hideAlert() {
+        const alerts = document.querySelectorAll('.alert');
+        alerts.forEach(alert => alert.remove());
+    }
+
+    function exportAnalysisData() {
+        if (!selectedCompany) {
+            showAlert('danger', 'No company selected for export');
+            return;
+        }
+
+        const analysisData = {
+            company: selectedCompany,
+            timestamp: new Date().toISOString(),
+            analysis_results: {
+                company_name: document.getElementById('companyName').textContent,
+                industry: document.getElementById('companyIndustry').textContent,
+                year: document.getElementById('companyYear').textContent,
+                health_score: document.getElementById('healthScore').textContent,
+                net_income: document.getElementById('netIncome').textContent,
+                operating_cash_flow: document.getElementById('operatingCashFlow').textContent,
+                free_cash_flow: document.getElementById('freeCashFlow').textContent,
+                debt_equity_ratio: document.getElementById('debtEquityRatio').textContent,
+                ml_health_score: document.getElementById('mlHealthScore').textContent,
+                risk_category: document.getElementById('mlRiskCategory').textContent,
+                recommendation: document.getElementById('mlRecommendation').textContent
+            }
+        };
+
+        const jsonStr = JSON.stringify(analysisData, null, 2);
+        const blob = new Blob([jsonStr], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `financial_analysis_${selectedCompany.company_name}_${new Date().toISOString().split('T')[0]}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+
+        showAlert('success', 'Analysis data exported successfully!');
+    }
+
+    // Add company suggestions on focus
+    document.getElementById('companySearch').addEventListener('focus', function() {
+        if (this.value.trim() === '' && companiesData.length > 0) {
+            // Show top 5 companies as suggestions
+            const topCompanies = companiesData.slice(0, 5);
+            
+            const companiesList = document.getElementById('companiesList');
+            companiesList.innerHTML = '';
+            
+            const suggestionHeader = document.createElement('div');
+            suggestionHeader.className = 'company-item';
+            suggestionHeader.style.fontWeight = 'bold';
+            suggestionHeader.style.background = '#f8f9fa';
+            suggestionHeader.innerHTML = '<i class="fas fa-lightbulb me-2"></i>Popular Companies';
+            companiesList.appendChild(suggestionHeader);
+            
+            topCompanies.forEach(company => {
+                const div = document.createElement('div');
+                div.className = 'company-item';
+                div.innerHTML = `
+                    <div>
+                        <strong>${company.company_name}</strong>
+                        <br>
+                        <small class="text-muted">
+                            <i class="fas fa-industry me-1"></i>${company.industry || 'General'} • 
+                            <i class="fas fa-chart-line me-1"></i>Score: ${company.financial_health_score || 'N/A'}
+                        </small>
+                    </div>
+                `;
+                div.onclick = () => selectCompany(company);
+                companiesList.appendChild(div);
+            });
+            
+            companiesList.style.display = 'block';
+        }
+    });
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', function(e) {
+        // Alt + A for analyze
+        if (e.altKey && e.key === 'a' && selectedCompany) {
+            e.preventDefault();
+            performAnalysis();
+        }
+        
+        // Escape to close dropdown
+        if (e.key === 'Escape') {
+            document.getElementById('companiesList').style.display = 'none';
+        }
+    });
+
+    // Enhanced error handling for API calls
+    window.addEventListener('unhandledrejection', function(event) {
+        console.error('Unhandled promise rejection:', event.reason);
+        showAlert('danger', 'An unexpected error occurred. Please try again.');
+    });
+
+    // Performance monitoring
+    window.addEventListener('load', function() {
+        const loadTime = performance.timing.loadEventEnd - performance.timing.navigationStart;
+        console.log(`Analysis page loaded in ${loadTime}ms`);
+        
+        if (loadTime > 3000) {
+            console.warn('Page loading slowly. Consider optimizing.');
+        }
+    });
+
+    // Make functions globally available for debugging
+    window.quickAnalyze = function(companyName) {
+        const company = companiesData.find(c => c.company_name === companyName);
+        if (company) {
+            selectCompany(company);
+            performAnalysis();
+        }
+    };
+
+    window.exportAnalysisData = exportAnalysisData;
+    
+    console.log('✅ Analysis page initialized successfully');
+    console.log('Available functions: quickAnalyze(), exportAnalysisData()');
+
+    // Simple auto-analysis check
+setTimeout(function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const companyFromUrl = urlParams.get('company');
+    
+    if (companyFromUrl) {
+        console.log('Auto-analyzing company from URL:', companyFromUrl);
+        
+        // Wait for companies data to load
+        const waitForData = setInterval(function() {
+            if (companiesData && companiesData.length > 0) {
+                clearInterval(waitForData);
+                
+                // Find and select company
+                const company = companiesData.find(c => c.company_name === companyFromUrl);
+                if (company) {
+                    console.log('Found company:', company);
+                    selectCompany(company);
+                    
+                    // Trigger analysis
+                    setTimeout(function() {
+                        console.log('Triggering analysis...');
+                        performAnalysis();
+                    }, 1000);
+                } else {
+                    console.log('Company not found in database:', companyFromUrl);
+                    // Fill search box anyway
+                    document.getElementById('companySearch').value = companyFromUrl;
+                }
+            }
+        }, 500); // Check every 500ms
+        
+        // Timeout after 10 seconds
+        setTimeout(function() {
+            clearInterval(waitForData);
+        }, 10000);
+    }
+}, 1000);
+
+
+
+
+    
+</script>
+{% endblock %}

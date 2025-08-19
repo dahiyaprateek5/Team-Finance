@@ -1,0 +1,535 @@
+<!-- AI Insights Panel Component -->
+<div class="ai-insights-panel">
+    <div class="panel-header">
+        <div class="header-content">
+            <div class="icon-wrapper">
+                <i class="fas fa-brain"></i>
+            </div>
+            <div class="header-text">
+                <h3>AI Financial Insights</h3>
+                <p>Powered by Advanced Analytics</p>
+            </div>
+        </div>
+        <div class="panel-actions">
+            <button class="refresh-btn" onclick="refreshInsights()">
+                <i class="fas fa-sync-alt"></i>
+            </button>
+            <button class="expand-btn" onclick="togglePanel()">
+                <i class="fas fa-expand-alt"></i>
+            </button>
+        </div>
+    </div>
+
+    <div class="insights-content">
+        <!-- Financial Health Score -->
+        <div class="insight-card health-score">
+            <div class="card-header">
+                <h4><i class="fas fa-heartbeat"></i> Financial Health Score</h4>
+                <span class="score-badge" id="healthScore">85</span>
+            </div>
+            <div class="score-visual">
+                <div class="progress-ring">
+                    <svg width="80" height="80">
+                        <circle cx="40" cy="40" r="35" fill="none" stroke="#e0e0e0" stroke-width="6"/>
+                        <circle cx="40" cy="40" r="35" fill="none" stroke="#4CAF50" stroke-width="6" 
+                                stroke-dasharray="220" stroke-dashoffset="33" class="progress-circle"/>
+                    </svg>
+                    <div class="score-text">85/100</div>
+                </div>
+                <div class="score-details">
+                    <div class="detail-item">
+                        <span class="label">Liquidity:</span>
+                        <span class="value good">Strong</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="label">Profitability:</span>
+                        <span class="value excellent">Excellent</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="label">Leverage:</span>
+                        <span class="value moderate">Moderate</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Key Insights -->
+        <div class="insight-card key-insights">
+            <div class="card-header">
+                <h4><i class="fas fa-lightbulb"></i> Key Insights</h4>
+                <span class="insight-count">4 Insights</span>
+            </div>
+            <div class="insights-list">
+                <div class="insight-item positive">
+                    <div class="insight-icon">
+                        <i class="fas fa-arrow-up"></i>
+                    </div>
+                    <div class="insight-content">
+                        <h5>Revenue Growth Acceleration</h5>
+                        <p>Q4 revenue increased by 23% compared to Q3, indicating strong market traction.</p>
+                        <span class="insight-impact">High Impact</span>
+                    </div>
+                </div>
+                
+                <div class="insight-item warning">
+                    <div class="insight-icon">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <div class="insight-content">
+                        <h5>Cash Flow Efficiency</h5>
+                        <p>Operating cash flow margin decreased to 12%. Consider optimizing working capital.</p>
+                        <span class="insight-impact">Medium Impact</span>
+                    </div>
+                </div>
+
+                <div class="insight-item neutral">
+                    <div class="insight-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div class="insight-content">
+                        <h5>Industry Benchmark</h5>
+                        <p>Current ratio of 2.1x is above industry average of 1.8x.</p>
+                        <span class="insight-impact">Low Impact</span>
+                    </div>
+                </div>
+
+                <div class="insight-item positive">
+                    <div class="insight-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <div class="insight-content">
+                        <h5>Risk Assessment</h5>
+                        <p>Liquidation risk decreased by 15% due to improved cash position.</p>
+                        <span class="insight-impact">High Impact</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recommendations -->
+        <div class="insight-card recommendations">
+            <div class="card-header">
+                <h4><i class="fas fa-tasks"></i> AI Recommendations</h4>
+                <span class="priority-filter">
+                    <select onchange="filterRecommendations(this.value)">
+                        <option value="all">All Priorities</option>
+                        <option value="high">High Priority</option>
+                        <option value="medium">Medium Priority</option>
+                        <option value="low">Low Priority</option>
+                    </select>
+                </span>
+            </div>
+            <div class="recommendations-list">
+                <div class="recommendation-item high-priority">
+                    <div class="priority-indicator"></div>
+                    <div class="recommendation-content">
+                        <h5>Optimize Inventory Management</h5>
+                        <p>Reduce inventory holding period from 45 to 35 days to improve cash flow by $2.3M.</p>
+                        <div class="recommendation-meta">
+                            <span class="timeline"><i class="fas fa-clock"></i> 2-3 months</span>
+                            <span class="impact"><i class="fas fa-dollar-sign"></i> $2.3M impact</span>
+                        </div>
+                        <button class="implement-btn">Mark as Implemented</button>
+                    </div>
+                </div>
+
+                <div class="recommendation-item medium-priority">
+                    <div class="priority-indicator"></div>
+                    <div class="recommendation-content">
+                        <h5>Diversify Revenue Streams</h5>
+                        <p>Consider expanding into adjacent markets to reduce dependency on core product line.</p>
+                        <div class="recommendation-meta">
+                            <span class="timeline"><i class="fas fa-clock"></i> 6-12 months</span>
+                            <span class="impact"><i class="fas fa-chart-line"></i> Growth opportunity</span>
+                        </div>
+                        <button class="implement-btn">View Details</button>
+                    </div>
+                </div>
+
+                <div class="recommendation-item low-priority">
+                    <div class="priority-indicator"></div>
+                    <div class="recommendation-content">
+                        <h5>Review Debt Structure</h5>
+                        <p>Evaluate refinancing options for long-term debt to reduce interest expenses.</p>
+                        <div class="recommendation-meta">
+                            <span class="timeline"><i class="fas fa-clock"></i> 3-6 months</span>
+                            <span class="impact"><i class="fas fa-percentage"></i> 0.5% interest savings</span>
+                        </div>
+                        <button class="implement-btn">Schedule Review</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Predictive Analytics -->
+        <div class="insight-card predictions">
+            <div class="card-header">
+                <h4><i class="fas fa-crystal-ball"></i> Predictions & Forecasts</h4>
+                <span class="confidence-level">92% Confidence</span>
+            </div>
+            <div class="predictions-grid">
+                <div class="prediction-item">
+                    <div class="prediction-icon">
+                        <i class="fas fa-trending-up"></i>
+                    </div>
+                    <div class="prediction-content">
+                        <h5>Next Quarter Revenue</h5>
+                        <div class="prediction-value">$12.5M - $13.2M</div>
+                        <div class="prediction-change positive">+8.5% growth</div>
+                    </div>
+                </div>
+
+                <div class="prediction-item">
+                    <div class="prediction-icon">
+                        <i class="fas fa-water"></i>
+                    </div>
+                    <div class="prediction-content">
+                        <h5>Cash Flow Forecast</h5>
+                        <div class="prediction-value">$3.8M</div>
+                        <div class="prediction-change positive">+12% improvement</div>
+                    </div>
+                </div>
+
+                <div class="prediction-item">
+                    <div class="prediction-icon">
+                        <i class="fas fa-exclamation-circle"></i>
+                    </div>
+                    <div class="prediction-content">
+                        <h5>Risk Level</h5>
+                        <div class="prediction-value">Low</div>
+                        <div class="prediction-change neutral">Stable outlook</div>
+                    </div>
+                </div>
+
+                <div class="prediction-item">
+                    <div class="prediction-icon">
+                        <i class="fas fa-chart-bar"></i>
+                    </div>
+                    <div class="prediction-content">
+                        <h5>Market Position</h5>
+                        <div class="prediction-value">Improving</div>
+                        <div class="prediction-change positive">+2 rank improvement</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.ai-insights-panel {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 15px;
+    padding: 25px;
+    margin: 20px 0;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    color: white;
+}
+
+.panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+}
+
+.header-content {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.icon-wrapper {
+    background: rgba(255,255,255,0.2);
+    padding: 12px;
+    border-radius: 10px;
+}
+
+.icon-wrapper i {
+    font-size: 24px;
+}
+
+.header-text h3 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 600;
+}
+
+.header-text p {
+    margin: 5px 0 0 0;
+    opacity: 0.8;
+    font-size: 14px;
+}
+
+.panel-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.refresh-btn, .expand-btn {
+    background: rgba(255,255,255,0.2);
+    border: none;
+    color: white;
+    padding: 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.refresh-btn:hover, .expand-btn:hover {
+    background: rgba(255,255,255,0.3);
+    transform: translateY(-2px);
+}
+
+.insights-content {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 20px;
+}
+
+.insight-card {
+    background: rgba(255,255,255,0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 12px;
+    padding: 20px;
+    border: 1px solid rgba(255,255,255,0.2);
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.card-header h4 {
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 18px;
+}
+
+.score-badge {
+    background: #4CAF50;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.score-visual {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.progress-ring {
+    position: relative;
+}
+
+.progress-circle {
+    transform: rotate(-90deg);
+    transform-origin: 50% 50%;
+    animation: progressAnimation 2s ease-in-out;
+}
+
+.score-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.score-details {
+    flex: 1;
+}
+
+.detail-item {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+
+.value.good { color: #4CAF50; }
+.value.excellent { color: #2196F3; }
+.value.moderate { color: #FF9800; }
+
+.insights-list, .recommendations-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.insight-item, .recommendation-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 15px;
+    padding: 15px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 10px;
+    border-left: 4px solid;
+}
+
+.insight-item.positive { border-left-color: #4CAF50; }
+.insight-item.warning { border-left-color: #FF9800; }
+.insight-item.neutral { border-left-color: #2196F3; }
+
+.recommendation-item.high-priority { border-left-color: #f44336; }
+.recommendation-item.medium-priority { border-left-color: #FF9800; }
+.recommendation-item.low-priority { border-left-color: #4CAF50; }
+
+.insight-icon {
+    background: rgba(255,255,255,0.2);
+    padding: 8px;
+    border-radius: 8px;
+    min-width: 40px;
+    text-align: center;
+}
+
+.insight-content h5, .recommendation-content h5 {
+    margin: 0 0 8px 0;
+    font-size: 16px;
+}
+
+.insight-content p, .recommendation-content p {
+    margin: 0 0 10px 0;
+    opacity: 0.9;
+    line-height: 1.4;
+}
+
+.insight-impact {
+    background: rgba(255,255,255,0.2);
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.recommendation-meta {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 10px;
+    font-size: 12px;
+    opacity: 0.8;
+}
+
+.implement-btn {
+    background: rgba(255,255,255,0.2);
+    border: 1px solid rgba(255,255,255,0.3);
+    color: white;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: all 0.3s ease;
+}
+
+.implement-btn:hover {
+    background: rgba(255,255,255,0.3);
+}
+
+.predictions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+}
+
+.prediction-item {
+    text-align: center;
+    padding: 20px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 10px;
+}
+
+.prediction-icon {
+    margin-bottom: 10px;
+}
+
+.prediction-icon i {
+    font-size: 24px;
+}
+
+.prediction-value {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.prediction-change {
+    font-size: 12px;
+    opacity: 0.8;
+}
+
+.prediction-change.positive { color: #4CAF50; }
+.prediction-change.neutral { color: #2196F3; }
+
+@keyframes progressAnimation {
+    from { stroke-dashoffset: 220; }
+    to { stroke-dashoffset: 33; }
+}
+
+@media (max-width: 768px) {
+    .insights-content {
+        grid-template-columns: 1fr;
+    }
+    
+    .score-visual {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .predictions-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+</style>
+
+<script>
+function refreshInsights() {
+    // Add loading animation
+    const refreshBtn = document.querySelector('.refresh-btn i');
+    refreshBtn.style.animation = 'spin 1s linear infinite';
+    
+    // Simulate API call
+    setTimeout(() => {
+        refreshBtn.style.animation = '';
+        // Update insights data here
+        updateInsightsData();
+    }, 2000);
+}
+
+function togglePanel() {
+    const panel = document.querySelector('.ai-insights-panel');
+    panel.classList.toggle('expanded');
+}
+
+function filterRecommendations(priority) {
+    const recommendations = document.querySelectorAll('.recommendation-item');
+    recommendations.forEach(item => {
+        if (priority === 'all' || item.classList.contains(`${priority}-priority`)) {
+            item.style.display = 'flex';
+        } else {
+            item.style.display = 'none';
+        }
+    });
+}
+
+function updateInsightsData() {
+    // Simulate real-time data updates
+    const healthScore = Math.floor(Math.random() * 20) + 80;
+    document.getElementById('healthScore').textContent = healthScore;
+    
+    // Update progress circle
+    const circle = document.querySelector('.progress-circle');
+    const offset = 220 - (healthScore / 100) * 220;
+    circle.style.strokeDashoffset = offset;
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', function() {
+    updateInsightsData();
+});
+</script>

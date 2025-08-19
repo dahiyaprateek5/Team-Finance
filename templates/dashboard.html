@@ -1,0 +1,3587 @@
+{% extends "base.html" %}
+
+{% block title %}Financial Dashboard - AI-Powered Risk Assessment{% endblock %}
+
+{% block content %}
+<div class="modern-dashboard">
+    <!-- Enhanced Glassmorphism Header -->
+    <div class="glass-header">
+        <div class="container-fluid">
+            <div class="row align-items-center">
+                <div class="col">
+                    <div class="header-content">
+                        <div class="d-flex align-items-center mb-2">
+                            <div class="icon-container me-3">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                            <div>
+                                <h1 class="modern-title mb-0">Financial Risk Dashboard</h1>
+                                <p class="subtitle mb-0">AI-Powered Analysis • Real-time Monitoring • Predictive Insights</p>
+                            </div>
+                        </div>
+                        <div class="status-indicators">
+                            <span class="status-dot live"></span>
+                            <span class="status-text">Live Data</span>
+                            <span class="separator">•</span>
+                            <span class="status-text" id="last-updated">Updated just now</span>
+                            <span class="separator">•</span>
+                            <span class="status-text ml-status">🤖 AI Enabled</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-auto">
+                    <div class="action-buttons">
+                        <button class="modern-btn primary" onclick="window.location.href='/upload'">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <span>Upload</span>
+                        </button>
+                        <button class="modern-btn secondary" onclick="window.location.href='/companies'">
+                            <i class="fas fa-building"></i>
+                            <span>Companies</span>
+                        </button>
+                        <button class="modern-btn accent" onclick="generateAdvancedReport()">
+                            <i class="fas fa-magic"></i>
+                            <span>AI Report</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container-fluid py-4">
+        <!-- Enhanced Stats Grid -->
+        <div class="stats-grid mb-5">
+            <div class="stat-card primary">
+                <div class="stat-icon">
+                    <i class="fas fa-building"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-number" data-target="{{ stats.total_companies if stats else 0 }}">0</div>
+                    <div class="stat-label">Portfolio Companies</div>
+                    <div class="stat-trend positive">
+                        <i class="fas fa-arrow-up"></i>
+                        <span>+12% this month</span>
+                    </div>
+                </div>
+                <div class="stat-glow primary-glow"></div>
+            </div>
+
+            <div class="stat-card success">
+                <div class="stat-icon">
+                    <i class="fas fa-chart-bar"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-number" data-target="{{ stats.total_records if stats else 0 }}">0</div>
+                    <div class="stat-label">Financial Analyses</div>
+                    <div class="stat-trend positive">
+                        <i class="fas fa-arrow-up"></i>
+                        <span>Processing live</span>
+                    </div>
+                </div>
+                <div class="stat-glow success-glow"></div>
+            </div>
+
+            <div class="stat-card info">
+                <div class="stat-icon">
+                    <i class="fas fa-heartbeat"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-number" data-target="{{ "%.0f"|format(stats.profitable_percentage) if stats and stats.profitable_percentage else 0 }}">0</div>
+                    <div class="stat-label">Health Score %</div>
+                    <div class="stat-trend positive">
+                        <i class="fas fa-arrow-up"></i>
+                        <span>Improving trend</span>
+                    </div>
+                </div>
+                <div class="stat-glow info-glow"></div>
+            </div>
+
+            <div class="stat-card warning">
+                <div class="stat-icon">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-number" data-target="{{ stats.high_risk_companies if stats else 0 }}">0</div>
+                    <div class="stat-label">High Risk Alert</div>
+                    <div class="stat-trend {{ 'negative' if stats and stats.high_risk_companies > 0 else 'neutral' }}">
+                        <i class="fas fa-{{ 'exclamation-triangle' if stats and stats.high_risk_companies > 0 else 'shield-check' }}"></i>
+                        <span>{{ 'Action needed' if stats and stats.high_risk_companies > 0 else 'All clear' }}</span>
+                    </div>
+                </div>
+                <div class="stat-glow warning-glow"></div>
+            </div>
+        </div>
+
+        <!-- Enhanced Dashboard Grid -->
+        <div class="dashboard-grid">
+            <!-- Enhanced Financial Analysis with Year Tabs -->
+            <div class="dashboard-card main-chart">
+                <div class="card-header modern">
+                    <div class="header-left">
+                        <h3 class="card-title">
+                            <i class="fas fa-chart-area me-2"></i>
+                            Financial Health Trends
+                        </h3>
+                        <p class="card-subtitle">Real-time analysis powered by AI across multiple years</p>
+                    </div>
+                    <div class="header-right">
+                        <div class="year-tabs">
+                            <button class="year-tab active" data-year="2024">2024</button>
+                            <button class="year-tab" data-year="2023">2023</button>
+                            <button class="year-tab" data-year="2022">2022</button>
+                        </div>
+                        <div class="time-selector">
+                            <button class="time-btn active" data-period="6m">6M</button>
+                            <button class="time-btn" data-period="1y">1Y</button>
+                            <button class="time-btn" data-period="3y">3Y</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <!-- Enhanced Metrics Summary -->
+                    <div class="metrics-summary mb-4">
+                        <div class="metric-card positive">
+                            <div class="metric-icon">
+                                <i class="fas fa-arrow-trend-up"></i>
+                            </div>
+                            <div class="metric-info">
+                                <span class="metric-value" id="avg-health-score">85.2</span>
+                                <span class="metric-label">Avg Health Score</span>
+                            </div>
+                        </div>
+                        <div class="metric-card neutral">
+                            <div class="metric-icon">
+                                <i class="fas fa-coins"></i>
+                            </div>
+                            <div class="metric-info">
+                                <span class="metric-value" id="cash-flow-trend">+12.5%</span>
+                                <span class="metric-label">Cash Flow Growth</span>
+                            </div>
+                        </div>
+                        <div class="metric-card negative">
+                            <div class="metric-icon">
+                                <i class="fas fa-shield-halved"></i>
+                            </div>
+                            <div class="metric-info">
+                                <span class="metric-value" id="risk-trend">-8.3%</span>
+                                <span class="metric-label">Risk Reduction</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="chart-container">
+                        <canvas id="modernFinancialChart"></canvas>
+                    </div>
+                    <div class="chart-legend">
+                        <div class="legend-item">
+                            <div class="legend-color health"></div>
+                            <span>Health Score</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color cashflow"></div>
+                            <span>Cash Flow Index</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color risk"></div>
+                            <span>Risk Level</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color profitability"></div>
+                            <span>Profitability</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Enhanced AI Insights Panel -->
+            <div class="dashboard-card ai-insights">
+                <div class="card-header modern">
+                    <h3 class="card-title">
+                        <i class="fas fa-brain me-2"></i>
+                        AI Insights
+                    </h3>
+                    <div class="ai-status">
+                        <div class="ai-indicator active"></div>
+                        <span>AI Active</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="insight-item priority-high">
+                        <div class="insight-icon">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <div class="insight-content">
+                            <h4>Critical Cash Flow Alert</h4>
+                            <p>3 companies showing negative trends</p>
+                            <button class="insight-action">Review Now</button>
+                        </div>
+                    </div>
+                    
+                    <div class="insight-item priority-medium">
+                        <div class="insight-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <div class="insight-content">
+                            <h4>Growth Opportunity</h4>
+                            <p>5 companies ready for expansion</p>
+                            <button class="insight-action">Analyze</button>
+                        </div>
+                    </div>
+                    
+                    <div class="insight-item priority-low">
+                        <div class="insight-icon">
+                            <i class="fas fa-shield-check"></i>
+                        </div>
+                        <div class="insight-content">
+                            <h4>Portfolio Health</h4>
+                            <p>Overall risk decreased by 8%</p>
+                            <button class="insight-action">Details</button>
+                        </div>
+                    </div>
+
+                    <div class="ai-summary">
+                        <div class="summary-header">
+                            <i class="fas fa-magic"></i>
+                            <span>AI Summary</span>
+                        </div>
+                        <div class="summary-content" id="ai-summary-text">
+                            Analyzing financial patterns...
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Enhanced Company Portfolio -->
+            <div class="dashboard-card portfolio">
+                <div class="card-header modern">
+                    <h3 class="card-title">
+                        <i class="fas fa-briefcase me-2"></i>
+                        Portfolio Overview
+                    </h3>
+                    <div class="portfolio-controls">
+                        <select class="filter-select" id="industry-filter">
+                            <option value="">All Industries</option>
+                            <option value="Technology">Technology</option>
+                            <option value="Healthcare">Healthcare</option>
+                            <option value="Financial">Financial</option>
+                            <option value="Industrial">Industrial</option>
+                        </select>
+                        <button class="view-all-btn" onclick="window.location.href='/companies'">
+                            View All
+                            <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="portfolio-grid" id="portfolio-container">
+                        {% if recent_companies %}
+                            {% for company in recent_companies%}
+                            <div class="company-card {{ 'high-risk' if company.risk_level == 'High' else 'low-risk' if company.risk_level == 'Low' else 'medium-risk' }}">
+                                <div class="company-header">
+                                    <div class="company-avatar">
+                                        {{ company.company_name[0] if company.company_name else 'C' }}
+                                    </div>
+                                    <div class="company-info">
+                                        <h4>{{ company.company_name or 'Unnamed Company' }}</h4>
+                                        <p>{{ company.industry or 'General' }}</p>
+                                    </div>
+                                    <div class="risk-indicator {{ company.risk_level.lower() if company.risk_level else 'medium' }}">
+                                        {{ company.risk_level or 'Medium' }}
+                                    </div>
+                                </div>
+                                <div class="company-metrics">
+                                    <div class="metric">
+                                        <span class="metric-label">Health</span>
+                                        <span class="metric-value">{{ company.health_score or 50 }}/100</span>
+                                    </div>
+                                    <div class="metric">
+                                        <span class="metric-label">Cash Flow</span>
+                                        <span class="metric-value {{ 'positive' if company.net_income and company.net_income|replace(',', '')|replace('$', '')|replace('M', '')|replace('B', '')|replace('K', '')|float > 0 else 'negative' }}">
+                                            {{ company.net_income or 'N/A' }}
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="company-actions">
+                                    <button class="action-btn" onclick="viewCompanyAnalysis('{{ company.company_name }}')">
+                                        <i class="fas fa-chart-line"></i>
+                                    </button>
+                                    <button class="action-btn" onclick="generateCompanyReport('{{ company.company_name }}')">
+                                        <i class="fas fa-file-alt"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                        <div class="empty-state">
+                            <div class="empty-icon">
+                                <i class="fas fa-plus-circle"></i>
+                            </div>
+                            <h4>Add Your First Company</h4>
+                            <p>Start building your financial portfolio</p>
+                            <button class="modern-btn primary" onclick="window.location.href='/companies'">
+                                <i class="fas fa-plus"></i>
+                                <span>Add Company</span>
+                            </button>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Enhanced Risk Analytics -->
+            <div class="dashboard-card risk-analytics">
+                <div class="card-header modern">
+                    <h3 class="card-title">
+                        <i class="fas fa-shield-alt me-2"></i>
+                        Risk Analytics
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="risk-overview">
+                        <div class="risk-circle" id="risk-circle">
+                            <div class="risk-percentage" id="risk-percentage">0%</div>
+                            <div class="risk-label">Overall Risk</div>
+                        </div>
+                        <div class="risk-breakdown">
+                            <div class="risk-item low">
+                                <div class="risk-dot"></div>
+                                <span class="risk-text">Low Risk</span>
+                                <span class="risk-count" id="low-risk-count">0</span>
+                            </div>
+                            <div class="risk-item medium">
+                                <div class="risk-dot"></div>
+                                <span class="risk-text">Medium Risk</span>
+                                <span class="risk-count" id="medium-risk-count">0</span>
+                            </div>
+                            <div class="risk-item high">
+                                <div class="risk-dot"></div>
+                                <span class="risk-text">High Risk</span>
+                                <span class="risk-count" id="high-risk-count">0</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="predictive-analytics">
+                        <h4>Predictive Analytics</h4>
+                        <div class="prediction-item">
+                            <div class="prediction-icon">
+                                <i class="fas fa-trending-up"></i>
+                            </div>
+                            <div class="prediction-content">
+                                <span class="prediction-title">Next Month Forecast</span>
+                                <span class="prediction-value positive">+5.2% Health Improvement</span>
+                            </div>
+                        </div>
+                        <div class="prediction-item">
+                            <div class="prediction-icon">
+                                <i class="fas fa-exclamation-circle"></i>
+                            </div>
+                            <div class="prediction-content">
+                                <span class="prediction-title">Alert Probability</span>
+                                <span class="prediction-value warning">12% Chance Critical Alert</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Enhanced Quick Actions -->
+            <div class="dashboard-card quick-actions">
+                <div class="card-header modern">
+                    <h3 class="card-title">
+                        <i class="fas fa-bolt me-2"></i>
+                        Quick Actions
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="action-grid">
+                        <button class="quick-action-btn upload" onclick="window.location.href='/upload'">
+                            <div class="action-icon">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                            </div>
+                            <span>Upload Documents</span>
+                        </button>
+                        
+                        <button class="quick-action-btn analyze" onclick="runBulkAnalysis()">
+                            <div class="action-icon">
+                                <i class="fas fa-cogs"></i>
+                            </div>
+                            <span>Bulk Analysis</span>
+                        </button>
+                        
+                        <button class="quick-action-btn report" onclick="generateDashboardReport()">
+                            <div class="action-icon">
+                                <i class="fas fa-file-pdf"></i>
+                            </div>
+                            <span>Export Report</span>
+                        </button>
+                        
+                        <button class="quick-action-btn ai" onclick="openAIAssistant()">
+                            <div class="action-icon">
+                                <i class="fas fa-robot"></i>
+                            </div>
+                            <span>AI Assistant</span>
+                        </button>
+                    </div>
+                    
+                    <div class="recent-activity">
+                        <h4>Recent Activity</h4>
+                        <div class="activity-timeline" id="activity-timeline">
+                            <div class="activity-item">
+                                <div class="activity-time">2 min ago</div>
+                                <div class="activity-text">Cash flow analysis completed</div>
+                            </div>
+                            <div class="activity-item">
+                                <div class="activity-time">15 min ago</div>
+                                <div class="activity-text">New company added to portfolio</div>
+                            </div>
+                            <div class="activity-item">
+                                <div class="activity-time">1 hour ago</div>
+                                <div class="activity-text">Risk alert resolved</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modern Loading Overlay -->
+<div class="modern-loading" id="modern-loading" style="display: none;">
+    <div class="loading-container">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">
+            <h3 id="loading-title">Processing Financial Data</h3>
+            <p id="loading-subtitle">Analyzing cash flow patterns with AI...</p>
+        </div>
+        <div class="loading-progress">
+            <div class="progress-bar" id="loading-progress-bar"></div>
+        </div>
+    </div>
+</div>
+
+<!-- AI Assistant Modal -->
+<div class="ai-modal" id="ai-assistant-modal" style="display: none;">
+    <div class="ai-modal-content">
+        <div class="ai-modal-header">
+            <h3>
+                <i class="fas fa-robot me-2"></i>
+                AI Financial Assistant
+            </h3>
+            <button class="close-btn" onclick="closeAIAssistant()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="ai-modal-body">
+            <div class="ai-chat" id="ai-chat">
+                <div class="ai-message">
+                    <div class="ai-avatar">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <div class="ai-text">
+                        Hello! I'm your AI Financial Assistant. I can help you analyze your portfolio, identify risks, and provide actionable insights. What would you like to know?
+                    </div>
+                </div>
+            </div>
+            <div class="ai-input-container">
+                <input type="text" id="ai-input" placeholder="Ask me about your financial data..." />
+                <button onclick="sendAIMessage()">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+:root {
+    --primary-color: #059669;
+    --secondary-color: #10b981;
+    --success-color: #059669;
+    --info-color: #6366f1;
+    --warning-color: #d97706;
+    --danger-color: #dc2626;
+    --dark-bg: #f8fafc;
+    --card-bg: rgba(255, 255, 255, 0.95);
+    --glass-bg: rgba(255, 255, 255, 0.9);
+    --text-primary: #1e293b;
+    --text-secondary: #64748b;
+    --border-color: rgba(0, 0, 0, 0.1);
+    --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    --glow-primary: 0 0 20px rgba(5, 150, 105, 0.3);
+    --glow-success: 0 0 20px rgba(5, 150, 105, 0.3);
+    --glow-info: 0 0 20px rgba(99, 102, 241, 0.3);
+    --glow-warning: 0 0 20px rgba(217, 119, 6, 0.3);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background: #ffffff;
+    min-height: 100vh;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    color: var(--text-primary);
+}
+
+.modern-dashboard {
+    min-height: 100vh;
+    padding: 0;
+}
+
+
+.portfolio-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+    max-height: 800px;
+    overflow-y: auto;
+    padding: 1rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1200px) {
+    .portfolio-grid {
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        max-height: 600px;
+    }
+}
+
+@media (max-width: 768px) {
+    .portfolio-grid {
+        grid-template-columns: 1fr;
+        max-height: 500px;
+    }
+}
+
+/* Enhanced Glassmorphism Header */
+.glass-header {
+    background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 2rem 0;
+    margin-bottom: 2rem;
+    box-shadow: 0 8px 32px rgba(5, 150, 105, 0.2);
+}
+
+.header-content {
+    color: white;
+}
+
+.icon-container {
+    width: 60px;
+    height: 60px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    color: white;
+}
+
+.modern-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #fff 0%, #f0f9ff 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.subtitle {
+    opacity: 0.9;
+    font-size: 1.1rem;
+    font-weight: 400;
+}
+
+.status-indicators {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    opacity: 0.8;
+}
+
+.status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #ef4444;
+}
+
+.status-dot.live {
+    background: #10b981;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+.separator {
+    opacity: 0.5;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 1rem;
+}
+
+.modern-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 12px;
+    font-weight: 600;
+    text-decoration: none;
+    color: white;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+}
+
+.modern-btn.primary {
+    background: rgba(5, 150, 105, 0.9);
+    box-shadow: 0 4px 20px rgba(5, 150, 105, 0.4);
+}
+
+.modern-btn.secondary {
+    background: rgba(220, 38, 38, 0.9);
+    box-shadow: 0 4px 20px rgba(220, 38, 38, 0.4);
+}
+
+.modern-btn.accent {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    box-shadow: 0 4px 20px rgba(240, 147, 251, 0.4);
+}
+
+.modern-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+}
+
+/* Enhanced Stats Grid */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 2rem;
+}
+
+.stat-card {
+    background: white;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 20px;
+    padding: 2rem;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.stat-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+}
+
+.stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+}
+
+.stat-card.primary::before {
+    background: linear-gradient(90deg, #059669 0%, #10b981 100%);
+}
+
+.stat-card.success::before {
+    background: linear-gradient(90deg, #059669 0%, #10b981 100%);
+}
+
+.stat-card.info::before {
+    background: linear-gradient(90deg, #6366f1 0%, #8b5cf6 100%);
+}
+
+.stat-card.warning::before {
+    background: linear-gradient(90deg, #d97706 0%, #f59e0b 100%);
+}
+
+.stat-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    margin-bottom: 1.5rem;
+    background: rgba(5, 150, 105, 0.1);
+    color: #059669;
+}
+
+.stat-content {
+    color: #1e293b;
+}
+
+.stat-number {
+    font-size: 3rem;
+    font-weight: 800;
+    line-height: 1;
+    margin-bottom: 0.5rem;
+    color: #1e293b;
+}
+
+.stat-label {
+    font-size: 1rem;
+    font-weight: 600;
+    opacity: 0.9;
+    margin-bottom: 1rem;
+}
+
+.stat-trend {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.stat-trend.positive {
+    color: #059669;
+}
+
+.stat-trend.negative {
+    color: #dc2626;
+}
+
+.stat-trend.neutral {
+    color: #64748b;
+}
+
+.stat-glow {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    height: 100%;
+    border-radius: 20px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+.stat-card:hover .stat-glow {
+    opacity: 1;
+}
+
+.primary-glow {
+    box-shadow: 0 0 40px rgba(5, 150, 105, 0.4);
+}
+
+.success-glow {
+    box-shadow: 0 0 40px rgba(5, 150, 105, 0.4);
+}
+
+.info-glow {
+    box-shadow: 0 0 40px rgba(99, 102, 241, 0.4);
+}
+
+.warning-glow {
+    box-shadow: 0 0 40px rgba(217, 119, 6, 0.4);
+}
+
+/* Dashboard Grid */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    grid-template-rows: auto auto auto;
+    gap: 2rem;
+    grid-template-areas: 
+        "main-chart ai-insights"
+        "portfolio risk-analytics"
+        "portfolio quick-actions";
+}
+
+.main-chart {
+    grid-area: main-chart;
+}
+
+.ai-insights {
+    grid-area: ai-insights;
+}
+
+.portfolio {
+    grid-area: portfolio;
+}
+
+.risk-analytics {
+    grid-area: risk-analytics;
+}
+
+.quick-actions {
+    grid-area: quick-actions;
+}
+
+.dashboard-card {
+    background: white;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 20px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.dashboard-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+}
+
+.card-header.modern {
+    padding: 2rem 2rem 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    background: #f8fafc;
+}
+
+.header-left .card-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 0.5rem;
+}
+
+.card-subtitle {
+    color: #64748b;
+    font-size: 0.875rem;
+}
+
+.card-body {
+    padding: 2rem;
+    color: #1e293b;
+}
+
+/* Year Tabs and Time Selector */
+.header-right {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.year-tabs {
+    display: flex;
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 12px;
+    padding: 4px;
+}
+
+.year-tab {
+    padding: 8px 16px;
+    border: none;
+    background: transparent;
+    color: #64748b;
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.year-tab.active,
+.year-tab:hover {
+    background: #059669;
+    color: white;
+}
+
+.time-selector {
+    display: flex;
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 12px;
+    padding: 4px;
+}
+
+.time-btn {
+    padding: 8px 16px;
+    border: none;
+    background: transparent;
+    color: #64748b;
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.time-btn.active,
+.time-btn:hover {
+    background: #059669;
+    color: white;
+}
+
+/* Enhanced Metrics Summary */
+.metrics-summary {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+}
+
+.metric-card {
+    background: #f8fafc;
+    border-radius: 12px;
+    padding: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.metric-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    background: rgba(5, 150, 105, 0.1);
+    color: #059669;
+}
+
+.metric-card.positive .metric-icon {
+    background: rgba(5, 150, 105, 0.1);
+    color: #059669;
+}
+
+.metric-card.neutral .metric-icon {
+    background: rgba(99, 102, 241, 0.1);
+    color: #6366f1;
+}
+
+.metric-card.negative .metric-icon {
+    background: rgba(220, 38, 38, 0.1);
+    color: #dc2626;
+}
+
+.metric-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.metric-value {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+.metric-label {
+    font-size: 0.75rem;
+    color: #64748b;
+    margin-top: 0.25rem;
+}
+
+/* Chart Container */
+.chart-container {
+    position: relative;
+    height: 300px;
+    margin-bottom: 1rem;
+}
+
+.chart-legend {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    flex-wrap: wrap;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    color: #64748b;
+}
+
+.legend-color {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+}
+
+.legend-color.health {
+    background: #059669;
+}
+
+.legend-color.cashflow {
+    background: #6366f1;
+}
+
+.legend-color.risk {
+    background: #dc2626;
+}
+
+.legend-color.profitability {
+    background: #d97706;
+}
+
+/* AI Insights */
+.ai-status {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #64748b;
+    font-size: 0.875rem;
+}
+
+.ai-indicator {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #ef4444;
+}
+
+.ai-indicator.active {
+    background: #059669;
+    animation: pulse 2s infinite;
+}
+
+.insight-item {
+    background: #f8fafc;
+    border-radius: 12px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border-left: 4px solid;
+    display: flex;
+    gap: 1rem;
+}
+
+.insight-item.priority-high {
+    border-left-color: #dc2626;
+}
+
+.insight-item.priority-medium {
+    border-left-color: #d97706;
+}
+
+.insight-item.priority-low {
+    border-left-color: #059669;
+}
+
+.insight-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.05);
+    flex-shrink: 0;
+}
+
+.insight-content h4 {
+    font-size: 0.875rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.insight-content p {
+    font-size: 0.75rem;
+    color: #64748b;
+    margin-bottom: 0.5rem;
+}
+
+.insight-action {
+    background: rgba(5, 150, 105, 0.1);
+    border: 1px solid rgba(5, 150, 105, 0.2);
+    color: #059669;
+    padding: 4px 12px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.insight-action:hover {
+    background: rgba(5, 150, 105, 0.2);
+}
+
+.ai-summary {
+    background: linear-gradient(135deg, rgba(5, 150, 105, 0.1) 0%, rgba(16, 185, 129, 0.1) 100%);
+    border-radius: 12px;
+    padding: 1rem;
+    margin-top: 1rem;
+}
+
+.summary-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: #059669;
+}
+
+.summary-content {
+    font-size: 0.875rem;
+    color: #1e293b;
+    line-height: 1.5;
+}
+
+/* Portfolio Controls */
+.portfolio-controls {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.filter-select {
+    padding: 0.5rem 1rem;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    background: white;
+    color: #1e293b;
+    cursor: pointer;
+}
+
+.view-all-btn {
+    background: rgba(5, 150, 105, 0.1);
+    border: 1px solid rgba(5, 150, 105, 0.2);
+    color: #059669;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-decoration: none;
+}
+
+.view-all-btn:hover {
+    background: rgba(5, 150, 105, 0.2);
+    color: #059669;
+}
+
+/* Portfolio Grid */
+.portfolio-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+}
+
+.company-card {
+    background: #f8fafc;
+    border-radius: 12px;
+    padding: 1rem;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.company-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: #059669;
+}
+
+.company-card.high-risk::before {
+    background: #dc2626;
+}
+
+.company-card.medium-risk::before {
+    background: #d97706;
+}
+
+.company-card:hover {
+    transform: translateY(-2px);
+    background: white;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.company-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.company-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    color: white;
+}
+
+.company-info h4 {
+    font-size: 0.875rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.company-info p {
+    font-size: 0.75rem;
+    color: #64748b;
+}
+
+.risk-indicator {
+    font-size: 0.625rem;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: 600;
+    text-transform: uppercase;
+    margin-left: auto;
+}
+
+.risk-indicator.low {
+    background: rgba(5, 150, 105, 0.2);
+    color: #059669;
+}
+
+.risk-indicator.medium {
+    background: rgba(217, 119, 6, 0.2);
+    color: #d97706;
+}
+
+.risk-indicator.high {
+    background: rgba(220, 38, 38, 0.2);
+    color: #dc2626;
+}
+
+.company-metrics {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+}
+
+.metric {
+    text-align: center;
+}
+
+.metric-label {
+    display: block;
+    font-size: 0.625rem;
+    color: #64748b;
+    margin-bottom: 0.25rem;
+    text-transform: uppercase;
+    font-weight: 500;
+}
+
+.metric-value {
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.metric-value.positive {
+    color: #059669;
+}
+
+.metric-value.negative {
+    color: #dc2626;
+}
+
+.company-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.action-btn {
+    background: rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    color: #64748b;
+    padding: 6px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+}
+
+.action-btn:hover {
+    background: rgba(5, 150, 105, 0.1);
+    color: #059669;
+}
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: 3rem 2rem;
+    grid-column: 1 / -1;
+}
+
+.empty-icon {
+    font-size: 3rem;
+    color: #64748b;
+    margin-bottom: 1rem;
+}
+
+.empty-state h4 {
+    font-size: 1.25rem;
+    margin-bottom: 0.5rem;
+}
+
+.empty-state p {
+    color: #64748b;
+    margin-bottom: 1.5rem;
+}
+
+/* Risk Analytics */
+.risk-overview {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.risk-circle {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    flex-shrink: 0;
+}
+
+.risk-circle::before {
+    content: '';
+    position: absolute;
+    width: 80%;
+    height: 80%;
+    background: white;
+    border-radius: 50%;
+}
+
+.risk-percentage {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1e293b;
+    z-index: 1;
+}
+
+.risk-label {
+    font-size: 0.75rem;
+    color: #64748b;
+    z-index: 1;
+}
+
+.risk-breakdown {
+    flex: 1;
+}
+
+.risk-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+}
+
+.risk-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+}
+
+.risk-item.low .risk-dot {
+    background: #059669;
+}
+
+.risk-item.medium .risk-dot {
+    background: #d97706;
+}
+
+.risk-item.high .risk-dot {
+    background: #dc2626;
+}
+
+.risk-text {
+    flex: 1;
+    font-size: 0.875rem;
+}
+
+.risk-count {
+    font-weight: 600;
+    color: #1e293b;
+    background: rgba(0, 0, 0, 0.05);
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+}
+
+.predictive-analytics h4 {
+    font-size: 1rem;
+    margin-bottom: 1rem;
+    color: #1e293b;
+}
+
+.prediction-item {
+    display: flex;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+    padding: 0.75rem;
+    background: #f8fafc;
+    border-radius: 8px;
+}
+
+.prediction-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.05);
+    flex-shrink: 0;
+}
+
+.prediction-content {
+    flex: 1;
+}
+
+.prediction-title {
+    display: block;
+    font-size: 0.75rem;
+    color: #64748b;
+    margin-bottom: 0.25rem;
+}
+
+.prediction-value {
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.prediction-value.positive {
+    color: #059669;
+}
+
+.prediction-value.warning {
+    color: #d97706;
+}
+
+/* Quick Actions */
+.action-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.quick-action-btn {
+    background: #f8fafc;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    color: #1e293b;
+    padding: 1rem;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+}
+
+.quick-action-btn:hover {
+    background: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    color: #1e293b;
+}
+
+.action-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    background: rgba(5, 150, 105, 0.1);
+    color: #059669;
+}
+
+.quick-action-btn span {
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-align: center;
+}
+
+.recent-activity h4 {
+    font-size: 1rem;
+    margin-bottom: 1rem;
+    color: #1e293b;
+}
+
+.activity-timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.activity-item {
+    padding: 0.75rem;
+    background: #f8fafc;
+    border-radius: 8px;
+    border-left: 3px solid #059669;
+}
+
+.activity-time {
+    font-size: 0.625rem;
+    color: #64748b;
+    margin-bottom: 0.25rem;
+}
+
+.activity-text {
+    font-size: 0.75rem;
+    color: #1e293b;
+}
+
+/* Modern Loading */
+.modern-loading {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(10px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+
+.loading-container {
+    text-align: center;
+    color: white;
+}
+
+.loading-spinner {
+    width: 60px;
+    height: 60px;
+    border: 4px solid rgba(255, 255, 255, 0.1);
+    border-top: 4px solid #059669;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 2rem;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.loading-text h3 {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.loading-text p {
+    opacity: 0.8;
+    margin-bottom: 2rem;
+}
+
+.loading-progress {
+    width: 300px;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 2px;
+    overflow: hidden;
+    margin: 0 auto;
+}
+
+.progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #059669 0%, #10b981 100%);
+    border-radius: 2px;
+    width: 0%;
+    animation: progressAnimation 3s ease-in-out infinite;
+}
+
+@keyframes progressAnimation {
+    0% { width: 0%; }
+    50% { width: 70%; }
+    100% { width: 100%; }
+}
+
+/* AI Assistant Modal */
+.ai-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(10px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+}
+
+.ai-modal-content {
+    background: white;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 20px;
+    width: 90%;
+    max-width: 600px;
+    max-height: 80vh;
+    overflow: hidden;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+}
+
+.ai-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    background: #f8fafc;
+}
+
+.ai-modal-header h3 {
+    margin: 0;
+    color: #1e293b;
+}
+
+.close-btn {
+    background: rgba(0, 0, 0, 0.05);
+    border: none;
+    color: #64748b;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.close-btn:hover {
+    background: rgba(220, 38, 38, 0.1);
+    color: #dc2626;
+}
+
+.ai-modal-body {
+    height: 500px;
+    display: flex;
+    flex-direction: column;
+}
+
+.ai-chat {
+    flex: 1;
+    padding: 1.5rem 2rem;
+    overflow-y: auto;
+}
+
+.ai-message {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.ai-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    flex-shrink: 0;
+}
+
+.ai-text {
+    background: #f8fafc;
+    padding: 1rem;
+    border-radius: 12px;
+    color: #1e293b;
+    line-height: 1.5;
+}
+
+.ai-input-container {
+    display: flex;
+    gap: 1rem;
+    padding: 1.5rem 2rem;
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+    background: #f8fafc;
+}
+
+.ai-input-container input {
+    flex: 1;
+    background: white;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 12px;
+    padding: 0.75rem 1rem;
+    color: #1e293b;
+    font-size: 0.875rem;
+}
+
+.ai-input-container input::placeholder {
+    color: #64748b;
+}
+
+.ai-input-container button {
+    background: #059669;
+    border: none;
+    color: white;
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.ai-input-container button:hover {
+    background: #10b981;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+        grid-template-areas: 
+            "main-chart"
+            "ai-insights"
+            "portfolio"
+            "risk-analytics"
+            "quick-actions";
+    }
+}
+
+@media (max-width: 768px) {
+    .modern-title {
+        font-size: 2rem;
+    }
+    
+    .subtitle {
+        font-size: 1rem;
+    }
+    
+    .action-buttons {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .stats-grid {
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1rem;
+    }
+    
+    .stat-number {
+        font-size: 2.5rem;
+    }
+    
+    .glass-header {
+        padding: 1rem 0;
+    }
+    
+    .card-header.modern,
+    .card-body {
+        padding: 1.5rem;
+    }
+    
+    .action-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .portfolio-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .risk-overview {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .metrics-summary {
+        grid-template-columns: 1fr;
+    }
+
+    .header-right {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+}
+
+/* Animations */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.dashboard-card,
+.stat-card {
+    animation: fadeInUp 0.6s ease forwards;
+}
+
+.dashboard-card:nth-child(1) { animation-delay: 0.1s; }
+.dashboard-card:nth-child(2) { animation-delay: 0.2s; }
+.dashboard-card:nth-child(3) { animation-delay: 0.3s; }
+.dashboard-card:nth-child(4) { animation-delay: 0.4s; }
+.dashboard-card:nth-child(5) { animation-delay: 0.5s; }
+
+/* Number Counter Animation */
+@keyframes countUp {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.stat-number {
+    animation: countUp 1s ease;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(5, 150, 105, 0.3);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(5, 150, 105, 0.5);
+}
+</style>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+<script>
+// Modern Dashboard JavaScript
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🚀 Modern Financial Dashboard Initializing...');
+    initializeModernDashboard();
+});
+
+function initializeModernDashboard() {
+    animateNumbers();
+    initializeChart();
+    loadDashboardData();
+    setupEventListeners();
+    startRealTimeUpdates();
+    updateLastUpdatedTime();
+}
+
+// Animate Numbers
+function animateNumbers() {
+    const numbers = document.querySelectorAll('.stat-number[data-target]');
+    
+    numbers.forEach(number => {
+        const target = parseInt(number.getAttribute('data-target'));
+        const duration = 2000;
+        const start = performance.now();
+        
+        function animate(currentTime) {
+            const elapsed = currentTime - start;
+            const progress = Math.min(elapsed / duration, 1);
+            
+            const easeOutQuart = 1 - Math.pow(1 - progress, 4);
+            const current = Math.floor(target * easeOutQuart);
+            
+            number.textContent = current.toLocaleString();
+            
+            if (progress < 1) {
+                requestAnimationFrame(animate);
+            }
+        }
+        
+        requestAnimationFrame(animate);
+    });
+}
+
+// Initialize Modern Chart
+function initializeChart() {
+    const ctx = document.getElementById('modernFinancialChart');
+    if (!ctx) return;
+    
+    const gradient1 = ctx.getContext('2d').createLinearGradient(0, 0, 0, 300);
+    gradient1.addColorStop(0, 'rgba(5, 150, 105, 0.8)');
+    gradient1.addColorStop(1, 'rgba(5, 150, 105, 0.1)');
+    
+    const gradient2 = ctx.getContext('2d').createLinearGradient(0, 0, 0, 300);
+    gradient2.addColorStop(0, 'rgba(99, 102, 241, 0.8)');
+    gradient2.addColorStop(1, 'rgba(99, 102, 241, 0.1)');
+    
+    const gradient3 = ctx.getContext('2d').createLinearGradient(0, 0, 0, 300);
+    gradient3.addColorStop(0, 'rgba(220, 38, 38, 0.8)');
+    gradient3.addColorStop(1, 'rgba(220, 38, 38, 0.1)');
+    
+    const gradient4 = ctx.getContext('2d').createLinearGradient(0, 0, 0, 300);
+    gradient4.addColorStop(0, 'rgba(217, 119, 6, 0.8)');
+    gradient4.addColorStop(1, 'rgba(217, 119, 6, 0.1)');
+    
+    window.modernChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+            datasets: [
+                {
+                    label: 'Health Score',
+                    data: [75, 78, 82, 79, 85, 88],
+                    borderColor: '#059669',
+                    backgroundColor: gradient1,
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4,
+                    pointBackgroundColor: '#059669',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2,
+                    pointRadius: 6,
+                    pointHoverRadius: 8
+                },
+                {
+                    label: 'Cash Flow Index',
+                    data: [65, 70, 75, 73, 80, 85],
+                    borderColor: '#6366f1',
+                    backgroundColor: gradient2,
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4,
+                    pointBackgroundColor: '#6366f1',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2,
+                    pointRadius: 6,
+                    pointHoverRadius: 8
+                },
+                {
+                    label: 'Risk Level',
+                    data: [25, 20, 18, 22, 15, 12],
+                    borderColor: '#dc2626',
+                    backgroundColor: gradient3,
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4,
+                    pointBackgroundColor: '#dc2626',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2,
+                    pointRadius: 6,
+                    pointHoverRadius: 8
+                },
+                {
+                    label: 'Profitability',
+                    data: [60, 65, 70, 68, 75, 80],
+                    borderColor: '#d97706',
+                    backgroundColor: gradient4,
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4,
+                    pointBackgroundColor: '#d97706',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2,
+                    pointRadius: 6,
+                    pointHoverRadius: 8
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: {
+                intersect: false,
+                mode: 'index'
+            },
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    titleColor: '#fff',
+                    bodyColor: '#fff',
+                    cornerRadius: 12,
+                    displayColors: true,
+                    borderColor: 'rgba(255, 255, 255, 0.1)',
+                    borderWidth: 1
+                }
+            },
+            scales: {
+                x: {
+                    grid: {
+                        display: false
+                    },
+                    border: {
+                        display: false
+                    },
+                    ticks: {
+                        color: '#64748b',
+                        font: {
+                            family: 'Inter',
+                            size: 12
+                        }
+                    }
+                },
+                y: {
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.1)',
+                        borderDash: [5, 5]
+                    },
+                    border: {
+                        display: false
+                    },
+                    ticks: {
+                        color: '#64748b',
+                        font: {
+                            family: 'Inter',
+                            size: 12
+                        },
+                        callback: function(value) {
+                            return value + '%';
+                        }
+                    }
+                }
+            },
+            elements: {
+                point: {
+                    hoverRadius: 8
+                }
+            }
+        }
+    });
+}
+
+// Load Dashboard Data
+// Load Dashboard Data
+// Load Dashboard Data (USE SAME API AS COMPANIES PAGE)
+function loadDashboardData() {
+    showModernLoading('Loading Financial Data', 'Analyzing cash flow patterns...');
+    
+    // ✅ USE SAME API AS COMPANIES PAGE
+    fetch('/api/companies')
+        .then(response => response.json())
+        .then(data => {
+            console.log('📊 Dashboard API response:', data);
+            
+            if (data.success && data.companies && data.companies.length > 0) {
+                console.log(`✅ Dashboard: Found ${data.companies.length} companies (SAME AS COMPANIES PAGE)`);
+                
+                // Use exact same data structure as companies page
+                updateDashboardWithData(data.companies);
+                generateAISummary(data.companies);
+                updateRiskAnalytics(data.companies);
+                showNotification('success', 'Data Loaded', `${data.companies.length} companies analyzed`);
+            } else {
+                console.log('❌ No companies data found');
+                showEmptyDashboard();
+                showNotification('warning', 'No Data', 'No companies found in database');
+            }
+        })
+        .catch(error => {
+            console.error('❌ Dashboard API failed:', error);
+            showEmptyDashboard();
+            showNotification('error', 'Database Error', 'Could not connect to database');
+        })
+        .finally(() => {
+            hideModernLoading();
+        });
+}
+
+
+// 1. MAIN RISK ANALYTICS FUNCTION - UPDATED WITH REAL DATA
+function updateRiskAnalytics(companies) {
+    if (!companies || companies.length === 0) {
+        console.log('⚠️ No companies data available for risk analytics');
+        return;
+    }
+    
+    const totalCompanies = companies.length;
+    let lowRisk = 0, mediumRisk = 0, highRisk = 0;
+    let healthScores = [];
+    let riskDetails = [];
+    
+    // Process each company
+    companies.forEach((company, index) => {
+        const healthScore = calculateRealHealthScore(company);
+        
+        if (healthScore !== null) {
+            healthScores.push(healthScore);
+            
+            // Categorize risk based on health score
+            let riskLevel;
+            if (healthScore >= 70) {
+                lowRisk++;
+                riskLevel = 'low';
+            } else if (healthScore >= 40) {
+                mediumRisk++;
+                riskLevel = 'medium';
+            } else {
+                highRisk++;
+                riskLevel = 'high';
+            }
+            
+            // Store detailed risk info for analytics
+            riskDetails.push({
+                company: company.name || `Company ${index + 1}`,
+                healthScore: healthScore,
+                riskLevel: riskLevel,
+                liquidationRisk: company.liquidation_label || 0,
+                debtToEquity: company.debt_to_equity_ratio || 0,
+                currentRatio: company.current_ratio || 0
+            });
+        }
+    });
+    
+    // Update DOM elements
+    updateRiskCounters(lowRisk, mediumRisk, highRisk);
+    
+    // Calculate overall risk percentage
+    const totalCategorized = lowRisk + mediumRisk + highRisk;
+    const riskPercentage = totalCategorized > 0 
+        ? Math.round(((mediumRisk + highRisk * 2) / (totalCategorized * 2)) * 100)
+        : 0;
+    
+    // Update risk percentage display
+    const riskPercentageElement = document.getElementById('risk-percentage');
+    if (riskPercentageElement) {
+        riskPercentageElement.textContent = riskPercentage + '%';
+    }
+    
+    // Update risk circle visualization
+    updateRiskCircle(riskPercentage, lowRisk, mediumRisk, highRisk);
+    
+    // Update predictive analytics
+    updatePredictiveAnalytics(companies, healthScores, riskDetails);
+    
+    // Update sector risk breakdown
+    updateSectorRiskAnalysis(companies);
+    
+    console.log('🛡️ Risk Analytics Updated:', {
+        totalCompanies,
+        lowRisk, 
+        mediumRisk, 
+        highRisk, 
+        totalCategorized, 
+        riskPercentage,
+        avgHealthScore: healthScores.length > 0 ? (healthScores.reduce((a,b) => a+b, 0) / healthScores.length).toFixed(1) : 0
+    });
+}
+
+// 2. CALCULATE REAL HEALTH SCORE BASED ON YOUR PROJECT METRICS
+function calculateRealHealthScore(company) {
+    if (!company) return null;
+    
+    let score = 0;
+    let weights = 0;
+    
+    // Liquidity Analysis (25% weight)
+    if (company.current_ratio !== undefined && company.current_ratio !== null) {
+        const currentRatioScore = Math.min(100, Math.max(0, (company.current_ratio - 0.5) * 50));
+        score += currentRatioScore * 0.25;
+        weights += 0.25;
+    }
+    
+    // Profitability Analysis (20% weight)
+    if (company.net_income !== undefined && company.net_income !== null) {
+        const profitabilityScore = company.net_income > 0 ? 
+            Math.min(100, Math.abs(company.net_income) / 1000000 * 10) : 0;
+        score += profitabilityScore * 0.2;
+        weights += 0.2;
+    }
+    
+    // Cash Flow Health (25% weight)
+    if (company.operating_cash_flow !== undefined && company.operating_cash_flow !== null) {
+        const cashFlowScore = company.operating_cash_flow > 0 ? 
+            Math.min(100, Math.abs(company.operating_cash_flow) / 1000000 * 10) : 0;
+        score += cashFlowScore * 0.25;
+        weights += 0.25;
+    }
+    
+    // Debt Management (20% weight)
+    if (company.debt_to_equity_ratio !== undefined && company.debt_to_equity_ratio !== null) {
+        const debtScore = Math.max(0, 100 - (company.debt_to_equity_ratio * 20));
+        score += debtScore * 0.2;
+        weights += 0.2;
+    }
+    
+    // Liquidation Risk (10% weight)
+    if (company.liquidation_label !== undefined) {
+        const liquidationScore = company.liquidation_label === 1 ? 0 : 100;
+        score += liquidationScore * 0.1;
+        weights += 0.1;
+    }
+    
+    // Return weighted score or null if no data
+    return weights > 0 ? Math.round(score / weights) : null;
+}
+
+// 3. UPDATE RISK COUNTERS IN DOM
+function updateRiskCounters(lowRisk, mediumRisk, highRisk) {
+    const elements = {
+        'low-risk-count': lowRisk,
+        'medium-risk-count': mediumRisk,
+        'high-risk-count': highRisk
+    };
+    
+    Object.entries(elements).forEach(([id, value]) => {
+        const element = document.getElementById(id);
+        if (element) {
+            element.textContent = value;
+            // Add animation class
+            element.classList.add('counter-updated');
+            setTimeout(() => element.classList.remove('counter-updated'), 500);
+        } else {
+            console.warn(`⚠️ Element with ID '${id}' not found`);
+        }
+    });
+}
+
+// 4. UPDATE RISK CIRCLE VISUALIZATION
+// ✅ REPLACE WITH THIS:
+function updateRiskCircle(riskPercentage, lowRisk, mediumRisk, highRisk) {
+    const riskCircle = document.getElementById('risk-circle');
+    if (!riskCircle) {
+        console.warn('⚠️ Risk circle element not found');
+        return;
+    }
+    
+    const total = lowRisk + mediumRisk + highRisk;
+    
+    // Clear existing content
+    riskCircle.innerHTML = '';
+    
+    if (total === 0) {
+        riskCircle.style.cssText = `
+            background: #e5e7eb !important;
+            width: 120px !important;
+            height: 120px !important;
+            border-radius: 50% !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+        `;
+        
+        riskCircle.innerHTML = '<div style="text-align: center; color: #64748b; font-size: 12px;"><div style="font-weight: bold;">0%</div><div>No Data</div></div>';
+        return;
+    }
+    
+    // Calculate proportions for gradient
+    const lowPercent = (lowRisk / total) * 360;
+    const mediumPercent = (mediumRisk / total) * 360;
+    const highPercent = (highRisk / total) * 360;
+    
+    // Create gradient
+    let gradient = 'conic-gradient(from 0deg';
+    let currentDegree = 0;
+    
+    if (lowRisk > 0) {
+        gradient += `, #059669 ${currentDegree}deg ${currentDegree + lowPercent}deg`;
+        currentDegree += lowPercent;
+    }
+    if (mediumRisk > 0) {
+        gradient += `, #d97706 ${currentDegree}deg ${currentDegree + mediumPercent}deg`;
+        currentDegree += mediumPercent;
+    }
+    if (highRisk > 0) {
+        gradient += `, #dc2626 ${currentDegree}deg ${currentDegree + highPercent}deg`;
+    }
+    
+    gradient += ')';
+    
+    // Apply circle styles
+    riskCircle.style.cssText = `
+        background: ${gradient} !important;
+        width: 120px !important;
+        height: 120px !important;
+        border-radius: 50% !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        position: relative !important;
+    `;
+    
+    // Create centered inner circle with text
+    const innerCircle = document.createElement('div');
+    innerCircle.style.cssText = `
+        width: 80px !important;
+        height: 80px !important;
+        background: white !important;
+        border-radius: 50% !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: center !important;
+        position: absolute !important;
+        top: 50% !important;
+        left: 50% !important;
+        transform: translate(-50%, -50%) !important;
+        z-index: 10 !important;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+    `;
+    
+    innerCircle.innerHTML = `
+        <div style="font-size: 18px !important; font-weight: bold !important; color: #1e293b !important; line-height: 1 !important; margin-bottom: 2px !important;">
+            ${riskPercentage}%
+        </div>
+        <div style="font-size: 10px !important; color: #64748b !important; line-height: 1 !important; text-align: center !important;">
+            Overall Risk
+        </div>
+    `;
+    
+    riskCircle.appendChild(innerCircle);
+    
+    console.log('✅ Risk circle updated with centered text');
+}
+
+// 5. UPDATE PREDICTIVE ANALYTICS WITH REAL DATA
+function updatePredictiveAnalytics(companies, healthScores, riskDetails) {
+    // ✅ FIX: Check all parameters
+    if (!healthScores || !Array.isArray(healthScores) || healthScores.length === 0) {
+        console.log('⚠️ No health scores available for predictive analytics');
+        return;
+    }
+    
+    if (!companies || !Array.isArray(companies)) {
+        console.log('⚠️ No companies data available for predictive analytics');
+        return;
+    }
+    
+    try {
+        // Calculate health improvement trend
+        const avgHealthScore = healthScores.reduce((sum, score) => sum + score, 0) / healthScores.length;
+        const healthTrend = calculateHealthTrend(avgHealthScore, companies);
+        
+        // Calculate alert probability based on current risk levels
+        const highRiskCompanies = healthScores.filter(score => score < 40).length;
+        const alertProbability = Math.round((highRiskCompanies / companies.length) * 100);
+        
+        // ✅ FIX: Safe stress test calculation
+        const stressTestResult = calculatePortfolioStressTest(riskDetails);
+        
+        // Update DOM elements safely
+        updateForecastElement(healthTrend);
+        updateAlertProbabilityElement(alertProbability);
+        updateStressTestElement(stressTestResult);
+        
+        console.log('🔮 Predictive Analytics Updated:', {
+            avgHealthScore: avgHealthScore.toFixed(1),
+            healthTrend: healthTrend.toFixed(1),
+            alertProbability,
+            stressTestResult
+        });
+    } catch (error) {
+        console.error('Error in predictive analytics:', error);
+    }
+}
+
+
+// 6. CALCULATE HEALTH TREND WITH ENHANCED LOGIC
+function calculateHealthTrend(avgHealthScore, companies) {
+    // Base trend calculation
+    let baseTrend;
+    if (avgHealthScore >= 80) {
+        baseTrend = 2.5;
+    } else if (avgHealthScore >= 60) {
+        baseTrend = 1.2;
+    } else if (avgHealthScore >= 40) {
+        baseTrend = -0.8;
+    } else {
+        baseTrend = -3.2;
+    }
+    
+    // Adjust based on cash flow trends
+    const cashFlowPositive = companies.filter(c => 
+        c.operating_cash_flow && c.operating_cash_flow > 0
+    ).length;
+    const cashFlowAdjustment = (cashFlowPositive / companies.length - 0.5) * 2;
+    
+    // Adjust based on debt levels
+    const lowDebtCompanies = companies.filter(c => 
+        c.debt_to_equity_ratio && c.debt_to_equity_ratio < 0.5
+    ).length;
+    const debtAdjustment = (lowDebtCompanies / companies.length - 0.5) * 1.5;
+    
+    return baseTrend + cashFlowAdjustment + debtAdjustment;
+}
+
+// 7. UPDATE FORECAST ELEMENT
+function updateForecastElement(healthTrend) {
+    const forecastElement = document.querySelector('.prediction-value.positive') || 
+                           document.querySelector('[data-prediction="forecast"]');
+    
+    if (forecastElement) {
+        const trendDirection = healthTrend >= 0 ? '+' : '';
+        forecastElement.textContent = `${trendDirection}${healthTrend.toFixed(1)}% Health Trend`;
+        
+        // Update styling based on trend
+        forecastElement.className = healthTrend >= 0 ? 
+            'prediction-value positive' : 'prediction-value warning';
+    }
+}
+
+// 8. UPDATE ALERT PROBABILITY ELEMENT
+function updateAlertProbabilityElement(alertProbability) {
+    const alertElement = document.querySelector('.prediction-value.warning') || 
+                        document.querySelector('[data-prediction="alert"]');
+    
+    if (alertElement) {
+        alertElement.textContent = `${alertProbability}% Risk Alert Probability`;
+        
+        // Update styling based on probability
+        if (alertProbability > 30) {
+            alertElement.className = 'prediction-value negative';
+        } else if (alertProbability > 15) {
+            alertElement.className = 'prediction-value warning';
+        } else {
+            alertElement.className = 'prediction-value positive';
+        }
+    }
+}
+
+// 9. CALCULATE PORTFOLIO STRESS TEST
+function calculatePortfolioStressTest(riskDetails) {
+    // ✅ FIX: Check if riskDetails exists and has length
+    if (!riskDetails || !Array.isArray(riskDetails) || riskDetails.length === 0) {
+        console.log('⚠️ No risk details available for stress test');
+        return 0;
+    }
+    
+    try {
+        // Simulate 20% economic downturn impact
+        const stressedCompanies = riskDetails.filter(company => {
+            // ✅ FIX: Check if company and healthScore exist
+            if (!company || typeof company.healthScore !== 'number') {
+                return false;
+            }
+            
+            const stressedHealthScore = company.healthScore * 0.8; // 20% reduction
+            return stressedHealthScore < 40; // Would become high risk
+        });
+        
+        return Math.round((stressedCompanies.length / riskDetails.length) * 100);
+    } catch (error) {
+        console.error('Error in stress test calculation:', error);
+        return 0;
+    }
+}
+
+// 10. UPDATE STRESS TEST ELEMENT
+function updateStressTestElement(stressTestResult) {
+    const stressElement = document.querySelector('[data-prediction="stress"]');
+    if (stressElement) {
+        stressElement.textContent = `${stressTestResult}% Portfolio at Risk`;
+        
+        // Update styling based on stress test result
+        if (stressTestResult > 40) {
+            stressElement.className = 'prediction-value negative';
+        } else if (stressTestResult > 20) {
+            stressElement.className = 'prediction-value warning';
+        } else {
+            stressElement.className = 'prediction-value positive';
+        }
+    }
+}
+
+// 11. SECTOR RISK ANALYSIS
+function updateSectorRiskAnalysis(companies) {
+    const sectorRisks = {};
+    
+    companies.forEach(company => {
+        const sector = company.sector || 'Unknown';
+        if (!sectorRisks[sector]) {
+            sectorRisks[sector] = { total: 0, highRisk: 0 };
+        }
+        
+        sectorRisks[sector].total++;
+        const healthScore = calculateRealHealthScore(company);
+        if (healthScore !== null && healthScore < 40) {
+            sectorRisks[sector].highRisk++;
+        }
+    });
+    
+    // Update sector risk breakdown if element exists
+    const sectorElement = document.getElementById('sector-risk-breakdown');
+    if (sectorElement) {
+        let sectorHTML = '<h4>Sector Risk Analysis</h4>';
+        Object.entries(sectorRisks).forEach(([sector, data]) => {
+            const riskPercent = data.total > 0 ? Math.round((data.highRisk / data.total) * 100) : 0;
+            sectorHTML += `
+                <div class="sector-risk-item">
+                    <span class="sector-name">${sector}</span>
+                    <span class="sector-risk ${riskPercent > 30 ? 'high' : riskPercent > 15 ? 'medium' : 'low'}">
+                        ${riskPercent}%
+                    </span>
+                </div>
+            `;
+        });
+        sectorElement.innerHTML = sectorHTML;
+    }
+}
+
+// 12. ENSURE REQUIRED HTML ELEMENTS EXIST
+function ensureRiskAnalyticsElements() {
+    const requiredElements = [
+        'low-risk-count',
+        'medium-risk-count', 
+        'high-risk-count',
+        'risk-percentage',
+        'risk-circle'
+    ];
+    
+    const missingElements = requiredElements.filter(id => !document.getElementById(id));
+    
+    if (missingElements.length > 0) {
+        console.warn('⚠️ Missing Risk Analytics Elements:', missingElements);
+        
+        // Create missing elements with basic structure
+        missingElements.forEach(id => {
+            const element = document.createElement('div');
+            element.id = id;
+            element.textContent = '0';
+            element.style.display = 'none'; // Hide until properly styled
+            document.body.appendChild(element);
+        });
+    }
+    
+    return missingElements.length === 0;
+}
+
+// 13. UPDATED MAIN DASHBOARD FUNCTION
+function updateDashboardWithData(companies) {
+    if (!companies || companies.length === 0) {
+        console.log('⚠️ No companies data available for dashboard update');
+        return;
+    }
+    
+    console.log('📊 Updating dashboard with real data...');
+    
+    // Ensure required elements exist
+    ensureRiskAnalyticsElements();
+    
+    // Calculate and update real stats first
+    if (typeof updateStatsWithRealData === 'function') {
+        updateStatsWithRealData(companies);
+    }
+    
+    // ✅ UPDATE RISK ANALYTICS WITH REAL DATA
+    updateRiskAnalytics(companies);
+    
+    // Update portfolio section if function exists
+    if (typeof updatePortfolioSection === 'function') {
+        updatePortfolioSection(companies);
+    }
+    
+    // Update activity timeline if function exists
+    if (typeof updateActivityTimeline === 'function') {
+        updateActivityTimeline();
+    }
+    
+    console.log('✅ Dashboard updated successfully with real data');
+}
+
+// Add the updateStatsWithRealData function:
+// Update Stats with Real Data (NO DEFAULT SCORES)
+// Update Stats with Real Data (MATCH COMPANIES PAGE LOGIC)
+function updateStatsWithRealData(companies) {
+    const totalCompanies = companies.length;
+    const totalRecords = totalCompanies * 3;
+    
+    let healthScores = [];
+    let atRiskCount = 0;
+    
+    companies.forEach(company => {
+        const healthScore = calculateRealHealthScore(company);
+        
+        if (healthScore !== null) {
+            healthScores.push(healthScore);
+            
+            // ✅ EXACT SAME LOGIC AS COMPANIES PAGE
+            if (healthScore < 40) {  // Companies page: filter(c => c.financial_health_score < 40)
+                atRiskCount++;
+            }
+        }
+    });
+    
+    // ✅ EXACT SAME CALCULATION AS COMPANIES PAGE
+    const avgHealthScore = healthScores.length > 0 
+        ? healthScores.reduce((a, b) => a + b, 0) / healthScores.length 
+        : 0;
+    
+    // Update individual stats
+    const statNumbers = document.querySelectorAll('.stat-number');
+    if (statNumbers.length >= 4) {
+        animateStatNumber(statNumbers[0], totalCompanies);
+        animateStatNumber(statNumbers[1], totalRecords);
+        animateStatNumber(statNumbers[2], Math.round(avgHealthScore * 10) / 10);  // Show 1 decimal like companies page
+        animateStatNumber(statNumbers[3], atRiskCount);  // Same at-risk logic
+    }
+    
+    console.log('📊 Dashboard Stats (SHOULD MATCH COMPANIES PAGE):', {
+        totalCompanies, 
+        totalRecords, 
+        avgHealthScore: Math.round(avgHealthScore * 10) / 10, 
+        atRiskCount
+    });
+}
+
+// Calculate Real Health Score (NO DEFAULTS)
+// Calculate Real Health Score (SAME AS COMPANIES PAGE)
+// Calculate Real Health Score (FIXED FIELD NAMES)
+// Calculate Real Health Score (EXACT SAME AS COMPANIES PAGE)
+function calculateRealHealthScore(company) {
+    // Check if we have financial_health_score in data
+    if (company.financial_health_score && company.financial_health_score > 0) {
+        return Math.round(company.financial_health_score);
+    }
+    
+    // ✅ USE EXACT SAME FIELD NAMES AS COMPANIES PAGE
+    const netIncome = parseFloat(company.net_income || 0);
+    const ocf = parseFloat(company.operating_cash_flow || 0);  // Same field name as companies page
+    const fcf = parseFloat(company.free_cash_flow || 0);
+    
+    // Check if we have ANY meaningful financial data
+    if (netIncome === 0 && ocf === 0 && fcf === 0) {
+        console.log(`⚠️ No financial data for ${company.company_name}`);
+        return null;
+    }
+    
+    // ✅ EXACT SAME CALCULATION AS COMPANIES PAGE
+    let score = 50; // Base score
+    
+    // 1. Operating Cash Flow Impact (40% weight)
+    if (ocf > 1000000) score += 20;
+    else if (ocf > 0) score += 10;
+    else if (ocf < -1000000) score -= 20;
+    else score -= 10;
+    
+    // 2. Net Income Impact (30% weight)
+    if (netIncome > 500000) score += 15;
+    else if (netIncome > 0) score += 8;
+    else if (netIncome < -500000) score -= 15;
+    else score -= 8;
+    
+    // 3. Free Cash Flow Impact (30% weight)
+    if (fcf > 500000) score += 15;
+    else if (fcf > 0) score += 7;
+    else if (fcf < -500000) score -= 15;
+    else score -= 7;
+    
+    const finalScore = Math.max(0, Math.min(100, Math.round(score)));
+    
+    console.log(`💯 ${company.company_name}: OCF: ${ocf}, Net Income: ${netIncome}, FCF: ${fcf}, Score: ${finalScore}`);
+    
+    return finalScore;
+}
+
+
+// Validate Company Financial Data
+function hasValidFinancialData(company) {
+    const netIncome = parseFloat(company.net_income || 0);
+    const operatingCF = parseFloat(company.net_cash_from_operating_activities || 0);
+    const freeCF = parseFloat(company.free_cash_flow || 0);
+    
+    // Return true only if at least one meaningful metric exists
+    return (netIncome !== 0 || operatingCF !== 0 || freeCF !== 0);
+}
+
+
+
+function animateStatNumber(element, targetValue) {
+    if (!element || !targetValue) return;
+    
+    const duration = 2000;
+    const start = performance.now();
+    const startValue = 0;
+    
+    function animate(currentTime) {
+        const elapsed = currentTime - start;
+        const progress = Math.min(elapsed / duration, 1);
+        const easeOutQuart = 1 - Math.pow(1 - progress, 4);
+        const current = Math.floor(targetValue * easeOutQuart);
+        
+        element.textContent = current.toLocaleString();
+        
+        if (progress < 1) {
+            requestAnimationFrame(animate);
+        }
+    }
+    
+    requestAnimationFrame(animate);
+}
+
+// Generate AI Summary
+function generateAISummary(companies) {
+    const totalCompanies = companies.length;
+    const healthyCompanies = companies.filter(c => c.financial_health_score > 70).length;
+    const riskCompanies = companies.filter(c => c.liquidation_label === 1).length;
+    const avgHealth = companies.reduce((sum, c) => sum + (c.financial_health_score || 50), 0) / totalCompanies;
+    
+    const summaryText = `Portfolio Analysis: ${totalCompanies} companies tracked. ${healthyCompanies} companies (${((healthyCompanies/totalCompanies)*100).toFixed(0)}%) show strong financial health. Average health score: ${avgHealth.toFixed(1)}/100. ${riskCompanies} companies flagged for attention. Overall trend: ${avgHealth > 70 ? 'Positive momentum' : avgHealth > 50 ? 'Stable performance' : 'Requires intervention'}.`;
+    
+    document.getElementById('ai-summary-text').textContent = summaryText;
+}
+
+
+
+
+
+// Update Risk Analytics
+function updateRiskAnalytics(companies) {
+    if (!companies || companies.length === 0) return;
+    
+    const totalCompanies = companies.length;
+    let lowRisk = 0, mediumRisk = 0, highRisk = 0;
+    let healthScores = [];
+    
+    companies.forEach(company => {
+        const healthScore = calculateRealHealthScore(company);
+        
+        if (healthScore !== null) {
+            healthScores.push(healthScore);
+            
+            // ✅ CATEGORIZE RISK BASED ON HEALTH SCORE
+            if (healthScore >= 70) {
+                lowRisk++;
+            } else if (healthScore >= 40) {
+                mediumRisk++;
+            } else {
+                highRisk++;
+            }
+        }
+    });
+    
+    // Update risk counters
+    document.getElementById('low-risk-count').textContent = lowRisk;
+    document.getElementById('medium-risk-count').textContent = mediumRisk;
+    document.getElementById('high-risk-count').textContent = highRisk;
+    
+    // Calculate overall risk percentage
+    const totalCategorized = lowRisk + mediumRisk + highRisk;
+    const riskPercentage = totalCategorized > 0 
+        ? Math.round(((mediumRisk + highRisk * 2) / (totalCategorized * 2)) * 100)
+        : 0;
+    
+    document.getElementById('risk-percentage').textContent = riskPercentage + '%';
+    
+    // Update risk circle with real data
+    updateRiskCircle(riskPercentage, lowRisk, mediumRisk, highRisk);
+    
+    // Update predictive analytics with real calculations
+    updatePredictiveAnalytics(companies, healthScores);
+    
+    console.log('🛡️ Risk Analytics Updated:', {
+        lowRisk, mediumRisk, highRisk, 
+        totalCategorized, 
+        riskPercentage
+    });
+}
+
+// Update Risk Breakdown
+function updateRiskBreakdown(companies) {
+    console.log('Updating risk breakdown for', companies.length, 'companies');
+}
+
+// Update Portfolio Section
+function updatePortfolioSection(companies) {
+    const container = document.getElementById('portfolio-container');
+    if (!container || !companies || companies.length === 0) return;
+    
+    // Clear existing content
+    container.innerHTML = '';
+    
+    // ✅ SHOW 15 COMPANIES (instead of 6)
+    companies.slice(0, 15).forEach((company, index) => {
+        const healthScore = calculateRealHealthScore(company) || 50;
+        const riskLevel = healthScore >= 80 ? 'low' : healthScore >= 50 ? 'medium' : 'high';
+        const riskText = healthScore >= 80 ? 'Low' : healthScore >= 50 ? 'Medium' : 'High';
+        
+        const companyCard = document.createElement('div');
+        companyCard.className = `company-card ${riskLevel}-risk`;
+        companyCard.innerHTML = `
+            <div class="company-header">
+                <div class="company-avatar">
+                    ${(company.company_name || company.name || 'C').charAt(0)}
+                </div>
+                <div class="company-info">
+                    <h4>${company.company_name || company.name || 'Unnamed Company'}</h4>
+                    <p>${company.industry || 'General'}</p>
+                </div>
+                <div class="risk-indicator ${riskLevel}">
+                    ${riskText}
+                </div>
+            </div>
+            <div class="company-metrics">
+                <div class="metric">
+                    <span class="metric-label">Health</span>
+                    <span class="metric-value">${healthScore}/100</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Cash Flow</span>
+                    <span class="metric-value ${(company.operating_cash_flow || 0) > 0 ? 'positive' : 'negative'}">
+                        ${formatCurrency(company.operating_cash_flow || 0)}
+                    </span>
+                </div>
+            </div>
+            <div class="company-actions">
+                <button class="action-btn" onclick="viewCompanyAnalysis('${company.company_name || company.name}')">
+                    <i class="fas fa-chart-line"></i>
+                </button>
+                <button class="action-btn" onclick="generateCompanyReport('${company.company_name || company.name}')">
+                    <i class="fas fa-file-alt"></i>
+                </button>
+            </div>
+        `;
+        container.appendChild(companyCard);
+    });
+    
+    console.log(`✅ Portfolio updated with ${Math.min(15, companies.length)} companies`);
+}
+
+// Update Activity Timeline
+function updateActivityTimeline() {
+    const timeline = document.getElementById('activity-timeline');
+    if (!timeline) return;
+    
+    const activities = [
+        { time: 'Just now', text: 'AI analysis completed for portfolio' },
+        { time: '5 min ago', text: 'Risk assessment updated' },
+        { time: '12 min ago', text: 'New financial data processed' },
+        { time: '1 hour ago', text: 'Health scores recalculated' }
+    ];
+    
+    timeline.innerHTML = activities.map(activity => `
+        <div class="activity-item">
+            <div class="activity-time">${activity.time}</div>
+            <div class="activity-text">${activity.text}</div>
+        </div>
+    `).join('');
+}
+
+// Setup Event Listeners
+function setupEventListeners() {
+    // Year tab buttons
+    document.querySelectorAll('.year-tab').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('.year-tab').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            updateChartYear(this.dataset.year);
+        });
+    });
+
+    // Time selector buttons
+    document.querySelectorAll('.time-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('.time-btn').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            updateChartPeriod(this.dataset.period);
+        });
+    });
+    
+    // Stat cards click handlers
+    document.querySelectorAll('.stat-card').forEach(card => {
+        card.addEventListener('click', function() {
+            this.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+                this.style.transform = '';
+            }, 150);
+        });
+    });
+
+    // Industry filter
+    const industryFilter = document.getElementById('industry-filter');
+    if (industryFilter) {
+        industryFilter.addEventListener('change', function() {
+            filterPortfolioByIndustry(this.value);
+        });
+    }
+}
+
+// Update Chart Year
+function updateChartYear(year) {
+    if (!window.modernChart) return;
+    
+    // Simulate different data for different years
+    let newData;
+    switch(year) {
+        case '2024':
+            newData = {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                datasets: [
+                    { ...window.modernChart.data.datasets[0], data: [75, 78, 82, 79, 85, 88] },
+                    { ...window.modernChart.data.datasets[1], data: [65, 70, 75, 73, 80, 85] },
+                    { ...window.modernChart.data.datasets[2], data: [25, 20, 18, 22, 15, 12] },
+                    { ...window.modernChart.data.datasets[3], data: [60, 65, 70, 68, 75, 80] }
+                ]
+            };
+            break;
+        case '2023':
+            newData = {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                datasets: [
+                    { ...window.modernChart.data.datasets[0], data: [70, 73, 77, 74, 80, 83] },
+                    { ...window.modernChart.data.datasets[1], data: [60, 65, 70, 68, 75, 80] },
+                    { ...window.modernChart.data.datasets[2], data: [30, 25, 23, 27, 20, 17] },
+                    { ...window.modernChart.data.datasets[3], data: [55, 60, 65, 63, 70, 75] }
+                ]
+            };
+            break;
+        case '2022':
+            newData = {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                datasets: [
+                    { ...window.modernChart.data.datasets[0], data: [65, 68, 72, 69, 75, 78] },
+                    { ...window.modernChart.data.datasets[1], data: [55, 60, 65, 63, 70, 75] },
+                    { ...window.modernChart.data.datasets[2], data: [35, 30, 28, 32, 25, 22] },
+                    { ...window.modernChart.data.datasets[3], data: [50, 55, 60, 58, 65, 70] }
+                ]
+            };
+            break;
+    }
+    
+    window.modernChart.data = newData;
+    window.modernChart.update('active');
+}
+
+// Update Chart Period
+function updateChartPeriod(period) {
+    if (!window.modernChart) return;
+    
+    let newData;
+    switch(period) {
+        case '6m':
+            newData = {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                datasets: [
+                    { ...window.modernChart.data.datasets[0], data: [75, 78, 82, 79, 85, 88] },
+                    { ...window.modernChart.data.datasets[1], data: [65, 70, 75, 73, 80, 85] },
+                    { ...window.modernChart.data.datasets[2], data: [25, 20, 18, 22, 15, 12] },
+                    { ...window.modernChart.data.datasets[3], data: [60, 65, 70, 68, 75, 80] }
+                ]
+            };
+            break;
+        case '1y':
+            newData = {
+                labels: ['Q1', 'Q2', 'Q3', 'Q4'],
+                datasets: [
+                    { ...window.modernChart.data.datasets[0], data: [72, 78, 85, 88] },
+                    { ...window.modernChart.data.datasets[1], data: [62, 70, 78, 85] },
+                    { ...window.modernChart.data.datasets[2], data: [28, 22, 15, 12] },
+                    { ...window.modernChart.data.datasets[3], data: [58, 65, 75, 80] }
+                ]
+            };
+            break;
+        case '3y':
+            newData = {
+                labels: ['2022', '2023', '2024'],
+                datasets: [
+                    { ...window.modernChart.data.datasets[0], data: [68, 78, 88] },
+                    { ...window.modernChart.data.datasets[1], data: [58, 70, 85] },
+                    { ...window.modernChart.data.datasets[2], data: [32, 22, 12] },
+                    { ...window.modernChart.data.datasets[3], data: [55, 65, 80] }
+                ]
+            };
+            break;
+    }
+    
+    window.modernChart.data = newData;
+    window.modernChart.update('active');
+}
+
+// Filter Portfolio by Industry
+function filterPortfolioByIndustry(industry) {
+    const companyCards = document.querySelectorAll('.company-card');
+    
+    companyCards.forEach(card => {
+        const companyIndustry = card.querySelector('.company-info p').textContent;
+        
+        if (!industry || companyIndustry.includes(industry)) {
+            card.style.display = 'block';
+        } else {
+            card.style.display = 'none';
+        }
+    });
+}
+
+// Start Real-time Updates
+function startRealTimeUpdates() {
+    setInterval(() => {
+        updateLastUpdatedTime();
+        // Simulate real-time data updates
+        if (Math.random() > 0.7) {
+            loadDashboardData();
+        }
+    }, 30000); // Update every 30 seconds
+}
+
+// Update Last Updated Time
+function updateLastUpdatedTime() {
+    const now = new Date();
+    const timeString = now.toLocaleTimeString('en-US', { 
+        hour: 'numeric', 
+        minute: '2-digit',
+        hour12: true 
+    });
+    document.getElementById('last-updated').textContent = `Updated ${timeString}`;
+}
+
+// Modern Loading Functions
+function showModernLoading(title = 'Processing', subtitle = 'Please wait...') {
+    const loading = document.getElementById('modern-loading');
+    document.getElementById('loading-title').textContent = title;
+    document.getElementById('loading-subtitle').textContent = subtitle;
+    loading.style.display = 'flex';
+    
+    // Animate progress bar
+    const progressBar = document.getElementById('loading-progress-bar');
+    progressBar.style.width = '0%';
+    setTimeout(() => {
+        progressBar.style.width = '100%';
+    }, 100);
+}
+
+function hideModernLoading() {
+    document.getElementById('modern-loading').style.display = 'none';
+}
+
+async function sendAIMessage() {
+    const input = document.getElementById('ai-input');
+    const message = input.value.trim();
+    
+    if (!message) return;
+    
+    // Add user message to chat
+    addAIMessage(message, 'user');
+    input.value = '';
+    
+    // Check if question is related to project or off-topic
+    if (isOffTopicQuestion(message)) {
+        addAIMessage("Sorry, I'm only allowed to help with financial analysis and questions related to this Financial Risk Assessment project for Small Companies and Startups. Please ask about portfolio management, cash flow analysis, balance sheet conversion, liquidation prediction, or other features from this system.", 'ai');
+        return;
+    }
+    
+    // For project-related questions, provide detailed answers
+    const projectAnswer = getProjectAnswer(message);
+    if (projectAnswer) {
+        addAIMessage(projectAnswer, 'ai');
+    } else {
+        addAIMessage("I can help you with questions about this Financial Risk Assessment project. You can ask about:\n\n• Balance Sheet Converter methodology\n• Cash Flow Statement generation\n• Financial metrics calculation\n• Machine learning models used\n• Dashboard features and visualization\n• Data sources\n• Project timeline and development phases\n\nWhat would you like to know?", 'ai');
+    }
+}
+
+function isOffTopicQuestion(message) {
+    const offTopicPatterns = [
+        /tell.*joke/i,
+        /what.*weather/i,
+        /personal.*advice/i,
+        /how.*cook/i,
+        /movie.*recommend/i,
+        /relationship.*help/i,
+        /health.*tips/i,
+        /general.*knowledge/i,
+        /sports/i,
+        /politics/i,
+        /entertainment/i,
+        /travel/i,
+        /shopping/i
+    ];
+    
+    return offTopicPatterns.some(pattern => pattern.test(message));
+}
+
+function getProjectAnswer(message) {
+    const msg = message.toLowerCase();
+    
+    // Balance Sheet related questions
+    if (msg.includes('balance sheet') || msg.includes('converter')) {
+        return "The Balance Sheet Converter is a tool that changes financial documents into clear, well-organized data. It uses smart computer methods (like Random Forest, KNN, and Time Series Forecasting) to give very accurate results — about 90% accuracy when all documents are provided, and about 85% accuracy even if some documents are missing.It works with 15 different document types, such as balance sheets (current and previous year), income statements, bank statements, and more. If any information is missing, the system uses industry standards and smart guesses to fill the gaps.";
+    }
+    
+    // Cash Flow related questions
+    if (msg.includes('cash flow') || msg.includes('indirect method')) {
+        return "The Cash Flow Statement Generator creates cash flow reports using the indirect method. It starts with net income and then makes changes for non-cash items (like depreciation) and working capital changes (like accounts receivable, inventory, and accounts payable).It calculates 21 important financial metrics, such as Operating Cash Flow, Free Cash Flow, and Working Capital Changes.For example, the formula for Operating Cash Flow is:Net Income + Depreciation + Stock Compensation - Accounts Receivable Change - Inventory Change + Accounts Payable Change + Accrued Change + Other Non-Cash Items.This method is commonly used because it fits well with standard financial statements and is easy to automate..";
+    }
+    
+    // Machine Learning questions
+    if (msg.includes('machine learning') || msg.includes('ml') || msg.includes('ai model')) {
+        return "This project uses advanced computer models (like XG-Boost, Neural Networks, Random Forest, and LightGBM) to predict financial risks. The goal is to reach 60%+ accuracy in predicting if a company might go into liquidation (close down).The system learns from past data using supervised learning and combines different models (ensemble methods) to improve results.If some data is missing, it fills the gaps using five smart methods: KNN, Random Forest, Time Series Analysis, Peer Company Comparison, and Industry Benchmarks. These methods are blended together in a weighted way to give the best estimate.";
+    }
+    
+    // Data sources questions
+    if (msg.includes('data') || msg.includes('sources') || msg.includes('sec') || msg.includes('companies house')) {
+        return "The project uses trusted data sources like SEC filings (10-K, 20-F), UK Companies House, AnnualReports.com, and company websites. It includes about 1,008 companies from 4 sectors (Industrial Goods, Technology, Healthcare, and Financial) and 12 industries.The data covers 2022–2024 and each company is marked as Excellent, Moderate, or Underperforming. I first save the data in Excel sheets, and after cleaning it, I move it into a Postgres SQL database.";
+    }
+    
+    // 21 metrics questions
+    if (msg.includes('metrics') || msg.includes('21') || msg.includes('financial ratios')) {
+        return "The system calculates 21 important financial metrics such as Net Income, Cash Flow from Operations, Working Capital Changes, Accounts Receivable/Payable, Inventory, Capital Spending, Investing/Financing Cash Flows, Depreciation, Stock Compensation, Acquisitions, Dividends, Share Buybacks, Free Cash Flow, and more.It also includes key ratios like Debt to Equity, Interest Coverage, Current Ratio, and OCF to Net Income Ratio. Together, these metrics give a complete picture of a company’s financial health.";
+    }
+    
+    // Dashboard questions
+    if (msg.includes('dashboard') || msg.includes('visualization') || msg.includes('ui')) {
+        return "The dashboard provides interactive visualizations such as radar charts for financial health, trend graphs for liquidity and cash flow, bar charts for risk analysis, and a liquidation prediction gauge. It is built using Power BI and Plotly+Dash and includes four main pages: a landing page with company search, a balance sheet converter, a cash flow generator, and an analysis dashboard. The system is designed to process data within 5–6 seconds and shows real-time progress tracking.";
+    }
+    
+    // Liquidation prediction questions
+    if (msg.includes('liquidation') || msg.includes('risk') || msg.includes('prediction')) {
+        return "Liquidation prediction works with a binary label: a company gets '1' if it has negative Net Income and negative Operating Cash Flow for at least 2 out of 3 years (2022–2024), otherwise it gets '0'. The system targets 60%+ accuracy using ensemble machine learning and offers early warnings and risk-reduction suggestions for small businesses.";
+    }
+    
+    // Technology questions
+    if (msg.includes('technology') || msg.includes('tech stack') || msg.includes('programming')) {
+        return "The technology stack uses Python for data processing, CSS for the frontend, Java for certain components, and PostgreSQL for the database, with development done in VS Code, Jupyter Notebook, and Google Colab. The system uses PyMuPDF to handle PDFs, openPyXL for Excel formatting, and Pandas for data manipulation. For visualization, it uses color coding: light green for excellent, light yellow for moderate, and light orange for underperforming companies.";
+    }
+    
+    // Project timeline questions
+    if (msg.includes('timeline') || msg.includes('phases') || msg.includes('development')) {
+        return "The project runs for 16 weeks (June–September 2025) in 4 phases: Phase 1 – Data setup & collection, Phase 2 – Core system & machine learning models, Phase 3 – UI integration & dashboard, and Phase 4 – Testing & finalization. Testing involves my father’s company, friends’ companies, and possibly Black Rabbit Club where i work currently in liverpool, , with 4–5 small business owners giving feedback for real-world validation.";
+    }
+    
+    // Requirements questions
+    if (msg.includes('requirements') || msg.includes('features')) {
+        return "The project’s essential requirements are automated balance sheet conversion, smart cash flow generation, 60%+ liquidation prediction accuracy, an interactive dashboard with visualizations, exploration of big company data (Apple, Microsoft, Google), secure database storage, downloadable statements, 5–6 second processing time, and a user-friendly interface for non-finance users. Desirable features include real-time monitoring and mobile-responsive design.";
+    }
+    
+    return null; // No specific answer found
+}
+function addTypingIndicator() {
+    const chat = document.getElementById('ai-chat');
+    const typingDiv = document.createElement('div');
+    typingDiv.id = 'typing-indicator';
+    typingDiv.className = 'ai-message typing';
+    typingDiv.innerHTML = `
+        <div class="ai-avatar">
+            <i class="fas fa-robot"></i>
+        </div>
+        <div class="ai-text">
+            <div class="typing-dots">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+    `;
+    chat.appendChild(typingDiv);
+    chat.scrollTop = chat.scrollHeight;
+}
+
+function removeTypingIndicator() {
+    const indicator = document.getElementById('typing-indicator');
+    if (indicator) {
+        indicator.remove();
+    }
+}
+
+function addAIMessage(message, sender) {
+    const chat = document.getElementById('ai-chat');
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `ai-message ${sender}`;
+    
+    if (sender === 'ai') {
+        messageDiv.innerHTML = `
+            <div class="ai-avatar">
+                <i class="fas fa-robot"></i>
+            </div>
+            <div class="ai-text">${message}</div>
+        `;
+    } else {
+        messageDiv.innerHTML = `
+            <div class="ai-text user-message" style="background: rgba(5, 150, 105, 0.1); margin-left: auto; margin-right: 0; max-width: 70%; border: 1px solid rgba(5, 150, 105, 0.2);">${message}</div>
+        `;
+    }
+    
+    chat.appendChild(messageDiv);
+    chat.scrollTop = chat.scrollHeight;
+}
+
+// Missing AI Assistant Functions (add these before the existing ones)
+function openAIAssistant() {
+    document.getElementById('ai-assistant-modal').style.display = 'flex';
+    document.getElementById('ai-input').focus();
+}
+
+function closeAIAssistant() {
+    document.getElementById('ai-assistant-modal').style.display = 'none';
+}
+
+// Missing showEmptyDashboard function
+function showEmptyDashboard() {
+    console.log('📊 No companies data - showing empty dashboard state');
+    
+    // Reset stats to 0
+    const statNumbers = document.querySelectorAll('.stat-number');
+    statNumbers.forEach(stat => {
+        stat.textContent = '0';
+    });
+    
+    // Show empty portfolio message
+    const portfolioContainer = document.getElementById('portfolio-container');
+    if (portfolioContainer) {
+        portfolioContainer.innerHTML = `
+            <div class="empty-state">
+                <div class="empty-icon">
+                    <i class="fas fa-plus-circle"></i>
+                </div>
+                <h4>Add Your First Company</h4>
+                <p>Start building your financial portfolio</p>
+                <button class="modern-btn primary" onclick="window.location.href='/companies'">
+                    <i class="fas fa-plus"></i>
+                    <span>Add Company</span>
+                </button>
+            </div>
+        `;
+    }
+    
+    // Reset risk analytics
+    const riskElements = {
+        'low-risk-count': 0,
+        'medium-risk-count': 0,
+        'high-risk-count': 0,
+        'risk-percentage': '0%'
+    };
+    
+    Object.entries(riskElements).forEach(([id, value]) => {
+        const element = document.getElementById(id);
+        if (element) {
+            element.textContent = value;
+        }
+    });
+}
+
+// Fix updateRiskAnalytics function - add null checks
+function updateRiskAnalytics(companies) {
+    if (!companies || companies.length === 0) {
+        console.log('⚠️ No companies data available for risk analytics');
+        showEmptyDashboard();
+        return;
+    }
+    
+    const totalCompanies = companies.length;
+    let lowRisk = 0, mediumRisk = 0, highRisk = 0;
+    let healthScores = [];
+    let riskDetails = [];
+    
+    // Process each company
+    companies.forEach((company, index) => {
+        const healthScore = calculateRealHealthScore(company);
+        
+        if (healthScore !== null) {
+            healthScores.push(healthScore);
+            
+            // Categorize risk based on health score
+            let riskLevel;
+            if (healthScore >= 70) {
+                lowRisk++;
+                riskLevel = 'low';
+            } else if (healthScore >= 40) {
+                mediumRisk++;
+                riskLevel = 'medium';
+            } else {
+                highRisk++;
+                riskLevel = 'high';
+            }
+            
+            riskDetails.push({
+                company: company.name || `Company ${index + 1}`,
+                healthScore: healthScore,
+                riskLevel: riskLevel,
+                liquidationRisk: company.liquidation_label || 0,
+                debtToEquity: company.debt_to_equity_ratio || 0,
+                currentRatio: company.current_ratio || 0
+            });
+        }
+    });
+    
+    // Update DOM elements with null checks
+    updateRiskCounters(lowRisk, mediumRisk, highRisk);
+    
+    // Calculate overall risk percentage
+    const totalCategorized = lowRisk + mediumRisk + highRisk;
+    const riskPercentage = totalCategorized > 0 
+        ? Math.round(((mediumRisk + highRisk * 2) / (totalCategorized * 2)) * 100)
+        : 0;
+    
+    // Update risk percentage display with null check
+    const riskPercentageElement = document.getElementById('risk-percentage');
+    if (riskPercentageElement) {
+        riskPercentageElement.textContent = riskPercentage + '%';
+    } else {
+        console.warn('⚠️ risk-percentage element not found');
+    }
+    
+    // Update risk circle visualization
+    updateRiskCircle(riskPercentage, lowRisk, mediumRisk, highRisk);
+    
+    // Update predictive analytics with safety checks
+    if (healthScores.length > 0) {
+        updatePredictiveAnalytics(companies, healthScores, riskDetails);
+    }
+    
+    console.log('🛡️ Risk Analytics Updated:', {
+        totalCompanies,
+        lowRisk, 
+        mediumRisk, 
+        highRisk, 
+        totalCategorized, 
+        riskPercentage,
+        avgHealthScore: healthScores.length > 0 ? (healthScores.reduce((a,b) => a+b, 0) / healthScores.length).toFixed(1) : 0
+    });
+}
+
+// Fix updateRiskCounters with null checks
+function updateRiskCounters(lowRisk, mediumRisk, highRisk) {
+    const elements = {
+        'low-risk-count': lowRisk,
+        'medium-risk-count': mediumRisk,
+        'high-risk-count': highRisk
+    };
+    
+    Object.entries(elements).forEach(([id, value]) => {
+        const element = document.getElementById(id);
+        if (element) {
+            element.textContent = value;
+            // Add animation class
+            element.classList.add('counter-updated');
+            setTimeout(() => element.classList.remove('counter-updated'), 500);
+        } else {
+            console.warn(`⚠️ Element with ID '${id}' not found`);
+        }
+    });
+}
+
+// Add this CSS for animation
+const additionalCSS = `
+.counter-updated {
+    animation: counterBounce 0.5s ease;
+}
+
+@keyframes counterBounce {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+`;
+
+// Add CSS to head
+const styleSheet = document.createElement('style');
+styleSheet.textContent = additionalCSS;
+document.head.appendChild(styleSheet);
+
+// Business Logic Functions
+function viewCompanyAnalysis(companyName) {
+    showModernLoading('Loading Analysis', `Analyzing ${companyName}...`);
+    
+    setTimeout(() => {
+        hideModernLoading();
+        window.location.href = `/analysis?company=${encodeURIComponent(companyName)}`;
+    }, 1500);
+}
+
+function generateCompanyReport(companyName) {
+    showModernLoading('Generating Report', `Creating comprehensive report for ${companyName}...`);
+    
+    setTimeout(() => {
+        hideModernLoading();
+        showNotification('success', 'Report Generated', `Comprehensive report for ${companyName} is ready for download`);
+    }, 2000);
+}
+
+function runBulkAnalysis() {
+    showModernLoading('Running Bulk Analysis', 'Analyzing all portfolio companies...');
+    
+    setTimeout(() => {
+        hideModernLoading();
+        showNotification('success', 'Bulk Analysis Complete', 'All companies have been analyzed and updated');
+        loadDashboardData();
+    }, 3000);
+}
+
+function generateDashboardReport() {
+    showModernLoading('Generating Dashboard Report', 'Compiling portfolio insights...');
+    
+    setTimeout(() => {
+        hideModernLoading();
+        showNotification('success', 'Dashboard Report Ready', 'Comprehensive portfolio report generated successfully');
+    }, 2500);
+}
+
+function generateAdvancedReport() {
+    showModernLoading('AI Report Generation', 'Creating AI-powered insights and recommendations...');
+    
+    setTimeout(() => {
+        hideModernLoading();
+        showNotification('success', 'AI Report Complete', 'Advanced AI-powered report with predictive insights is ready');
+    }, 3500);
+}
+
+// Utility Functions
+function formatCurrency(value) {
+    if (!value) return 'N/A';
+    
+    const num = Math.abs(value);
+    if (num >= 1e9) return `${(value/1e9).toFixed(1)}B`;
+    if (num >= 1e6) return `${(value/1e6).toFixed(1)}M`;
+    if (num >= 1e3) return `${(value/1e3).toFixed(1)}K`;
+    return `${value.toFixed(0)}`;
+}
+
+function showNotification(type, title, message) {
+    const notification = document.createElement('div');
+    notification.className = 'modern-notification';
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 10001;
+        background: white;
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        border-radius: 12px;
+        padding: 1rem 1.5rem;
+        color: #1e293b;
+        max-width: 400px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        animation: slideInRight 0.3s ease;
+    `;
+    
+    const iconMap = {
+        success: 'fa-check-circle',
+        error: 'fa-exclamation-triangle',
+        info: 'fa-info-circle'
+    };
+    
+    const colorMap = {
+        success: '#059669',
+        error: '#dc2626',
+        info: '#6366f1'
+    };
+    
+    notification.innerHTML = `
+        <div style="display: flex; align-items: center; gap: 0.75rem;">
+            <i class="fas ${iconMap[type]}" style="color: ${colorMap[type]}; font-size: 1.25rem;"></i>
+            <div>
+                <div style="font-weight: 600; margin-bottom: 0.25rem;">${title}</div>
+                <div style="font-size: 0.875rem; color: #64748b;">${message}</div>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.style.animation = 'slideOutRight 0.3s ease';
+        setTimeout(() => notification.remove(), 300);
+    }, 5000);
+}
+
+// Add CSS for animations
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes slideInRight {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+    
+    @keyframes slideOutRight {
+        from {
+            transform: translateX(0);
+            opacity: 1;
+        }
+        to {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+    }
+`;
+document.head.appendChild(style);
+
+// Keyboard Shortcuts
+document.addEventListener('keydown', function(e) {
+    if (e.altKey) {
+        switch(e.key) {
+            case 'r':
+                e.preventDefault();
+                loadDashboardData();
+                showNotification('info', 'Refreshing', 'Dashboard data is being updated...');
+                break;
+            case 'a':
+                e.preventDefault();
+                openAIAssistant();
+                break;
+            case 'c':
+                e.preventDefault();
+                window.location.href = '/companies';
+                break;
+            case 'u':
+                e.preventDefault();
+                window.location.href = '/upload';
+                break;
+        }
+    }
+    
+    // ESC to close modals
+    if (e.key === 'Escape') {
+        closeAIAssistant();
+    }
+    
+    // Enter in AI input
+    if (e.key === 'Enter' && e.target.id === 'ai-input') {
+        sendAIMessage();
+    }
+});
+
+// Performance monitoring
+console.log('🚀 Modern Financial Dashboard Loaded');
+console.log('⚡ Features: Real-time data, AI insights, Predictive analytics');
+console.log('🎨 UI: Clean white design, Smooth animations, Responsive layout');
+console.log('⌨️ Shortcuts: Alt+R (refresh), Alt+A (AI), Alt+C (companies), Alt+U (upload)');
+console.log('🤖 AI Assistant available for financial insights');
+
+// Initialize tooltips and other UI enhancements
+document.querySelectorAll('[title]').forEach(element => {
+    element.addEventListener('mouseenter', function() {
+        // Custom tooltip implementation if needed
+    });
+});
+
+console.log('✅ Modern Financial Dashboard Ready - All systems operational');
+</script>
+
+{% endblock %}Time - start;
+            const progress = Math.min

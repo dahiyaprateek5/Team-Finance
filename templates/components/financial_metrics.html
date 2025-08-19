@@ -1,0 +1,1153 @@
+<!-- Financial Metrics Component -->
+<div class="financial-metrics-container">
+    <!-- Key Performance Indicators -->
+    <div class="kpi-section">
+        <div class="section-header">
+            <h3><i class="fas fa-chart-line"></i> Key Performance Indicators</h3>
+            <div class="header-actions">
+                <button class="toggle-view-btn" onclick="toggleKPIView()">
+                    <i class="fas fa-th"></i>
+                </button>
+                <button class="refresh-btn" onclick="refreshKPIs()">
+                    <i class="fas fa-sync-alt"></i>
+                </button>
+            </div>
+        </div>
+        
+        <div class="kpi-grid" id="kpiGrid">
+            <!-- Revenue Metrics -->
+            <div class="kpi-card revenue-card">
+                <div class="kpi-header">
+                    <div class="kpi-icon">
+                        <i class="fas fa-dollar-sign"></i>
+                    </div>
+                    <div class="kpi-trend positive">
+                        <i class="fas fa-arrow-up"></i>
+                        <span>+12.5%</span>
+                    </div>
+                </div>
+                <div class="kpi-content">
+                    <h4>Total Revenue</h4>
+                    <div class="kpi-value" id="totalRevenue">$15.2M</div>
+                    <div class="kpi-comparison">
+                        <span class="current-period">Q4 2024: $15.2M</span>
+                        <span class="previous-period">Q3 2024: $13.5M</span>
+                    </div>
+                    <div class="kpi-sparkline" id="revenueSparkline"></div>
+                </div>
+            </div>
+
+            <!-- Profit Metrics -->
+            <div class="kpi-card profit-card">
+                <div class="kpi-header">
+                    <div class="kpi-icon">
+                        <i class="fas fa-chart-bar"></i>
+                    </div>
+                    <div class="kpi-trend positive">
+                        <i class="fas fa-arrow-up"></i>
+                        <span>+8.3%</span>
+                    </div>
+                </div>
+                <div class="kpi-content">
+                    <h4>Net Profit</h4>
+                    <div class="kpi-value" id="netProfit">$2.8M</div>
+                    <div class="kpi-comparison">
+                        <span class="current-period">Margin: 18.4%</span>
+                        <span class="previous-period">Prev: 17.1%</span>
+                    </div>
+                    <div class="kpi-sparkline" id="profitSparkline"></div>
+                </div>
+            </div>
+
+            <!-- Cash Flow Metrics -->
+            <div class="kpi-card cashflow-card">
+                <div class="kpi-header">
+                    <div class="kpi-icon">
+                        <i class="fas fa-water"></i>
+                    </div>
+                    <div class="kpi-trend positive">
+                        <i class="fas fa-arrow-up"></i>
+                        <span>+15.7%</span>
+                    </div>
+                </div>
+                <div class="kpi-content">
+                    <h4>Operating Cash Flow</h4>
+                    <div class="kpi-value" id="operatingCashFlow">$4.1M</div>
+                    <div class="kpi-comparison">
+                        <span class="current-period">Free CF: $3.2M</span>
+                        <span class="previous-period">OCF Margin: 27%</span>
+                    </div>
+                    <div class="kpi-sparkline" id="cashflowSparkline"></div>
+                </div>
+            </div>
+
+            <!-- Growth Metrics -->
+            <div class="kpi-card growth-card">
+                <div class="kpi-header">
+                    <div class="kpi-icon">
+                        <i class="fas fa-trending-up"></i>
+                    </div>
+                    <div class="kpi-trend positive">
+                        <i class="fas fa-arrow-up"></i>
+                        <span>+23.1%</span>
+                    </div>
+                </div>
+                <div class="kpi-content">
+                    <h4>Revenue Growth</h4>
+                    <div class="kpi-value" id="revenueGrowth">23.1%</div>
+                    <div class="kpi-comparison">
+                        <span class="current-period">YoY Growth</span>
+                        <span class="previous-period">Target: 20%</span>
+                    </div>
+                    <div class="kpi-sparkline" id="growthSparkline"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Financial Ratios -->
+    <div class="ratios-section">
+        <div class="section-header">
+            <h3><i class="fas fa-calculator"></i> Financial Ratios</h3>
+            <div class="ratio-filters">
+                <select id="ratioCategory" onchange="filterRatios(this.value)">
+                    <option value="all">All Ratios</option>
+                    <option value="liquidity">Liquidity Ratios</option>
+                    <option value="profitability">Profitability Ratios</option>
+                    <option value="leverage">Leverage Ratios</option>
+                    <option value="efficiency">Efficiency Ratios</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="ratios-grid">
+            <!-- Liquidity Ratios -->
+            <div class="ratio-group liquidity" data-category="liquidity">
+                <h4>Liquidity Ratios</h4>
+                <div class="ratio-items">
+                    <div class="ratio-item">
+                        <div class="ratio-header">
+                            <span class="ratio-name">Current Ratio</span>
+                            <span class="ratio-benchmark">Industry: 2.1</span>
+                        </div>
+                        <div class="ratio-value good">2.4</div>
+                        <div class="ratio-bar">
+                            <div class="ratio-progress" style="width: 85%"></div>
+                            <div class="benchmark-marker" style="left: 75%"></div>
+                        </div>
+                        <div class="ratio-interpretation good">Strong liquidity position</div>
+                    </div>
+
+                    <div class="ratio-item">
+                        <div class="ratio-header">
+                            <span class="ratio-name">Quick Ratio</span>
+                            <span class="ratio-benchmark">Industry: 1.3</span>
+                        </div>
+                        <div class="ratio-value good">1.8</div>
+                        <div class="ratio-bar">
+                            <div class="ratio-progress" style="width: 90%"></div>
+                            <div class="benchmark-marker" style="left: 65%"></div>
+                        </div>
+                        <div class="ratio-interpretation good">Excellent short-term liquidity</div>
+                    </div>
+
+                    <div class="ratio-item">
+                        <div class="ratio-header">
+                            <span class="ratio-name">Cash Ratio</span>
+                            <span class="ratio-benchmark">Industry: 0.5</span>
+                        </div>
+                        <div class="ratio-value moderate">0.7</div>
+                        <div class="ratio-bar">
+                            <div class="ratio-progress" style="width: 70%"></div>
+                            <div class="benchmark-marker" style="left: 50%"></div>
+                        </div>
+                        <div class="ratio-interpretation moderate">Adequate cash reserves</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Profitability Ratios -->
+            <div class="ratio-group profitability" data-category="profitability">
+                <h4>Profitability Ratios</h4>
+                <div class="ratio-items">
+                    <div class="ratio-item">
+                        <div class="ratio-header">
+                            <span class="ratio-name">Gross Profit Margin</span>
+                            <span class="ratio-benchmark">Industry: 35%</span>
+                        </div>
+                        <div class="ratio-value excellent">42%</div>
+                        <div class="ratio-bar">
+                            <div class="ratio-progress" style="width: 84%"></div>
+                            <div class="benchmark-marker" style="left: 70%"></div>
+                        </div>
+                        <div class="ratio-interpretation excellent">Outstanding gross profitability</div>
+                    </div>
+
+                    <div class="ratio-item">
+                        <div class="ratio-header">
+                            <span class="ratio-name">Net Profit Margin</span>
+                            <span class="ratio-benchmark">Industry: 8%</span>
+                        </div>
+                        <div class="ratio-value excellent">18.4%</div>
+                        <div class="ratio-bar">
+                            <div class="ratio-progress" style="width: 92%"></div>
+                            <div class="benchmark-marker" style="left: 40%"></div>
+                        </div>
+                        <div class="ratio-interpretation excellent">Exceptional net profitability</div>
+                    </div>
+
+                    <div class="ratio-item">
+                        <div class="ratio-header">
+                            <span class="ratio-name">Return on Assets (ROA)</span>
+                            <span class="ratio-benchmark">Industry: 6%</span>
+                        </div>
+                        <div class="ratio-value good">12.3%</div>
+                        <div class="ratio-bar">
+                            <div class="ratio-progress" style="width: 82%"></div>
+                            <div class="benchmark-marker" style="left: 60%"></div>
+                        </div>
+                        <div class="ratio-interpretation good">Strong asset utilization</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Leverage Ratios -->
+            <div class="ratio-group leverage" data-category="leverage">
+                <h4>Leverage Ratios</h4>
+                <div class="ratio-items">
+                    <div class="ratio-item">
+                        <div class="ratio-header">
+                            <span class="ratio-name">Debt-to-Equity</span>
+                            <span class="ratio-benchmark">Industry: 0.8</span>
+                        </div>
+                        <div class="ratio-value good">0.6</div>
+                        <div class="ratio-bar">
+                            <div class="ratio-progress" style="width: 60%"></div>
+                            <div class="benchmark-marker" style="left: 80%"></div>
+                        </div>
+                        <div class="ratio-interpretation good">Conservative debt levels</div>
+                    </div>
+
+                    <div class="ratio-item">
+                        <div class="ratio-header">
+                            <span class="ratio-name">Interest Coverage</span>
+                            <span class="ratio-benchmark">Industry: 8x</span>
+                        </div>
+                        <div class="ratio-value excellent">15.2x</div>
+                        <div class="ratio-bar">
+                            <div class="ratio-progress" style="width: 95%"></div>
+                            <div class="benchmark-marker" style="left: 50%"></div>
+                        </div>
+                        <div class="ratio-interpretation excellent">Very strong interest coverage</div>
+                    </div>
+
+                    <div class="ratio-item">
+                        <div class="ratio-header">
+                            <span class="ratio-name">Debt Service Coverage</span>
+                            <span class="ratio-benchmark">Industry: 2.5x</span>
+                        </div>
+                        <div class="ratio-value good">3.8x</div>
+                        <div class="ratio-bar">
+                            <div class="ratio-progress" style="width: 76%"></div>
+                            <div class="benchmark-marker" style="left: 50%"></div>
+                        </div>
+                        <div class="ratio-interpretation good">Strong debt service ability</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Efficiency Ratios -->
+            <div class="ratio-group efficiency" data-category="efficiency">
+                <h4>Efficiency Ratios</h4>
+                <div class="ratio-items">
+                    <div class="ratio-item">
+                        <div class="ratio-header">
+                            <span class="ratio-name">Asset Turnover</span>
+                            <span class="ratio-benchmark">Industry: 1.2x</span>
+                        </div>
+                        <div class="ratio-value good">1.5x</div>
+                        <div class="ratio-bar">
+                            <div class="ratio-progress" style="width: 75%"></div>
+                            <div class="benchmark-marker" style="left: 60%"></div>
+                        </div>
+                        <div class="ratio-interpretation good">Efficient asset utilization</div>
+                    </div>
+
+                    <div class="ratio-item">
+                        <div class="ratio-header">
+                            <span class="ratio-name">Inventory Turnover</span>
+                            <span class="ratio-benchmark">Industry: 6x</span>
+                        </div>
+                        <div class="ratio-value excellent">8.2x</div>
+                        <div class="ratio-bar">
+                            <div class="ratio-progress" style="width: 82%"></div>
+                            <div class="benchmark-marker" style="left: 60%"></div>
+                        </div>
+                        <div class="ratio-interpretation excellent">Excellent inventory management</div>
+                    </div>
+
+                    <div class="ratio-item">
+                        <div class="ratio-header">
+                            <span class="ratio-name">Receivables Turnover</span>
+                            <span class="ratio-benchmark">Industry: 10x</span>
+                        </div>
+                        <div class="ratio-value moderate">9.1x</div>
+                        <div class="ratio-bar">
+                            <div class="ratio-progress" style="width: 68%"></div>
+                            <div class="benchmark-marker" style="left: 70%"></div>
+                        </div>
+                        <div class="ratio-interpretation moderate">Room for improvement in collections</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Performance Summary -->
+    <div class="performance-summary">
+        <div class="section-header">
+            <h3><i class="fas fa-trophy"></i> Performance Summary</h3>
+            <div class="summary-period">
+                <select onchange="updateSummaryPeriod(this.value)">
+                    <option value="quarter">This Quarter</option>
+                    <option value="year" selected>This Year</option>
+                    <option value="ytd">Year to Date</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="summary-grid">
+            <div class="summary-card overall-score">
+                <div class="score-circle">
+                    <svg width="100" height="100">
+                        <circle cx="50" cy="50" r="40" fill="none" stroke="#e0e0e0" stroke-width="8"/>
+                        <circle cx="50" cy="50" r="40" fill="none" stroke="#4CAF50" stroke-width="8" 
+                                stroke-dasharray="251" stroke-dashoffset="50" class="score-progress"/>
+                    </svg>
+                    <div class="score-text">
+                        <span class="score-number">85</span>
+                        <span class="score-label">Overall Score</span>
+                    </div>
+                </div>
+                <div class="score-breakdown">
+                    <div class="breakdown-item">
+                        <span class="category">Profitability</span>
+                        <div class="category-bar">
+                            <div class="category-progress" style="width: 90%"></div>
+                        </div>
+                        <span class="category-score">90</span>
+                    </div>
+                    <div class="breakdown-item">
+                        <span class="category">Liquidity</span>
+                        <div class="category-bar">
+                            <div class="category-progress" style="width: 85%"></div>
+                        </div>
+                        <span class="category-score">85</span>
+                    </div>
+                    <div class="breakdown-item">
+                        <span class="category">Efficiency</span>
+                        <div class="category-bar">
+                            <div class="category-progress" style="width: 78%"></div>
+                        </div>
+                        <span class="category-score">78</span>
+                    </div>
+                    <div class="breakdown-item">
+                        <span class="category">Leverage</span>
+                        <div class="category-bar">
+                            <div class="category-progress" style="width: 88%"></div>
+                        </div>
+                        <span class="category-score">88</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="summary-card achievements">
+                <h4><i class="fas fa-medal"></i> Key Achievements</h4>
+                <div class="achievement-list">
+                    <div class="achievement-item">
+                        <div class="achievement-icon excellent">
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <div class="achievement-content">
+                            <h5>Revenue Milestone</h5>
+                            <p>Exceeded $15M quarterly revenue target by 12%</p>
+                        </div>
+                    </div>
+                    <div class="achievement-item">
+                        <div class="achievement-icon good">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <div class="achievement-content">
+                            <h5>Profit Margin Improvement</h5>
+                            <p>Increased net profit margin from 15.2% to 18.4%</p>
+                        </div>
+                    </div>
+                    <div class="achievement-item">
+                        <div class="achievement-icon good">
+                            <i class="fas fa-shield-alt"></i>
+                        </div>
+                        <div class="achievement-content">
+                            <h5>Risk Reduction</h5>
+                            <p>Lowered financial risk score by 25 points</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="summary-card targets">
+                <h4><i class="fas fa-bullseye"></i> Targets & Goals</h4>
+                <div class="target-list">
+                    <div class="target-item">
+                        <div class="target-header">
+                            <span class="target-name">Annual Revenue</span>
+                            <span class="target-status achieved">Achieved</span>
+                        </div>
+                        <div class="target-progress">
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 112%"></div>
+                            </div>
+                            <div class="target-values">
+                                <span class="current">$60.8M</span>
+                                <span class="target">/ $54M</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="target-item">
+                        <div class="target-header">
+                            <span class="target-name">Cash Flow Target</span>
+                            <span class="target-status on-track">On Track</span>
+                        </div>
+                        <div class="target-progress">
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 85%"></div>
+                            </div>
+                            <div class="target-values">
+                                <span class="current">$16.4M</span>
+                                <span class="target">/ $19.2M</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="target-item">
+                        <div class="target-header">
+                            <span class="target-name">Debt Reduction</span>
+                            <span class="target-status behind">Behind</span>
+                        </div>
+                        <div class="target-progress">
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 65%"></div>
+                            </div>
+                            <div class="target-values">
+                                <span class="current">$3.2M</span>
+                                <span class="target">/ $5M</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.financial-metrics-container {
+    padding: 20px;
+    background: #f8f9fa;
+    min-height: 100vh;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #e9ecef;
+}
+
+.section-header h3 {
+    color: #2c3e50;
+    font-size: 24px;
+    font-weight: 600;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.header-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.toggle-view-btn, .refresh-btn {
+    padding: 8px 12px;
+    border: 1px solid #dee2e6;
+    background: white;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.toggle-view-btn:hover, .refresh-btn:hover {
+    background: #e9ecef;
+    border-color: #adb5bd;
+}
+
+/* KPI Section */
+.kpi-section {
+    margin-bottom: 40px;
+}
+
+.kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+}
+
+.kpi-card {
+    background: white;
+    border-radius: 12px;
+    padding: 25px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    border-left: 4px solid;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.kpi-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+}
+
+.revenue-card { border-left-color: #4CAF50; }
+.profit-card { border-left-color: #2196F3; }
+.cashflow-card { border-left-color: #FF9800; }
+.growth-card { border-left-color: #9C27B0; }
+
+.kpi-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.kpi-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    color: white;
+}
+
+.revenue-card .kpi-icon { background: linear-gradient(45deg, #4CAF50, #45a049); }
+.profit-card .kpi-icon { background: linear-gradient(45deg, #2196F3, #1976d2); }
+.cashflow-card .kpi-icon { background: linear-gradient(45deg, #FF9800, #f57c00); }
+.growth-card .kpi-icon { background: linear-gradient(45deg, #9C27B0, #7b1fa2); }
+
+.kpi-trend {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 14px;
+    font-weight: 600;
+    padding: 5px 10px;
+    border-radius: 15px;
+}
+
+.kpi-trend.positive {
+    background: rgba(76, 175, 80, 0.1);
+    color: #4CAF50;
+}
+
+.kpi-trend.negative {
+    background: rgba(244, 67, 54, 0.1);
+    color: #f44336;
+}
+
+.kpi-content h4 {
+    color: #34495e;
+    font-size: 16px;
+    margin: 0 0 10px 0;
+    font-weight: 500;
+}
+
+.kpi-value {
+    font-size: 32px;
+    font-weight: 700;
+    color: #2c3e50;
+    margin-bottom: 10px;
+}
+
+.kpi-comparison {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    margin-bottom: 15px;
+}
+
+.current-period {
+    font-size: 14px;
+    color: #2c3e50;
+    font-weight: 500;
+}
+
+.previous-period {
+    font-size: 12px;
+    color: #7f8c8d;
+}
+
+.kpi-sparkline {
+    height: 40px;
+    background: linear-gradient(90deg, rgba(52, 152, 219, 0.1) 0%, rgba(52, 152, 219, 0.3) 100%);
+    border-radius: 4px;
+    position: relative;
+    overflow: hidden;
+}
+
+.kpi-sparkline::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent 0%, #3498db 50%, transparent 100%);
+    animation: sparkline 2s ease-in-out infinite;
+}
+
+/* Ratios Section */
+.ratios-section {
+    margin-bottom: 40px;
+}
+
+.ratio-filters select {
+    padding: 8px 15px;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    background: white;
+    cursor: pointer;
+}
+
+.ratios-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 25px;
+}
+
+.ratio-group {
+    background: white;
+    border-radius: 12px;
+    padding: 25px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.ratio-group h4 {
+    color: #2c3e50;
+    font-size: 18px;
+    margin: 0 0 20px 0;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #ecf0f1;
+}
+
+.ratio-items {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.ratio-item {
+    padding: 15px 0;
+}
+
+.ratio-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.ratio-name {
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.ratio-benchmark {
+    font-size: 12px;
+    color: #7f8c8d;
+    background: #ecf0f1;
+    padding: 2px 8px;
+    border-radius: 10px;
+}
+
+.ratio-value {
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+.ratio-value.excellent { color: #27ae60; }
+.ratio-value.good { color: #2ecc71; }
+.ratio-value.moderate { color: #f39c12; }
+.ratio-value.poor { color: #e74c3c; }
+
+.ratio-bar {
+    position: relative;
+    height: 8px;
+    background: #ecf0f1;
+    border-radius: 4px;
+    margin-bottom: 8px;
+}
+
+.ratio-progress {
+    height: 100%;
+    border-radius: 4px;
+    background: linear-gradient(90deg, #3498db, #2ecc71);
+    transition: width 1s ease-in-out;
+}
+
+.benchmark-marker {
+    position: absolute;
+    top: -2px;
+    width: 2px;
+    height: 12px;
+    background: #e74c3c;
+    border-radius: 1px;
+}
+
+.ratio-interpretation {
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.ratio-interpretation.excellent { color: #27ae60; }
+.ratio-interpretation.good { color: #2ecc71; }
+.ratio-interpretation.moderate { color: #f39c12; }
+.ratio-interpretation.poor { color: #e74c3c; }
+
+/* Performance Summary */
+.performance-summary {
+    margin-bottom: 40px;
+}
+
+.summary-period select {
+    padding: 8px 15px;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    background: white;
+    cursor: pointer;
+}
+
+.summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 25px;
+}
+
+.summary-card {
+    background: white;
+    border-radius: 12px;
+    padding: 25px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.summary-card h4 {
+    color: #2c3e50;
+    font-size: 18px;
+    margin: 0 0 20px 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Overall Score */
+.overall-score {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.score-circle {
+    position: relative;
+    margin-bottom: 25px;
+}
+
+.score-progress {
+    transform: rotate(-90deg);
+    transform-origin: 50% 50%;
+    animation: scoreAnimation 2s ease-in-out;
+}
+
+.score-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+}
+
+.score-number {
+    display: block;
+    font-size: 28px;
+    font-weight: 700;
+    color: #2c3e50;
+}
+
+.score-label {
+    font-size: 12px;
+    color: #7f8c8d;
+}
+
+.score-breakdown {
+    width: 100%;
+}
+
+.breakdown-item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 12px;
+}
+
+.category {
+    min-width: 80px;
+    font-size: 12px;
+    font-weight: 500;
+    color: #34495e;
+}
+
+.category-bar {
+    flex: 1;
+    height: 6px;
+    background: #ecf0f1;
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.category-progress {
+    height: 100%;
+    background: linear-gradient(90deg, #3498db, #2ecc71);
+    border-radius: 3px;
+    transition: width 1s ease-in-out;
+}
+
+.category-score {
+    min-width: 30px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #2c3e50;
+    text-align: right;
+}
+
+/* Achievements */
+.achievement-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.achievement-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 15px;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+
+.achievement-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 16px;
+}
+
+.achievement-icon.excellent { background: linear-gradient(45deg, #f39c12, #e67e22); }
+.achievement-icon.good { background: linear-gradient(45deg, #3498db, #2980b9); }
+
+.achievement-content h5 {
+    color: #2c3e50;
+    font-size: 14px;
+    margin: 0 0 5px 0;
+    font-weight: 600;
+}
+
+.achievement-content p {
+    color: #7f8c8d;
+    font-size: 12px;
+    margin: 0;
+    line-height: 1.4;
+}
+
+/* Targets */
+.target-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.target-item {
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+
+.target-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.target-name {
+    font-weight: 600;
+    color: #2c3e50;
+    font-size: 14px;
+}
+
+.target-status {
+    font-size: 12px;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 10px;
+}
+
+.target-status.achieved {
+    background: rgba(39, 174, 96, 0.1);
+    color: #27ae60;
+}
+
+.target-status.on-track {
+    background: rgba(52, 152, 219, 0.1);
+    color: #3498db;
+}
+
+.target-status.behind {
+    background: rgba(231, 76, 60, 0.1);
+    color: #e74c3c;
+}
+
+.target-progress {
+    margin-bottom: 8px;
+}
+
+.progress-bar {
+    height: 8px;
+    background: #ecf0f1;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 5px;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #3498db, #2ecc71);
+    border-radius: 4px;
+    transition: width 1s ease-in-out;
+}
+
+.target-values {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+}
+
+.current {
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.target {
+    color: #7f8c8d;
+}
+
+@keyframes sparkline {
+    0%, 100% { transform: translateX(-100%); }
+    50% { transform: translateX(100%); }
+}
+
+@keyframes scoreAnimation {
+    from { stroke-dashoffset: 251; }
+    to { stroke-dashoffset: 50; }
+}
+
+@media (max-width: 768px) {
+    .kpi-grid, .ratios-grid, .summary-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .section-header {
+        flex-direction: column;
+        gap: 15px;
+        align-items: stretch;
+    }
+    
+    .chart-controls {
+        flex-direction: column;
+        gap: 10px;
+    }
+}
+</style>
+
+<script>
+function toggleKPIView() {
+    const grid = document.getElementById('kpiGrid');
+    grid.classList.toggle('list-view');
+    
+    const btn = document.querySelector('.toggle-view-btn i');
+    if (grid.classList.contains('list-view')) {
+        btn.className = 'fas fa-th-large';
+    } else {
+        btn.className = 'fas fa-th';
+    }
+}
+
+function refreshKPIs() {
+    const refreshBtn = document.querySelector('.refresh-btn i');
+    refreshBtn.style.animation = 'spin 1s linear infinite';
+    
+    // Simulate data refresh
+    setTimeout(() => {
+        refreshBtn.style.animation = '';
+        updateKPIValues();
+        showNotification('KPIs refreshed successfully', 'success');
+    }, 1500);
+}
+
+function updateKPIValues() {
+    // Simulate real-time KPI updates
+    const kpis = {
+        totalRevenue: (Math.random() * 3 + 14).toFixed(1) + 'M',
+        netProfit: (Math.random() * 0.8 + 2.5).toFixed(1) + 'M',
+        operatingCashFlow: (Math.random() * 1 + 3.8).toFixed(1) + 'M',
+        revenueGrowth: (Math.random() * 10 + 20).toFixed(1) + '%'
+    };
+    
+    Object.keys(kpis).forEach(key => {
+        const element = document.getElementById(key);
+        if (element) {
+            element.textContent = '$' + kpis[key];
+        }
+    });
+}
+
+function filterRatios(category) {
+    const ratioGroups = document.querySelectorAll('.ratio-group');
+    
+    ratioGroups.forEach(group => {
+        if (category === 'all' || group.dataset.category === category) {
+            group.style.display = 'block';
+        } else {
+            group.style.display = 'none';
+        }
+    });
+}
+
+function updateSummaryPeriod(period) {
+    console.log('Summary period changed to:', period);
+    // Update summary data based on selected period
+    updatePerformanceData(period);
+}
+
+function updatePerformanceData(period) {
+    // Simulate performance data update
+    const scoreElement = document.querySelector('.score-number');
+    const newScore = Math.floor(Math.random() * 20) + 80;
+    scoreElement.textContent = newScore;
+    
+    // Update progress circle
+    const circle = document.querySelector('.score-progress');
+    const offset = 251 - (newScore / 100) * 251;
+    circle.style.strokeDashoffset = offset;
+}
+
+function formatDetailedCurrency(value) {
+    if (!value || value === 0) return '$0';
+    
+    const absValue = Math.abs(value);
+    const sign = value < 0 ? '-$' : '$';
+    
+    if (absValue >= 1e12) return `${sign}${(absValue/1e12).toFixed(2)} Trillion`;
+    if (absValue >= 1e9) return `${sign}${(absValue/1e9).toFixed(2)} Billion`;
+    if (absValue >= 1e6) return `${sign}${(absValue/1e6).toFixed(2)} Million`;
+    if (absValue >= 1e3) return `${sign}${(absValue/1e3).toFixed(2)} Thousand`;
+    return `${sign}${absValue.toLocaleString()}`;
+}
+
+function showNotification(message, type = 'info') {
+    const notification = document.createElement('div');
+    notification.className = `notification ${type}`;
+    notification.textContent = message;
+    
+    // Add notification styles
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 15px 20px;
+        border-radius: 6px;
+        color: white;
+        font-weight: 500;
+        z-index: 3000;
+        transition: opacity 0.3s;
+        background: ${type === 'success' ? '#4CAF50' : type === 'error' ? '#f44336' : '#2196F3'};
+    `;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.style.opacity = '0';
+        setTimeout(() => notification.remove(), 300);
+    }, 3000);
+}
+
+// Initialize animations and data on page load
+document.addEventListener('DOMContentLoaded', function() {
+    updateKPIValues();
+    updatePerformanceData('year');
+    
+    // Animate progress bars
+    setTimeout(() => {
+        const progressBars = document.querySelectorAll('.ratio-progress, .category-progress, .progress-fill');
+        progressBars.forEach(bar => {
+            const width = bar.style.width;
+            bar.style.width = '0%';
+            setTimeout(() => {
+                bar.style.width = width;
+            }, 100);
+        });
+    }, 500);
+});
+
+// Add CSS for spin animation
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+    
+    .list-view {
+        grid-template-columns: 1fr !important;
+    }
+    
+    .list-view .kpi-card {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+    }
+    
+    .list-view .kpi-content {
+        flex: 1;
+    }
+`;
+
+document.head.appendChild(style);
+</script>
