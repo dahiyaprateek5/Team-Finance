@@ -4053,7 +4053,7 @@ if __name__ == '__main__':
     print("🚀 Starting Enhanced Financial Risk Assessment Application...")
     print("="*80)
     print("📊 EXISTING FEATURES:")
-    print(f"✅ XGBoost Available: {XGBOOST_AVAILABLE}")
+    #print(f"✅ XGBoost Available: {XGBOOST_AVAILABLE}")
     print(f"✅ Random Forest Available: {RANDOM_FOREST_AVAILABLE}")
     print(f"✅ Neural Networks Available: {NEURAL_NETWORKS_AVAILABLE}")
     print(f"✅ LightGBM Available: {LIGHTGBM_AVAILABLE}")
