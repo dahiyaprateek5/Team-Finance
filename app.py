@@ -10,7 +10,17 @@ Integrates XGBoost, Random Forest, Neural Networks, and LightGBM
 Enhanced with PostgreSQL Cash Flow Data Fetching
 NEW: Balance Sheet & Cash Flow Generators with ML Imputation
 """
+import logging
+import warnings
 
+# Suppress all logging output
+logging.getLogger().setLevel(logging.CRITICAL)
+warnings.filterwarnings('ignore')
+
+# Suppress Flask's built-in logging
+logging.getLogger('werkzeug').setLevel(logging.ERROR)
+logging.getLogger('financial_utils').setLevel(logging.ERROR)
+logging.getLogger('DATABASE_CONNECTION.db_connection').setLevel(logging.ERROR)
 import logging
 import warnings
 from datetime import datetime
@@ -58,10 +68,10 @@ try:
     from dataclasses import dataclass
     from enum import Enum
     PDF_PARSER_LIBRARIES_AVAILABLE = True
-    print("✅ PDF parsing libraries available")
+    #print("✅ PDF parsing libraries available")
 except ImportError as e:
-    print(f"⚠️ PDF libraries not available: {e}")
-    print("🔄 Continuing without PDF support...")
+    #print(f"⚠️ PDF libraries not available: {e}")
+    #print("🔄 Continuing without PDF support...")
     
     # Still import required classes for type hints
     from dataclasses import dataclass
@@ -142,7 +152,7 @@ except ImportError as e:
             except Exception as e:
                 return {'valid': False, 'error': f'File validation error: {str(e)}'}
     
-    print("✅ PDF fallback classes created - Excel/CSV processing available")
+    #print("✅ PDF fallback classes created - Excel/CSV processing available")
 
 class DocumentType(Enum):
     BALANCE_SHEET = "balance_sheet"
@@ -367,10 +377,10 @@ try:
     from DATABASE_CONNECTION.db_connection import DatabaseConnection
     from DATABASE_CONNECTION.db_operations import DatabaseOperations
     DATABASE_CLASSES_AVAILABLE = True
-    print("✅ Database classes imported successfully")
+    #print("✅ Database classes imported successfully")
 except ImportError as e:
-    print(f"⚠️ Database classes not available: {e}")
-    print(f"Make sure you have: DATABASE_CONNECTION/db_connection.py, DATABASE_CONNECTION/db_operations.py")
+    #print(f"⚠️ Database classes not available: {e}")
+    #print(f"Make sure you have: DATABASE_CONNECTION/db_connection.py, DATABASE_CONNECTION/db_operations.py")
     DATABASE_CLASSES_AVAILABLE = False
 
 # Import routes (existing + new)
@@ -382,7 +392,7 @@ try:
     from routes.upload_routes import upload_bp
     EXISTING_ROUTES_AVAILABLE = True
 except ImportError as e:
-    print(f"⚠️ Some existing routes not available: {e}")
+    #print(f"⚠️ Some existing routes not available: {e}")
     EXISTING_ROUTES_AVAILABLE = False
 
 # Import NEW routes
@@ -390,19 +400,19 @@ try:
     from routes.balance_sheet_routes import balance_sheet_bp
     from routes.cash_flow_routes import cash_flow_bp
     NEW_ROUTES_AVAILABLE = True
-    print("✅ New Balance Sheet & Cash Flow routes imported successfully")
+    #print("✅ New Balance Sheet & Cash Flow routes imported successfully")
 except ImportError as e:
-    print(f"⚠️ New routes not available: {e}")
-    print("Make sure you have: routes/balance_sheet_routes.py, routes/cash_flow_routes.py")
+    #print(f"⚠️ New routes not available: {e}")
+    #print("Make sure you have: routes/balance_sheet_routes.py, routes/cash_flow_routes.py")
     NEW_ROUTES_AVAILABLE = False
 
 
 try:
     from routes.upload_routes import upload_bp
     UPLOAD_ROUTES_AVAILABLE = True
-    print("✅ Upload routes imported successfully")
+    #print("✅ Upload routes imported successfully")
 except ImportError as e:
-    print(f"❌ Upload routes import failed: {e}")
+    #print(f"❌ Upload routes import failed: {e}")
     UPLOAD_ROUTES_AVAILABLE = False
 
 
@@ -414,7 +424,7 @@ try:
     from services.ai_service import AIService
     EXISTING_SERVICES_AVAILABLE = True
 except ImportError as e:
-    print(f"⚠️ Existing services not available: {e}")
+    #print(f"⚠️ Existing services not available: {e}")
     EXISTING_SERVICES_AVAILABLE = False
 
 # Import NEW services
@@ -424,9 +434,9 @@ try:
     from services.data_imputation_service import DataImputationService
     from services.financial_processing_service import FinancialProcessingService
     NEW_SERVICES_AVAILABLE = True
-    print("✅ New services imported successfully")
+    #print("✅ New services imported successfully")
 except ImportError as e:
-    print(f"⚠️ New services not available: {e}")
+    #print(f"⚠️ New services not available: {e}")
     print("Make sure you have: services/balance_sheet_service.py, services/cash_flow_service.py, etc.")
     NEW_SERVICES_AVAILABLE = False
 
@@ -437,9 +447,9 @@ try:
     from models.balance_sheet_models import BalanceSheetModel
     from models.cash_flow_models import CashFlowModel
     NEW_MODELS_AVAILABLE = True
-    print("✅ New models imported successfully")
+    #print("✅ New models imported successfully")
 except ImportError as e:
-    print(f"⚠️ New models not available: {e}")
+    #print(f"⚠️ New models not available: {e}")
     print("Make sure you have: models/balance_sheet_generator.py, models/cash_flow_generator.py, etc.")
     NEW_MODELS_AVAILABLE = False
 
@@ -449,9 +459,9 @@ try:
     from utils.cash_flow_utils import CashFlowUtils
     from utils.financial_calculations import FinancialCalculations
     NEW_UTILS_AVAILABLE = True
-    print("✅ New utilities imported successfully")
+    #print("✅ New utilities imported successfully")
 except ImportError as e:
-    print(f"⚠️ New utilities not available: {e}")
+    #print(f"⚠️ New utilities not available: {e}")
     print("Make sure you have: utils/balance_sheet_utils.py, utils/cash_flow_utils.py, etc.")
     NEW_UTILS_AVAILABLE = False
 
@@ -460,35 +470,35 @@ try:
     from ml_algorithms.xgboost import XGBRegressorModel, XGBClassifierModel, XGBConfig  
     XGBOOST_AVAILABLE = True
 except ImportError as e:
-    print(f"⚠️ XGBoost not available: {e}")
+    #print(f"⚠️ XGBoost not available: {e}")
     XGBOOST_AVAILABLE = False
 
 try:
     from ml_algorithms.random_forest import RandomForestRegressorModel, RandomForestClassifierModel, RandomForestConfig
     RANDOM_FOREST_AVAILABLE = True
 except ImportError as e:
-    print(f"⚠️ Random Forest not available: {e}")
+    #print(f"⚠️ Random Forest not available: {e}")
     RANDOM_FOREST_AVAILABLE = False
 
 try:
     from ml_algorithms.neural_networks import NeuralNetworkRegressor, NeuralNetworkClassifier, NeuralNetworkConfig
     NEURAL_NETWORKS_AVAILABLE = True
 except ImportError as e:
-    print(f"⚠️ Neural Networks not available: {e}")
+    #print(f"⚠️ Neural Networks not available: {e}")
     NEURAL_NETWORKS_AVAILABLE = False
 
 try:
     from ml_algorithms.lightgbm import LGBRegressorModel, LGBClassifierModel, LGBConfig
     LIGHTGBM_AVAILABLE = True
 except ImportError as e:
-    print(f"⚠️ LightGBM not available: {e}")
+    #print(f"⚠️ LightGBM not available: {e}")
     LIGHTGBM_AVAILABLE = False
 
 try:
     from ml_algorithms.essemble_manager import EnsembleManager  
     ENSEMBLE_AVAILABLE = True
 except ImportError as e:
-    print(f"⚠️ Ensemble Manager not available: {e}")
+    #print(f"⚠️ Ensemble Manager not available: {e}")
     ENSEMBLE_AVAILABLE = False
 
 try:
@@ -498,7 +508,7 @@ try:
     )
     EVALUATION_AVAILABLE = True
 except ImportError as e:
-    print(f"⚠️ Model Evaluation not available: {e}")
+    #print(f"⚠️ Model Evaluation not available: {e}")
     EVALUATION_AVAILABLE = False
 
 # Import NEW ML algorithms for imputation
@@ -508,18 +518,18 @@ try:
     from ml_algorithms.peer_analysis import PeerAnalysis
     from ml_algorithms.industry_benchmarks import IndustryBenchmarks
     IMPUTATION_ALGORITHMS_AVAILABLE = True
-    print("✅ Imputation algorithms imported successfully")
+    #print("✅ Imputation algorithms imported successfully")
 except ImportError as e:
-    print(f"⚠️ Imputation algorithms not available: {e}")
+    #print(f"⚠️ Imputation algorithms not available: {e}")
     print("Make sure you have: ml_algorithms/knn_imputer.py, ml_algorithms/time_series_analyzer.py, etc.")
     IMPUTATION_ALGORITHMS_AVAILABLE = False
 
 try:
     from utils.ml_predictor import MLPredictor, format_confidence_response, get_confidence_recommendations
     CONFIDENCE_UTILS_AVAILABLE = True
-    print("✅ Confidence utilities imported")
+    #print("✅ Confidence utilities imported")
 except ImportError as e:
-    print(f"⚠️ Confidence utilities not available: {e}")
+    #print(f"⚠️ Confidence utilities not available: {e}")
     # Create simple fallback
     class MLPredictor:
         def __init__(self):
@@ -540,7 +550,7 @@ except ImportError as e:
             return "Low confidence - gather more data"
     
     CONFIDENCE_UTILS_AVAILABLE = True
-    print("✅ Confidence utilities initialized (fallback)")
+    #print("✅ Confidence utilities initialized (fallback)")
 
 # Initialize Flask app
 app = Flask(__name__, static_folder='static', static_url_path='/static')
@@ -564,76 +574,12 @@ app.config.update({
     'BALANCE_SHEET_ACCURACY_THRESHOLD': 0.85,
     'CASH_FLOW_ACCURACY_THRESHOLD': 0.90
 })
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 # Create upload directories
 for folder in ['uploads', 'uploads/balance_sheets', 'uploads/cash_flow', 'uploads/processed', 'uploads/results']:
     folder_path = os.path.join(current_dir, folder)
     if not os.path.exists(folder_path):
         os.makedirs(folder_path)
-        print(f"✅ Created directory: {folder_path}")
+        #print(f"✅ Created directory: {folder_path}")
 
 global balance_sheet_service, cash_flow_service
 
@@ -654,18 +600,14 @@ balance_sheet_generator = None
 cash_flow_generator = None
 pdf_parsing_service = None
 
-
-
-
-
 if UPLOAD_ROUTES_AVAILABLE:
     try:
         app.register_blueprint(upload_bp, url_prefix='/upload')
-        print("✅ Upload blueprint registered at /upload")
+        #print("✅ Upload blueprint registered at /upload")
     except Exception as e:
         print(f"❌ Upload blueprint registration failed: {e}")
 else:
-    print("❌ Upload routes not available - creating fallback")
+    #print("❌ Upload routes not available - creating fallback")
     
     # Create a simple fallback route for testing
     @app.route('/upload/balance-sheet', methods=['POST'])
@@ -680,16 +622,12 @@ else:
 print(f"Upload routes available: {UPLOAD_ROUTES_AVAILABLE}")
 
 
-# ===========================================
-# ENHANCED DATABASE CONNECTION (UPDATED)
-# ===========================================
-
 def initialize_database():
     """Initialize database connection using your actual classes"""
     global db_connection, db_operations
     
     if not DATABASE_CLASSES_AVAILABLE:
-        print("❌ Database classes not available - database features disabled")
+        #print("❌ Database classes not available - database features disabled")
         return False
     
     try:
@@ -4052,10 +3990,10 @@ def cash_flow_generator_page():
 if __name__ == '__main__':
     print("🚀 Starting Enhanced Financial Risk Assessment Application...")
     print("="*80)
-    print("📊 EXISTING FEATURES:")
-    print(f"✅ XGBoost Available: {XGBOOST_AVAILABLE}")
-    print(f"✅ Random Forest Available: {RANDOM_FOREST_AVAILABLE}")
-    print(f"✅ Neural Networks Available: {NEURAL_NETWORKS_AVAILABLE}")
+    #print("📊 EXISTING FEATURES:")
+    #print(f"✅ XGBoost Available: {XGBOOST_AVAILABLE}")
+    #print(f"✅ Random Forest Available: {RANDOM_FOREST_AVAILABLE}")
+    #print(f"✅ Neural Networks Available: {NEURAL_NETWORKS_AVAILABLE}")
     print(f"✅ LightGBM Available: {LIGHTGBM_AVAILABLE}")
     print(f"✅ Ensemble Available: {ENSEMBLE_AVAILABLE}")
     print(f"✅ Evaluation Available: {EVALUATION_AVAILABLE}")
@@ -4098,7 +4036,7 @@ if __name__ == '__main__':
                 try:
                     result = db_connection.execute_select(f"SELECT COUNT(*) as count FROM {table}")
                     count = result[0]['count'] if result else 0
-                    print(f"📋 {table.replace('_', ' ').title()}: {count} records")
+                    #print(f"📋 {table.replace('_', ' ').title()}: {count} records")
                 except:
                     print(f"⚠️ {table} table not accessible")
                     
@@ -4114,49 +4052,8 @@ if __name__ == '__main__':
     print("📈 Analytics: http://localhost:5000/analytics")
     print("📋 Companies: http://localhost:5000/companies")
     print("📁 Upload: http://localhost:5000/upload")
-    print()
-    print("🆕 NEW GENERATOR PAGES:")
     print("📊 Balance Sheet Generator: http://localhost:5000/balance-sheet")
     print("💰 Cash Flow Generator: http://localhost:5000/cash-flow-generator")
-    print()
-    print("🔗 API ENDPOINTS:")
-    print("📊 API Status: http://localhost:5000/api/status")
-    print("📖 API Documentation: http://localhost:5000/api/documentation")
-    print("📋 Models: http://localhost:5000/api/models")
-    print()
-    print("💰 EXISTING Cash Flow Data Endpoints:")
-    print("📊 Companies Data: GET /api/cash-flow/companies")
-    print("🔍 Search Companies: GET /api/cash-flow/search?q=<term>")
-    print("🏢 Company Profile: GET /api/cash-flow/company/<id_or_name>")
-    print("📈 Training Data: GET /api/cash-flow/train-data")
-    print()
-    print("🆕 NEW Generator Endpoints:")
-    print("📊 Balance Sheet Upload: POST /api/balance-sheet/upload")
-    print("💰 Cash Flow Generate: POST /api/cash-flow-generator/generate")
-    print("🔧 Data Imputation: POST /api/data-imputation/analyze")
-    print("✅ Financial Validation: POST /api/financial-processing/validate")
-    print()
-    print("🤖 ML Model Endpoints:")
-    print("🔧 Create Model: POST /api/models/create")
-    print("🎓 Train from DB: POST /api/models/train-from-db")
-    print("🔮 Predict Company Risk: POST /api/models/predict-company")
-    print("📊 Confidence Analysis: POST /api/models/predict_with_confidence")
-    print("="*80)
-    print("⚙️ CONFIGURATION:")
-    max_size = app.config.get('MAX_CONTENT_LENGTH', 50 * 1024 * 1024)
-    print(f"📁 Max File Size: {max_size // (1024 * 1024)}MB")
-    print(f"📄 Allowed Extensions: {', '.join(app.config.get('ALLOWED_EXTENSIONS', {'pdf', 'xlsx'}))}")
-    print(f"🔧 Imputation Methods: {', '.join(app.config.get('IMPUTATION_METHODS', ['knn']))}")
-    print(f"💱 Supported Currencies: {', '.join(app.config.get('SUPPORTED_CURRENCIES', ['USD']))}")
-    print(f"📊 Financial Metrics: {app.config.get('FINANCIAL_METRICS_COUNT', 21)}")
-    print("="*80)
-
-    if PDF_PARSER_LIBRARIES_AVAILABLE:
-        print("✅ Enhanced PDF parsing available")
-        print("📄 Enhanced Parse: POST /api/pdf/enhanced-parse") 
-        print("✅ Validate Document: POST /api/pdf/validate-document")
-        print("🔧 Parsing Methods: GET /api/pdf/parsing-methods")
-    else:
-        print("❌ Enhanced PDF parsing not available")
+    
     
     app.run(debug=True, host='0.0.0.0', port=5000)

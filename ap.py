@@ -11,10 +11,19 @@ Enhanced with PostgreSQL Cash Flow Data Fetching
 NEW: Balance Sheet & Cash Flow Generators with ML Imputation
 """
 
+import logging
+import warnings
+from datetime import datetime
+
+warnings.filterwarnings('ignore')
+logging.getLogger().setLevel(logging.CRITICAL)
+
 import os
 import sys
 from venv import logger
 import warnings
+
+from models.cash_flow_generator import clean_financial_value
 warnings.filterwarnings('ignore')
 # Add these imports at the top of your app.py (after existing imports)
 import re
@@ -534,7 +543,7 @@ except ImportError as e:
     print("✅ Confidence utilities initialized (fallback)")
 
 # Initialize Flask app
-app = Flask(__name__)
+app = Flask(__name__, static_folder='static', static_url_path='/static')
 
 # Enhanced Configuration
 app.config.update({
@@ -1070,9 +1079,267 @@ if NEW_ROUTES_AVAILABLE:
 
 
 
+# Add these routes in your app.py (around line 2000, before if __name__ == '__main__':)
+
+@app.route('/cash_flow_generator.html')
+def cash_flow_generator_html():
+    """Serve cash flow generator HTML file directly"""
+    try:
+        return render_template('cash_flow_generator.html')
+    except Exception as e:
+        try:
+            return send_from_directory('.', 'cash_flow_generator.html')
+        except:
+            return f"Cash flow generator file not found: {e}", 404
+
+@app.route('/cash-flow-generator.html')  # Alternative URL
+def cash_flow_generator_alt():
+    """Alternative route for cash flow generator"""
+    return cash_flow_generator_html()
+
+@app.route('/balance_sheet_generator.html')
+def balance_sheet_generator_html():
+    """Serve balance sheet generator HTML file directly"""
+    try:
+        return render_template('balance_sheet_generator.html')
+    except Exception as e:
+        try:
+            return send_from_directory('.', 'balance_sheet_generator.html')
+        except:
+            return f"Balance sheet generator file not found: {e}", 404
+
+@app.route('/balance-sheet-generator.html')  # Alternative URL
+def balance_sheet_generator_alt():
+    """Alternative route for balance sheet generator"""
+    return balance_sheet_generator_html()
+
+# Fix existing route (around line 1400 in your app.py)
 @app.route('/cash_flow_generator')
 def cash_flow_generator():
-    return render_template('cash_flow_generator.html')
+    """Cash flow generator page - FIXED"""
+    try:
+        return render_template('cash_flow_generator.html')
+    except Exception as e:
+        try:
+            return send_from_directory('.', 'cash_flow_generator.html')
+        except:
+            return f"Template not found: {e}", 404
+        
+
+@app.route('/debug/static-test')
+def debug_static_test():
+    """Debug static files"""
+    import os
+    
+    static_info = {
+        'static_folder_configured': app.static_folder,
+        'static_url_path': app.static_url_path,
+        'current_directory': os.getcwd(),
+        'static_folder_exists': os.path.exists('static'),
+        'images_folder_exists': os.path.exists('static/images'),
+        'guide_folder_exists': os.path.exists('static/images/guide'),
+        'files_in_guide': []
+    }
+    
+    try:
+        if os.path.exists('static/images/guide'):
+            static_info['files_in_guide'] = os.listdir('static/images/guide')
+    except:
+        static_info['files_in_guide'] = ['Error reading directory']
+    
+    return jsonify(static_info)
+
+
+
+@app.route('/static/<path:filename>')
+def serve_static(filename):
+    """Serve static files explicitly"""
+    try:
+        return send_from_directory('static', filename)
+    except Exception as e:
+        return jsonify({'error': f'File not found: {filename}', 'message': str(e)}), 404
+
+
+
+# Add this route in app.py (around line 1800):
+
+@app.route('/api/cash-flow/get-latest-processed', methods=['GET'])
+def get_latest_processed_cash_flow():
+    """Get latest processed cash flow data"""
+    try:
+        if not db_connection:
+            return jsonify({
+                'success': False,
+                'error': 'Database not connected'
+            }), 500
+        
+        # Get latest processed cash flow from database
+        query = """
+        SELECT company_id, company_name, industry, year,
+               net_income, net_cash_from_operating_activities,
+               net_cash_from_investing_activities, net_cash_from_financing_activities,
+               free_cash_flow, generated_at, liquidation_label
+        FROM cash_flow_statement 
+        ORDER BY generated_at DESC 
+        LIMIT 1
+        """
+        
+        result = db_connection.execute_select(query)
+        
+        if result:
+            cash_flow_data = clean_data_for_json(result[0])
+            
+            return jsonify({
+                'success': True,
+                'data': cash_flow_data,
+                'cash_flow_id': f"cf_{cash_flow_data.get('company_id', 'unknown')}",
+                'processed_at': cash_flow_data.get('generated_at'),
+                'message': 'Latest processed data retrieved successfully'
+            })
+        else:
+            return jsonify({
+                'success': False,
+                'error': 'No processed cash flow data found',
+                'message': 'Please upload and process some files first'
+            }), 404
+            
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+# Also add this endpoint for file upload processing:
+@app.route('/api/cash-flow/process-files', methods=['POST'])
+def process_cash_flow_files():
+    """Process cash flow files upload"""
+    try:
+        if 'files' not in request.files:
+            return jsonify({
+                'success': False,
+                'error': 'No files provided'
+            }), 400
+        
+        files = request.files.getlist('files')
+        company_name = request.form.get('company_name', 'Uploaded Company')
+        
+        if not files or all(file.filename == '' for file in files):
+            return jsonify({
+                'success': False,
+                'error': 'No files selected'
+            }), 400
+        
+        # Process files
+        processed_data = {}
+        session_id = f"cf_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+        
+        for file in files:
+            if file and allowed_file(file.filename):
+                # Save file temporarily
+                filename = secure_filename(file.filename)
+                file_path = os.path.join(app.config['UPLOAD_FOLDER'], f"{session_id}_{filename}")
+                file.save(file_path)
+                
+                try:
+                    # Process based on file type
+                    if filename.endswith('.csv'):
+                        import pandas as pd
+                        df = pd.read_csv(file_path, encoding='utf-8', error_bad_lines=False)
+                        # Extract cash flow data from CSV
+                        extracted_data = extract_cash_flow_from_dataframe(df)
+                        processed_data.update(extracted_data)
+                    
+                    elif filename.endswith(('.xlsx', '.xls')):
+                        import pandas as pd
+                        df = pd.read_excel(file_path)
+                        extracted_data = extract_cash_flow_from_dataframe(df)
+                        processed_data.update(extracted_data)
+                
+                finally:
+                    # Clean up
+                    try:
+                        os.remove(file_path)
+                    except:
+                        pass
+        
+        # Generate complete cash flow with ML estimation
+        if processed_data:
+            complete_data = apply_ml_estimation_cash_flow(processed_data, company_name)
+            
+            # Save to database
+            cash_flow_id = save_cash_flow_to_database(complete_data, session_id, company_name, 'unknown')
+            
+            return jsonify({
+                'success': True,
+                'cash_flow_id': cash_flow_id,
+                'data': clean_data_for_json(complete_data),
+                'files_processed': len([f for f in files if f.filename]),
+                'message': 'Files processed successfully'
+            })
+        else:
+            return jsonify({
+                'success': False,
+                'error': 'No financial data could be extracted from uploaded files'
+            }), 400
+            
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+# Helper function for cash flow data extraction
+def extract_cash_flow_from_dataframe(df):
+    """Extract cash flow data from pandas DataFrame"""
+    extracted_data = {}
+    
+    # Convert DataFrame to search for financial items
+    for index, row in df.iterrows():
+        for col in df.columns:
+            item_name = str(row.iloc[0] if col == df.columns[0] else col).lower()
+            value = clean_financial_value(row[col] if col != df.columns[0] else row.iloc[1] if len(row) > 1 else None)
+            
+            # Map financial items
+            if 'net income' in item_name and value is not None:
+                extracted_data['net_income'] = value
+            elif 'operating cash' in item_name and value is not None:
+                extracted_data['net_cash_from_operating_activities'] = value
+            elif 'investing cash' in item_name and value is not None:
+                extracted_data['net_cash_from_investing_activities'] = value
+            elif 'financing cash' in item_name and value is not None:
+                extracted_data['net_cash_from_financing_activities'] = value
+            elif 'free cash flow' in item_name and value is not None:
+                extracted_data['free_cash_flow'] = value
+    
+    return extracted_data
+
+def apply_ml_estimation_cash_flow(extracted_data, company_name):
+    """Apply ML estimation for missing cash flow values"""
+    complete_data = {
+        'company_name': company_name,
+        'generated_at': datetime.now().isoformat(),
+        'year': datetime.now().year,
+        'data_source': 'uploaded_with_ml_estimation'
+    }
+    
+    # Copy extracted data
+    complete_data.update(extracted_data)
+    
+    # Apply industry ratios for missing values
+    if 'net_income' in extracted_data and extracted_data['net_income']:
+        base_income = extracted_data['net_income']
+        
+        if 'net_cash_from_operating_activities' not in extracted_data:
+            complete_data['net_cash_from_operating_activities'] = base_income * 1.15  # 115% of net income
+        
+        if 'free_cash_flow' not in extracted_data:
+            ocf = complete_data.get('net_cash_from_operating_activities', base_income * 1.15)
+            complete_data['free_cash_flow'] = ocf * 0.75  # 75% of OCF
+    
+    return complete_data
+
+
+
 
 # Add these endpoints to your app.py
 
@@ -1114,6 +1381,15 @@ def clean_data_for_json(data):
     elif pd.isna(data):
         return None
     return data
+
+
+
+
+@app.route('/guide')
+def user_guide():
+    return render_template('user_guide.html')
+
+
 
 # Updated cash flow upload endpoint
 @app.route('/api/cash-flow/process-upload', methods=['POST'])
@@ -1269,27 +1545,165 @@ def save_cash_flow_to_database(cash_flow_data, company_id, company_name, industr
 # Add these routes before if __name__ == '__main__':
 # =====================================
 
-@app.route('/cash-flow-results.html')
-def cash_flow_results_page():
-    """Serve actual cash flow results HTML file"""
+# Add these routes in your app.py (around line 2000, before if __name__ == '__main__':)
+
+@app.route('/balance_sheet_results.html')
+def balance_sheet_results_html():
+    """Serve balance sheet results HTML file directly"""
     try:
-        # First try to serve from templates folder
-        return render_template('cash-flow-results.html')
-    except:
+        return render_template('balance_sheet_results.html')
+    except Exception as e:
+        # If template not found, try to serve from static
         try:
-            # Try to serve from static folder
-            return send_from_directory('static', 'cash-flow-results.html')
+            return send_from_directory('.', 'balance_sheet_results.html')
         except:
+            return f"File not found: {e}", 404
+
+@app.route('/balance-sheet-results.html')  # Alternative URL
+def balance_sheet_results_alt():
+    """Alternative route for balance sheet results"""
+    return balance_sheet_results_html()
+
+@app.route('/cash-flow-results.html')
+def cash_flow_results_html():
+    """Serve cash flow results HTML file directly"""
+    try:
+        return render_template('cash_flow_results.html')
+    except Exception as e:
+        try:
+            return send_from_directory('.', 'cash_flow_results.html')
+        except:
+            return f"File not found: {e}", 404
+
+@app.route('/upload.html')
+def upload_html():
+    """Serve upload HTML file directly"""
+    try:
+        return render_template('upload.html')
+    except Exception as e:
+        try:
+            return send_from_directory('.', 'upload.html')
+        except:
+            return f"File not found: {e}", 404
+
+
+
+@app.route('/company/<company_name>/analysis')
+def auto_company_analysis(company_name):
+    try:
+        return render_template('analytics.html', 
+                             selected_company=company_name,
+                             auto_analyze=True)
+    except Exception as e:
+        print(f"Error: {e}")  # Debug ke liye
+        return f"Template Error: {str(e)}"
+
+
+
+
+
+
+
+
+
+
+
+# Process documents endpoint (ye bhi missing hai)
+@app.route('/process_documents', methods=['POST'])
+def process_documents():
+    """Process uploaded documents and generate balance sheet"""
+    try:
+        if not balance_sheet_service:
+            return jsonify({
+                'success': False,
+                'error': 'Balance sheet service not available'
+            }), 503
+        
+        # Get uploaded files
+        files = []
+        for key in request.files:
+            if key.startswith('file_'):
+                files.append(request.files[key])
+        
+        if not files:
+            return jsonify({
+                'success': False,
+                'error': 'No files uploaded'
+            }), 400
+        
+        analysis_type = request.form.get('analysis_type', 'balance-sheet')
+        company_name = request.form.get('company_name', 'Your Company')
+        
+        # Process files using your BalanceSheetGenerator
+        session_id = f"bs_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+        
+        # Save uploaded files temporarily
+        uploaded_files = []
+        for i, file in enumerate(files):
+            if file and file.filename:
+                filename = secure_filename(file.filename)
+                file_path = os.path.join(app.config['UPLOAD_FOLDER'], f"{session_id}_{filename}")
+                file.save(file_path)
+                uploaded_files.append(file_path)
+        
+        # Use your BalanceSheetGenerator to process
+        if uploaded_files:
+            # Read first file (you can enhance this to process multiple files)
+            import pandas as pd
+            
             try:
-                # Try to serve from root directory
-                return send_from_directory('.', 'cash-flow-results.html')
-            except:
-                try:
-                    # Try templates with underscore
-                    return render_template('cash_flow_results.html')
-                except:
-                    # Return 404 if file not found
-                    return "Cash flow results page not found. Please make sure cash-flow-results.html exists in templates or static folder.", 404
+                if uploaded_files[0].endswith('.csv'):
+                    df = pd.read_csv(uploaded_files[0])
+                elif uploaded_files[0].endswith(('.xlsx', '.xls')):
+                    df = pd.read_excel(uploaded_files[0])
+                else:
+                    return jsonify({
+                        'success': False,
+                        'error': 'Unsupported file format'
+                    }), 400
+                
+                # Process with BalanceSheetGenerator
+                result = balance_sheet_service.process_uploaded_balance_sheet(
+                    df=df,
+                    company_id=session_id,
+                    company_name=company_name,
+                    industry='unknown'
+                )
+                
+                if result:
+                    # Clean data for JSON
+                    cleaned_result = clean_data_for_json(result)
+                    
+                    return jsonify({
+                        'success': True,
+                        'balance_sheet_data': cleaned_result,
+                        'session_id': session_id,
+                        'message': 'Balance sheet generated successfully'
+                    })
+                else:
+                    return jsonify({
+                        'success': False,
+                        'error': 'Failed to process balance sheet'
+                    }), 500
+                    
+            finally:
+                # Clean up temporary files
+                for file_path in uploaded_files:
+                    try:
+                        os.remove(file_path)
+                    except:
+                        pass
+        
+        return jsonify({
+            'success': False,
+            'error': 'No valid files to process'
+        }), 400
+        
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
 
 
 
@@ -3248,6 +3662,11 @@ def debug_routes():
         routes.append(f"{rule.rule} -> {rule.endpoint} [{','.join(rule.methods)}]")
     return "<br>".join(routes)
 
+
+
+
+
+
 @app.route('/')
 def index():
     """Enhanced main dashboard page"""
@@ -3699,45 +4118,6 @@ if __name__ == '__main__':
     print("🆕 NEW GENERATOR PAGES:")
     print("📊 Balance Sheet Generator: http://localhost:5000/balance-sheet")
     print("💰 Cash Flow Generator: http://localhost:5000/cash-flow-generator")
-    print()
-    print("🔗 API ENDPOINTS:")
-    print("📊 API Status: http://localhost:5000/api/status")
-    print("📖 API Documentation: http://localhost:5000/api/documentation")
-    print("📋 Models: http://localhost:5000/api/models")
-    print()
-    print("💰 EXISTING Cash Flow Data Endpoints:")
-    print("📊 Companies Data: GET /api/cash-flow/companies")
-    print("🔍 Search Companies: GET /api/cash-flow/search?q=<term>")
-    print("🏢 Company Profile: GET /api/cash-flow/company/<id_or_name>")
-    print("📈 Training Data: GET /api/cash-flow/train-data")
-    print()
-    print("🆕 NEW Generator Endpoints:")
-    print("📊 Balance Sheet Upload: POST /api/balance-sheet/upload")
-    print("💰 Cash Flow Generate: POST /api/cash-flow-generator/generate")
-    print("🔧 Data Imputation: POST /api/data-imputation/analyze")
-    print("✅ Financial Validation: POST /api/financial-processing/validate")
-    print()
-    print("🤖 ML Model Endpoints:")
-    print("🔧 Create Model: POST /api/models/create")
-    print("🎓 Train from DB: POST /api/models/train-from-db")
-    print("🔮 Predict Company Risk: POST /api/models/predict-company")
-    print("📊 Confidence Analysis: POST /api/models/predict_with_confidence")
-    print("="*80)
-    print("⚙️ CONFIGURATION:")
-    max_size = app.config.get('MAX_CONTENT_LENGTH', 50 * 1024 * 1024)
-    print(f"📁 Max File Size: {max_size // (1024 * 1024)}MB")
-    print(f"📄 Allowed Extensions: {', '.join(app.config.get('ALLOWED_EXTENSIONS', {'pdf', 'xlsx'}))}")
-    print(f"🔧 Imputation Methods: {', '.join(app.config.get('IMPUTATION_METHODS', ['knn']))}")
-    print(f"💱 Supported Currencies: {', '.join(app.config.get('SUPPORTED_CURRENCIES', ['USD']))}")
-    print(f"📊 Financial Metrics: {app.config.get('FINANCIAL_METRICS_COUNT', 21)}")
-    print("="*80)
-
-    if PDF_PARSER_LIBRARIES_AVAILABLE:
-        print("✅ Enhanced PDF parsing available")
-        print("📄 Enhanced Parse: POST /api/pdf/enhanced-parse") 
-        print("✅ Validate Document: POST /api/pdf/validate-document")
-        print("🔧 Parsing Methods: GET /api/pdf/parsing-methods")
-    else:
-        print("❌ Enhanced PDF parsing not available")
+    
     
     app.run(debug=True, host='0.0.0.0', port=5000)
