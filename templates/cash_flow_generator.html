@@ -1192,136 +1192,173 @@
 
         // Process uploaded files (REAL API ONLY) - ENHANCED VERSION
         async function processUploadedFiles() {
-            if (!isServerConnected) {
-                showError('Server connection required. Please start Flask server first.');
-                return;
-            }
+    if (!isServerConnected) {
+        showError('Server connection required. Please start Flask server first.');
+        return;
+    }
 
-            if (uploadedFiles.length === 0) {
-                showError('Please select files to upload');
-                return;
-            }
+    if (uploadedFiles.length === 0) {
+        showError('Please select files to upload');
+        return;
+    }
 
-            try {
-                console.log('📤 Processing uploaded files with real API...');
-                document.getElementById('processingSection').style.display = 'block';
-                document.getElementById('uploadBtn').disabled = true;
+    try {
+        console.log('📤 Processing uploaded files with real API...');
+        document.getElementById('processingSection').style.display = 'block';
+        document.getElementById('uploadBtn').disabled = true;
 
-                await simulateProcessingSteps();
+        await simulateProcessingSteps();
 
-                // Create FormData for file upload
-                const formData = new FormData();
-                uploadedFiles.forEach(file => formData.append('files', file));
-                formData.append('company_name', 'Uploaded Company');
-                formData.append('company_id', 'comp_' + Date.now());
-                formData.append('industry', 'unknown');
-                formData.append('method', selectedMethod);
-
-                console.log('📤 Sending files to API...');
-                const response = await fetch('/api/cash-flow/process-upload', {
-                    method: 'POST',
-                    body: formData
-                });
-
-                console.log('📥 API Response status:', response.status);
-
-                if (!response.ok) {
-                    const errorText = await response.text();
-                    throw new Error(`API request failed with status: ${response.status} - ${errorText}`);
+        // ADD CSV PROCESSING HERE:
+        let processedData = {};
+        
+        for (const file of uploadedFiles) {
+            if (file.name.toLowerCase().endsWith('.csv')) {
+                try {
+                    console.log(`Processing CSV file: ${file.name}`);
+                    const csvData = await processCSVFile(file);
+                    processedData = { ...processedData, ...csvData };
+                    console.log('CSV data extracted:', csvData);
+                } catch (error) {
+                    console.error('CSV processing error:', error);
+                    showError(`Error processing ${file.name}: ${error.message}`);
+                    document.getElementById('uploadBtn').disabled = false;
+                    document.getElementById('processingSection').style.display = 'none';
+                    return;
                 }
-
-                const result = await response.json();
-                console.log('📊 API Response data:', result);
-
-                // ✅ ENHANCED: Handle all possible backend response cases
-                if (result.success) {
-                    // Case 1: Full success with cash_flow_id
-                    if (result.cash_flow_id && result.data) {
-                        localStorage.setItem('cash_flow_id', result.cash_flow_id);
-                        localStorage.setItem('cash_flow_data', JSON.stringify(result.data));
-                        console.log('💾 Stored cash_flow_id:', result.cash_flow_id);
-                        
-                        showSuccess('Cash flow statement processed successfully! Redirecting to results...');
-                        setTimeout(() => {
-                            console.log('🔄 Redirecting to cash-flow-results.html');
-                            // Try multiple redirect paths
-                            const possiblePaths = [
-                                'cash-flow-results.html',
-                                '/cash-flow-results.html',
-                                '/static/cash-flow-results.html',
-                                './cash-flow-results.html'
-                            ];
-                            
-                            // Try first path, if fails try others
-                            tryRedirect(possiblePaths, 0);
-                        }, 2000);
-                        
-                    } 
-                    // Case 2: Success with data but no cash_flow_id (backend issue)
-                    else if (result.data) {
-                        console.warn('⚠️ No cash_flow_id in response, using fallback');
-                        const tempId = 'temp_upload_' + Date.now();
-                        localStorage.setItem('cash_flow_id', tempId);
-                        localStorage.setItem('cash_flow_data', JSON.stringify(result.data));
-                        
-                        showSuccess('Cash flow processed! Redirecting to results...');
-                        setTimeout(() => {
-                            console.log('🔄 Redirecting with temp ID:', tempId);
-                            tryRedirect(['cash-flow-results.html', '/cash-flow-results.html', '/static/cash-flow-results.html'], 0);
-                        }, 2000);
-                    }
-                    // Case 3: Success flag but no data
-                    else {
-                        throw new Error('API returned success but no data available');
-                    }
-                } 
-                // Case 4: Process completed but with warnings/partial failure
-                else if (result.data && (result.message || result.error)) {
-                    console.warn('⚠️ Processing completed with warnings:', result.message || result.error);
-                    
-                    // Still redirect if we have data
-                    const tempId = result.cash_flow_id || ('temp_upload_' + Date.now());
-                    localStorage.setItem('cash_flow_id', tempId);
-                    localStorage.setItem('cash_flow_data', JSON.stringify(result.data));
-                    
-                    showSuccess('Cash flow processed with warnings! Redirecting to results...');
-                    setTimeout(() => {
-                        console.log('🔄 Redirecting with warnings, temp ID:', tempId);
-                        tryRedirect(['cash-flow-results.html', '/cash-flow-results.html', '/static/cash-flow-results.html'], 0);
-                    }, 2000);
-                }
-                // Case 5: Complete failure
-                else {
-                    throw new Error(result.message || result.error || 'Processing failed - no data returned');
-                }
-
-            } catch (error) {
-                console.error('❌ Error processing cash flow files:', error);
-                showError('Error processing files: ' + error.message);
-                
-                // ✅ EMERGENCY FALLBACK: Check if we have data despite error
-                const response = await fetch('/api/cash-flow/get-latest-processed', {
-                    method: 'GET'
-                }).catch(() => null);
-                
-                if (response && response.ok) {
-                    const fallbackData = await response.json();
-                    if (fallbackData.success && fallbackData.data) {
-                        console.log('🔄 Found fallback data, offering manual redirect');
-                        showError('Processing had issues but data might be available. <button onclick="forceRedirect()" style="margin-left: 10px; padding: 5px 10px; background: #667eea; color: white; border: none; border-radius: 5px; cursor: pointer;">View Results Anyway</button>');
-                        
-                        // Store fallback data
-                        const tempId = 'fallback_upload_' + Date.now();
-                        localStorage.setItem('cash_flow_id', tempId);
-                        localStorage.setItem('cash_flow_data', JSON.stringify(fallbackData.data));
-                        return;
-                    }
-                }
-                
-                document.getElementById('uploadBtn').disabled = false;
-                document.getElementById('processingSection').style.display = 'none';
             }
         }
+
+        // MODIFIED FormData creation
+        const formData = new FormData();
+        uploadedFiles.forEach(file => formData.append('files', file));
+        if (Object.keys(processedData).length > 0) {
+            formData.append('processed_data', JSON.stringify(processedData));
+        }
+        formData.append('company_name', 'Uploaded Company');
+        formData.append('company_id', 'comp_' + Date.now());
+        formData.append('industry', 'unknown');
+        formData.append('method', selectedMethod);
+
+        console.log('📤 Sending files to API...');
+        const response = await fetch('/api/cash-flow/process-upload', {
+            method: 'POST',
+            body: formData
+        });
+
+        console.log('📥 API Response status:', response.status);
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`API request failed with status: ${response.status} - ${errorText}`);
+        }
+
+        const result = await response.json();
+        console.log('📊 API Response data:', result);
+
+        // Rest of your existing success/error handling code remains the same...
+        if (result.success) {
+            if (result.cash_flow_id && result.data) {
+                localStorage.setItem('cash_flow_id', result.cash_flow_id);
+                localStorage.setItem('cash_flow_data', JSON.stringify(result.data));
+                console.log('💾 Stored cash_flow_id:', result.cash_flow_id);
+                
+                showSuccess('Cash flow statement processed successfully! Redirecting to results...');
+                setTimeout(() => {
+                    console.log('🔄 Redirecting to cash-flow-results.html');
+                    const possiblePaths = [
+                        'cash-flow-results.html',
+                        '/cash-flow-results.html',
+                        '/static/cash-flow-results.html',
+                        './cash-flow-results.html'
+                    ];
+                    tryRedirect(possiblePaths, 0);
+                }, 2000);
+            } 
+            else if (result.data) {
+                console.warn('⚠️ No cash_flow_id in response, using fallback');
+                const tempId = 'temp_upload_' + Date.now();
+                localStorage.setItem('cash_flow_id', tempId);
+                localStorage.setItem('cash_flow_data', JSON.stringify(result.data));
+                
+                showSuccess('Cash flow processed! Redirecting to results...');
+                setTimeout(() => {
+                    console.log('🔄 Redirecting with temp ID:', tempId);
+                    tryRedirect(['cash-flow-results.html', '/cash-flow-results.html', '/static/cash-flow-results.html'], 0);
+                }, 2000);
+            }
+            else {
+                throw new Error('API returned success but no data available');
+            }
+        } 
+        else if (result.data && (result.message || result.error)) {
+            console.warn('⚠️ Processing completed with warnings:', result.message || result.error);
+            
+            const tempId = result.cash_flow_id || ('temp_upload_' + Date.now());
+            localStorage.setItem('cash_flow_id', tempId);
+            localStorage.setItem('cash_flow_data', JSON.stringify(result.data));
+            
+            showSuccess('Cash flow processed with warnings! Redirecting to results...');
+            setTimeout(() => {
+                console.log('🔄 Redirecting with warnings, temp ID:', tempId);
+                tryRedirect(['cash-flow-results.html', '/cash-flow-results.html', '/static/cash-flow-results.html'], 0);
+            }, 2000);
+        }
+        else {
+            throw new Error(result.message || result.error || 'Processing failed - no data returned');
+        }
+
+    } catch (error) {
+        console.error('❌ Error processing cash flow files:', error);
+        showError('Error processing files: ' + error.message);
+        
+        const response = await fetch('/api/cash-flow/get-latest-processed', {
+            method: 'GET'
+        }).catch(() => null);
+        
+        if (response && response.ok) {
+            const fallbackData = await response.json();
+            if (fallbackData.success && fallbackData.data) {
+                console.log('🔄 Found fallback data, offering manual redirect');
+                showError('Processing had issues but data might be available. <button onclick="forceRedirect()" style="margin-left: 10px; padding: 5px 10px; background: #667eea; color: white; border: none; border-radius: 5px; cursor: pointer;">View Results Anyway</button>');
+                
+                const tempId = 'fallback_upload_' + Date.now();
+                localStorage.setItem('cash_flow_id', tempId);
+                localStorage.setItem('cash_flow_data', JSON.stringify(fallbackData.data));
+                return;
+            }
+        }
+        
+        document.getElementById('uploadBtn').disabled = false;
+        document.getElementById('processingSection').style.display = 'none';
+    }
+}
+
+function debugCSVStructure(file) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const content = e.target.result;
+        console.log('=== CSV DEBUG ANALYSIS ===');
+        console.log('File size:', content.length, 'characters');
+        
+        const lines = content.split('\n');
+        console.log('Total lines:', lines.length);
+        
+        lines.forEach((line, i) => {
+            if (i < 10) { // Show first 10 lines
+                const commas = (line.match(/,/g) || []).length;
+                const semicolons = (line.match(/;/g) || []).length;
+                const tabs = (line.match(/\t/g) || []).length;
+                console.log(`Line ${i + 1}: "${line}" | Fields with comma: ${commas + 1}, semicolon: ${semicolons + 1}, tab: ${tabs + 1}`);
+                
+                if (line.includes('"')) {
+                    console.log(`  Has quotes: ${line}`);
+                }
+            }
+        });
+    };
+    reader.readAsText(file);
+}
 
         // Generate cash flow from balance sheet (REAL API ONLY) - ENHANCED VERSION
         async function generateCashFlow() {
@@ -1654,7 +1691,7 @@
         });
 
 
-// cash_flow_generator.html mein ye function replace karo (around line 1100):
+
 
 function processCSVFile(file) {
     return new Promise((resolve, reject) => {
@@ -1663,73 +1700,62 @@ function processCSVFile(file) {
             try {
                 const csv = e.target.result;
                 
-                // ✅ ENHANCED CSV PARSING - Handle malformed CSV
-                const lines = csv.split('\n').filter(line => line.trim() !== '');
+                // Split into lines and clean
+                const lines = csv.split('\n')
+                    .map(line => line.trim())
+                    .filter(line => line.length > 0);
                 
                 if (lines.length < 2) {
-                    reject(new Error('CSV file must have at least 2 lines (header + data)'));
+                    reject(new Error('CSV must have header and at least one data row'));
                     return;
                 }
                 
-                // Parse CSV with flexible delimiter detection
-                const data = [];
-                let delimiter = ',';
-                
-                // Detect delimiter from first line
+                // Auto-detect delimiter
                 const firstLine = lines[0];
-                if (firstLine.includes('\t')) delimiter = '\t';
-                else if (firstLine.includes(';')) delimiter = ';';
-                else if (firstLine.includes('|')) delimiter = '|';
+                let delimiter = ',';
+                const delimiters = [',', ';', '\t', '|'];
+                let maxFields = 0;
                 
-                console.log(`📊 Detected CSV delimiter: "${delimiter}"`);
-                
-                // Parse each line with error handling
-                for (let i = 0; i < lines.length; i++) {
-                    const line = lines[i].trim();
-                    if (!line) continue;
-                    
-                    try {
-                        // Split by delimiter and handle quoted fields
-                        let fields = line.split(delimiter);
-                        
-                        // Handle quoted fields that might contain the delimiter
-                        if (line.includes('"')) {
-                            fields = parseCSVLine(line, delimiter);
-                        }
-                        
-                        // Clean up fields
-                        fields = fields.map(field => field.replace(/^"(.*)"$/, '$1').trim());
-                        
-                        if (i === 0) {
-                            data.push(fields); // Header
-                        } else if (fields.length >= 2) {
-                            data.push(fields); // Data rows with at least 2 fields
-                        }
-                        
-                    } catch (lineError) {
-                        console.warn(`⚠️ Skipping line ${i + 1}: ${lineError.message}`);
-                        continue;
+                for (const del of delimiters) {
+                    const fieldCount = firstLine.split(del).length;
+                    if (fieldCount > maxFields) {
+                        maxFields = fieldCount;
+                        delimiter = del;
                     }
                 }
                 
-                if (data.length < 2) {
-                    reject(new Error('No valid data rows found in CSV'));
-                    return;
+                console.log(`Detected delimiter: "${delimiter}" with ${maxFields} fields`);
+                
+                // Parse with flexible field count handling
+                const data = [];
+                const expectedFields = lines[0].split(delimiter).length;
+                
+                for (let i = 0; i < lines.length; i++) {
+                    const line = lines[i];
+                    const fields = line.split(delimiter).map(f => f.trim().replace(/^"|"$/g, ''));
+                    
+                    // Handle inconsistent field counts
+                    while (fields.length < expectedFields) {
+                        fields.push(''); // Pad with empty strings
+                    }
+                    if (fields.length > expectedFields) {
+                        fields.splice(expectedFields); // Truncate extra fields
+                    }
+                    
+                    data.push(fields);
                 }
                 
-                console.log(`✅ Successfully parsed CSV: ${data.length - 1} data rows`);
+                console.log(`Parsed ${data.length} rows with ${expectedFields} fields each`);
                 
-                // Extract financial data from CSV
                 const extractedData = extractFinancialDataFromCSV(data);
                 resolve(extractedData);
                 
             } catch (error) {
-                console.error('❌ CSV parsing error:', error);
-                reject(new Error(`Error processing CSV file: ${error.message}`));
+                reject(new Error(`CSV parsing failed: ${error.message}`));
             }
         };
         
-        reader.onerror = () => reject(new Error('Failed to read CSV file'));
+        reader.onerror = () => reject(new Error('Failed to read file'));
         reader.readAsText(file);
     });
 }
@@ -1755,6 +1781,21 @@ function parseCSVLine(line, delimiter) {
     
     result.push(current);
     return result;
+}
+
+function cleanFinancialValue(value) {
+    if (!value || value === '' || value === null) return null;
+    
+    // Convert to string and clean
+    let cleaned = value.toString()
+        .replace(/[$£€¥₹,\s%]/g, '') // Remove currency and symbols
+        .replace(/^\((.+)\)$/, '-$1') // Handle (123) as negative
+        .replace(/[^\d.-]/g, ''); // Keep only digits, dots, minus
+    
+    if (cleaned === '' || cleaned === '-') return null;
+    
+    const number = parseFloat(cleaned);
+    return isNaN(number) ? null : number;
 }
 
 // ✅ ENHANCED FINANCIAL DATA EXTRACTION:

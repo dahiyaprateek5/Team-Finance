@@ -11,7 +11,8 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <!-- Chart.js - Updated to latest version -->
     <!-- Replace old Chart.js with this -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/Chart.umd.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
     <style>
         :root {
@@ -808,36 +809,14 @@
 
         // Load balance sheet data when page loads
     
-window.addEventListener('load', async function() {
-    const balanceSheetData = localStorage.getItem('balance_sheet_data');
-    
-    if (!balanceSheetData) {
-        alert('No balance sheet data found. Please generate a balance sheet first.');
-        window.location.href = 'balance_sheet_generator.html';
-        return;
-    }
-    
-    try {
-        const data = JSON.parse(balanceSheetData);
-        populateBalanceSheet(data);
-        calculateAndDisplayRatios(data);
-        generateInsights(data);
-        
-        // Initialize chart after data loads
-        setTimeout(() => {
-            initializeBalanceSheetChart(data);
-        }, 500);
-        
-        console.log('✅ Balance sheet data loaded successfully');
-    } catch (error) {
-        console.error('Error loading balance sheet:', error);
-        alert('Error loading balance sheet data: ' + error.message);
-    }
-});
+
 
         function populateBalanceSheet(data) {
             // Update company title and date
-            document.querySelector('.company-title').textContent = data.company_name || 'Your Company Balance Sheet';
+            const companyTitleElement = document.querySelector('.company-title');
+if (companyTitleElement) {
+    companyTitleElement.textContent = data.company_name || 'Your Company Balance Sheet';
+}
             document.getElementById('currentDate').textContent = new Date(data.generated_at).toLocaleDateString('en-US');
             
             // Update assets section
@@ -1060,6 +1039,8 @@ window.addEventListener('load', async function() {
 
         // Replace the downloadReport function in your balance_sheet_results.html
 
+// Add this before closing </head> tag
+
 function downloadReport() {
     const balanceSheetData = JSON.parse(localStorage.getItem('balance_sheet_data'));
     if (!balanceSheetData) {
@@ -1067,60 +1048,86 @@ function downloadReport() {
         return;
     }
     
-    // Generate CSV content
-    const csvContent = generateCSVReport(balanceSheetData);
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
     
-    // Create and download file
-    const blob = new Blob([csvContent], { type: 'text/csv' });
-    const url = window.URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `balance_sheet_analysis_${new Date().toISOString().split('T')[0]}.csv`;
-    link.click();
-    window.URL.revokeObjectURL(url);
+    // PDF Header
+    doc.setFontSize(20);
+    doc.text('Balance Sheet Analysis Report', 20, 20);
     
-    alert('Balance Sheet Analysis Report download started!');
-}
-
-function generateCSVReport(data) {
-    return `Balance Sheet Analysis Report
-Company: ${data.company_name}
-Generated: ${new Date(data.generated_at).toLocaleDateString()}
-Data Accuracy: ${data.accuracy_percentage}%
-
-ASSETS
-Cash and Equivalents,${data.cash_and_equivalents}
-Accounts Receivable,${data.accounts_receivable}
-Inventory,${data.inventory}
-Prepaid Expenses,${data.prepaid_expenses}
-Total Current Assets,${data.current_assets}
-
-Property Plant Equipment,${data.net_ppe}
-Intangible Assets,${data.intangible_assets}
-Investments,${data.investments}
-Total Non-Current Assets,${data.non_current_assets}
-TOTAL ASSETS,${data.total_assets}
-
-LIABILITIES
-Accounts Payable,${data.accounts_payable}
-Short-term Debt,${data.short_term_debt}
-Accrued Liabilities,${data.accrued_liabilities}
-Total Current Liabilities,${data.current_liabilities}
-
-Long-term Debt,${data.long_term_debt}
-Deferred Tax Liabilities,${data.deferred_tax_liabilities}
-Total Non-Current Liabilities,${data.non_current_liabilities}
-TOTAL LIABILITIES,${data.total_liabilities}
-
-EQUITY
-Share Capital,${data.share_capital}
-Retained Earnings,${data.retained_earnings}
-TOTAL EQUITY,${data.total_equity}
-
-FINANCIAL RATIOS
-Current Ratio,${((data.current_assets || 0) / (data.current_liabilities || 1)).toFixed(2)}
-Debt to Equity,${((data.total_liabilities || 0) / (data.total_equity || 1)).toFixed(2)}
-Quick Ratio,${(((data.current_assets || 0) - (data.inventory || 0)) / (data.current_liabilities || 1)).toFixed(2)}`;
+    doc.setFontSize(12);
+    doc.text(`Company: ${balanceSheetData.company_name}`, 20, 35);
+    doc.text(`Generated: ${new Date(balanceSheetData.generated_at).toLocaleDateString()}`, 20, 45);
+    doc.text(`Data Accuracy: ${balanceSheetData.accuracy_percentage}%`, 20, 55);
+    
+    // Assets Section
+    let yPos = 70;
+    doc.setFontSize(16);
+    doc.text('ASSETS', 20, yPos);
+    yPos += 10;
+    
+    doc.setFontSize(10);
+    const assetData = [
+        ['Cash and Equivalents', formatCurrency(balanceSheetData.cash_and_equivalents)],
+        ['Accounts Receivable', formatCurrency(balanceSheetData.accounts_receivable)],
+        ['Inventory', formatCurrency(balanceSheetData.inventory)],
+        ['Total Current Assets', formatCurrency(balanceSheetData.current_assets)],
+        ['Property, Plant & Equipment', formatCurrency(balanceSheetData.net_ppe)],
+        ['TOTAL ASSETS', formatCurrency(balanceSheetData.total_assets)]
+    ];
+    
+    assetData.forEach(([label, value]) => {
+        doc.text(label, 20, yPos);
+        doc.text(value, 150, yPos);
+        yPos += 8;
+    });
+    
+    // Liabilities Section
+    yPos += 10;
+    doc.setFontSize(16);
+    doc.text('LIABILITIES & EQUITY', 20, yPos);
+    yPos += 10;
+    
+    doc.setFontSize(10);
+    const liabilityData = [
+        ['Accounts Payable', formatCurrency(balanceSheetData.accounts_payable)],
+        ['Short-term Debt', formatCurrency(balanceSheetData.short_term_debt)],
+        ['Total Current Liabilities', formatCurrency(balanceSheetData.current_liabilities)],
+        ['Long-term Debt', formatCurrency(balanceSheetData.long_term_debt)],
+        ['TOTAL LIABILITIES', formatCurrency(balanceSheetData.total_liabilities)],
+        ['Share Capital', formatCurrency(balanceSheetData.share_capital)],
+        ['Retained Earnings', formatCurrency(balanceSheetData.retained_earnings)],
+        ['TOTAL EQUITY', formatCurrency(balanceSheetData.total_equity)]
+    ];
+    
+    liabilityData.forEach(([label, value]) => {
+        doc.text(label, 20, yPos);
+        doc.text(value, 150, yPos);
+        yPos += 8;
+    });
+    
+    // Financial Ratios
+    yPos += 15;
+    doc.setFontSize(16);
+    doc.text('FINANCIAL RATIOS', 20, yPos);
+    yPos += 10;
+    
+    doc.setFontSize(10);
+    const ratioData = [
+        ['Current Ratio', ((balanceSheetData.current_assets || 0) / (balanceSheetData.current_liabilities || 1)).toFixed(2)],
+        ['Debt to Equity', ((balanceSheetData.total_liabilities || 0) / (balanceSheetData.total_equity || 1)).toFixed(2)],
+        ['Quick Ratio', (((balanceSheetData.current_assets || 0) - (balanceSheetData.inventory || 0)) / (balanceSheetData.current_liabilities || 1)).toFixed(2)]
+    ];
+    
+    ratioData.forEach(([label, value]) => {
+        doc.text(label, 20, yPos);
+        doc.text(value, 150, yPos);
+        yPos += 8;
+    });
+    
+    // Save PDF
+    doc.save(`balance_sheet_analysis_${new Date().toISOString().split('T')[0]}.pdf`);
+    alert('Balance Sheet PDF Report downloaded successfully!');
 }
 
         function scheduleAnalysis() {
