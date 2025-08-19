@@ -11,7 +11,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <!-- Chart.js - Updated to latest version -->
     <!-- Replace old Chart.js with this -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/Chart.umd.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
     <style>
@@ -576,10 +576,11 @@
 
     <div class="container">
         <div class="results-header">
-            <h1 class="company-title">Your Company Balance Sheet</h1>
-            <div class="generation-date">Generated on: <span id="currentDate"></span></div>
-            
-        </div>
+    <h1 class="company-title">Your Company Balance Sheet</h1>
+    <div class="generation-date">Generated on: <span id="currentDate"></span></div>
+    <div class="data-quality-badge">Data Quality: 94% Accurate</div>
+    <div class="health-score">Financial Health Score: 85/100</div> 
+</div>
 
         <div class="results-grid">
             <div class="balance-sheet-card">
@@ -812,43 +813,91 @@
 
 
         function populateBalanceSheet(data) {
-            // Update company title and date
-            const companyTitleElement = document.querySelector('.company-title');
-if (companyTitleElement) {
-    companyTitleElement.textContent = data.company_name || 'Your Company Balance Sheet';
+    // Update company title and date with null checks
+    const companyTitleElement = document.querySelector('.company-title');
+    if (companyTitleElement) {
+        companyTitleElement.textContent = data.company_name || 'Your Company Balance Sheet';
+    }
+    
+    const currentDateElement = document.getElementById('currentDate');
+    if (currentDateElement) {
+        currentDateElement.textContent = new Date(data.generated_at).toLocaleDateString('en-US');
+    }
+    
+    // Update assets section with null checks
+    const cashElement = document.getElementById('cashEquivalents');
+    if (cashElement) cashElement.textContent = formatCurrency(data.cash_and_equivalents);
+    
+    const receivablesElement = document.getElementById('accountsReceivableAssets');
+    if (receivablesElement) receivablesElement.textContent = formatCurrency(data.accounts_receivable);
+    
+    const inventoryElement = document.getElementById('inventoryAssets');
+    if (inventoryElement) inventoryElement.textContent = formatCurrency(data.inventory);
+    
+    const prepaidElement = document.getElementById('prepaidExpenses');
+    if (prepaidElement) prepaidElement.textContent = formatCurrency(data.prepaid_expenses);
+    
+    const totalCurrentAssetsElement = document.getElementById('totalCurrentAssets');
+    if (totalCurrentAssetsElement) totalCurrentAssetsElement.textContent = formatCurrency(data.current_assets);
+    
+    const netPPEElement = document.getElementById('netPPE');
+    if (netPPEElement) netPPEElement.textContent = formatCurrency(data.net_ppe);
+    
+    const intangibleElement = document.getElementById('intangibleAssets');
+    if (intangibleElement) intangibleElement.textContent = formatCurrency(data.intangible_assets);
+    
+    const investmentsElement = document.getElementById('investments');
+    if (investmentsElement) investmentsElement.textContent = formatCurrency(data.investments);
+    
+    const totalNonCurrentAssetsElement = document.getElementById('totalNonCurrentAssets');
+    if (totalNonCurrentAssetsElement) totalNonCurrentAssetsElement.textContent = formatCurrency(data.non_current_assets);
+    
+    const totalAssetsElement = document.getElementById('totalAssets');
+    if (totalAssetsElement) totalAssetsElement.innerHTML = `<strong>${formatCurrency(data.total_assets)}</strong>`;
+    
+    // Update liabilities & equity section with null checks
+    const accountsPayableElement = document.getElementById('accountsPayableLiabilities');
+    if (accountsPayableElement) accountsPayableElement.textContent = formatCurrency(data.accounts_payable);
+    
+    const shortTermDebtElement = document.getElementById('shortTermDebt');
+    if (shortTermDebtElement) shortTermDebtElement.textContent = formatCurrency(data.short_term_debt);
+    
+    const accruedLiabilitiesElement = document.getElementById('accruedLiabilities');
+    if (accruedLiabilitiesElement) accruedLiabilitiesElement.textContent = formatCurrency(data.accrued_liabilities);
+    
+    const totalCurrentLiabilitiesElement = document.getElementById('totalCurrentLiabilities');
+    if (totalCurrentLiabilitiesElement) totalCurrentLiabilitiesElement.textContent = formatCurrency(data.current_liabilities);
+    
+    const longTermDebtElement = document.getElementById('longTermDebt');
+    if (longTermDebtElement) longTermDebtElement.textContent = formatCurrency(data.long_term_debt);
+    
+    const deferredTaxElement = document.getElementById('deferredTaxLiabilities');
+    if (deferredTaxElement) deferredTaxElement.textContent = formatCurrency(data.deferred_tax_liabilities);
+    
+    const totalNonCurrentLiabilitiesElement = document.getElementById('totalNonCurrentLiabilities');
+    if (totalNonCurrentLiabilitiesElement) totalNonCurrentLiabilitiesElement.textContent = formatCurrency(data.non_current_liabilities);
+    
+    const totalLiabilitiesElement = document.getElementById('totalLiabilities');
+    if (totalLiabilitiesElement) totalLiabilitiesElement.textContent = formatCurrency(data.total_liabilities);
+    
+    const shareCapitalElement = document.getElementById('shareCapital');
+    if (shareCapitalElement) shareCapitalElement.textContent = formatCurrency(data.share_capital);
+    
+    const retainedEarningsElement = document.getElementById('retainedEarnings');
+    if (retainedEarningsElement) retainedEarningsElement.textContent = formatCurrency(data.retained_earnings);
+    
+    const totalEquityElement = document.getElementById('totalEquity');
+    if (totalEquityElement) totalEquityElement.textContent = formatCurrency(data.total_equity);
+    
+    const totalLiabilitiesEquityElement = document.getElementById('totalLiabilitiesEquity');
+    if (totalLiabilitiesEquityElement) totalLiabilitiesEquityElement.innerHTML = `<strong>${formatCurrency(data.total_assets)}</strong>`;
+    
+    // Update data quality badge with null check
+    const dataQualityElement = document.querySelector('.data-quality-badge');
+    if (dataQualityElement) {
+        dataQualityElement.textContent = `Data Quality: ${data.accuracy_percentage || 94}% Accurate`;
+    }
 }
-            document.getElementById('currentDate').textContent = new Date(data.generated_at).toLocaleDateString('en-US');
-            
-            // Update assets section
-            document.getElementById('cashEquivalents').textContent = formatCurrency(data.cash_and_equivalents);
-            document.getElementById('accountsReceivableAssets').textContent = formatCurrency(data.accounts_receivable);
-            document.getElementById('inventoryAssets').textContent = formatCurrency(data.inventory);
-            document.getElementById('prepaidExpenses').textContent = formatCurrency(data.prepaid_expenses);
-            document.getElementById('totalCurrentAssets').textContent = formatCurrency(data.current_assets);
-            document.getElementById('netPPE').textContent = formatCurrency(data.net_ppe);
-            document.getElementById('intangibleAssets').textContent = formatCurrency(data.intangible_assets);
-            document.getElementById('investments').textContent = formatCurrency(data.investments);
-            document.getElementById('totalNonCurrentAssets').textContent = formatCurrency(data.non_current_assets);
-            document.getElementById('totalAssets').innerHTML = `<strong>${formatCurrency(data.total_assets)}</strong>`;
-            
-            // Update liabilities & equity section
-            document.getElementById('accountsPayableLiabilities').textContent = formatCurrency(data.accounts_payable);
-            document.getElementById('shortTermDebt').textContent = formatCurrency(data.short_term_debt);
-            document.getElementById('accruedLiabilities').textContent = formatCurrency(data.accrued_liabilities);
-            document.getElementById('totalCurrentLiabilities').textContent = formatCurrency(data.current_liabilities);
-            document.getElementById('longTermDebt').textContent = formatCurrency(data.long_term_debt);
-            document.getElementById('deferredTaxLiabilities').textContent = formatCurrency(data.deferred_tax_liabilities);
-            document.getElementById('totalNonCurrentLiabilities').textContent = formatCurrency(data.non_current_liabilities);
-            document.getElementById('totalLiabilities').textContent = formatCurrency(data.total_liabilities);
-            document.getElementById('shareCapital').textContent = formatCurrency(data.share_capital);
-            document.getElementById('retainedEarnings').textContent = formatCurrency(data.retained_earnings);
-            document.getElementById('totalEquity').textContent = formatCurrency(data.total_equity);
-            document.getElementById('totalLiabilitiesEquity').innerHTML = `<strong>${formatCurrency(data.total_assets)}</strong>`;
-            
-            // Update data quality badge
-            document.querySelector('.data-quality-badge').textContent = 
-                `Data Quality: ${data.accuracy_percentage || 94}% Accurate`;
-        }
 
         function calculateAndDisplayRatios(data) {
             // Calculate financial ratios from actual data
@@ -875,8 +924,10 @@ if (companyTitleElement) {
                 quickRatio
             });
             
-            document.querySelector('.health-score').textContent = 
-                `Financial Health Score: ${healthScore}/100`;
+            const healthScoreElement = document.querySelector('.health-score');
+if (healthScoreElement) {
+    healthScoreElement.textContent = `Financial Health Score: ${healthScore}/100`;
+}
         }
 
         function calculateHealthScore(ratios) {
