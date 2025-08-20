@@ -1803,7 +1803,7 @@ function extractFinancialDataFromCSV(data) {
     
     // Enhanced pattern matching
     const patterns = {
-        net_income: /net.income|profit.*loss|earnings|income.*net/i,
+        net_income: /net.income|profit.*loss|earnings|netIncome|income.*net/i,
         operating_cash_flow: /operating.*cash|cash.*operation|ocf/i,
         investing_cash_flow: /investing.*cash|cash.*invest|icf/i,
         financing_cash_flow: /financing.*cash|cash.*financ|fcf/i,
