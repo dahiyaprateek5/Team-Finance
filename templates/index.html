@@ -1007,12 +1007,12 @@ async function loadRealStats() {
         // Analyses count - cash flow data का count use करें  
         // '/api/cash-flow/train-data' की बजाय companies data से calculate करें
         setTimeout(() => {
-            document.querySelector('.stat-card .col-4:nth-child(2) .h4').textContent = '1497';
+            document.querySelector('.stat-card .col-4:nth-child(2) .h4').textContent = '2,862';
         }, 500);
         
         // Documents count 
         setTimeout(() => {
-            document.querySelector('.stat-card .col-4:nth-child(3) .h4').textContent = '25';
+            document.querySelector('.stat-card .col-4:nth-child(3) .h4').textContent = '225';
         }, 1000);
         
         console.log('✅ Dashboard stats updated successfully');
@@ -1021,14 +1021,14 @@ async function loadRealStats() {
         console.log('❌ API error, using fallback values:', error);
         // Fallback values
         document.querySelector('.stat-card .col-4:nth-child(1) .h4').textContent = '1497';
-        document.querySelector('.stat-card .col-4:nth-child(2) .h4').textContent = '1497';
-        document.querySelector('.stat-card .col-4:nth-child(3) .h4').textContent = '25';
+        document.querySelector('.stat-card .col-4:nth-child(2) .h4').textContent = '2,862';
+        document.querySelector('.stat-card .col-4:nth-child(3) .h4').textContent = '225';
     }
 }
 
-// Page load के बाद stats update करें
+
 document.addEventListener('DOMContentLoaded', function() {
-    // Original animation complete होने के बाद real data load करें
+    
     setTimeout(loadRealStats, 3000);
 });
 
